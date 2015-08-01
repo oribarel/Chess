@@ -20,10 +20,7 @@ Functions that are labeled:
 
 
 #include "Chess.h"
-//stam
-//stam
-//stam
-//stam
+
 
 
 int properties[6] = { 1, 0, 1, 0, 0, 0 };
