@@ -1,3 +1,5 @@
+/* It seems we are ok*/
+
 /*
 The structs are:
 - Coord: a coordinate on the board. see header file.
