@@ -8,7 +8,9 @@
 #include <time.h>
 #include <ctype.h>
 
-
+#define WHITE_M //damka
+#define BLACK_M //damka
+#define PLAYER_WINS //damka
 
 #define DEBUG 0
 

@@ -730,53 +730,6 @@ int IsAlly(char tool, char myColor)
 }
 
 
-/*DCLR*/
-/*returns all moves that the tool in coord may do with the specific configuration of the board.*/
-cMove *GetMovesOfTool(board_t board, Coord coord)
-{
-	Move *allMoves = NULL, *tmpMoves, *tmpMovesEnd;
-	Coord coord;
-	int ally;
-	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && properties[1] != 1; k++)
-	{
-		coord.i_coord = (int)mod(k, BOARD_SIZE);
-		coord.j_coord = k / BOARD_SIZE; /*(int)floor(k / BOARD_SIZE);*/
-		ally = IsAlly(GetContentOfCoord(board, coord), player);
-		if (ally)
-			/*it is an ally:*/
-		{
-			tmpMoves = movesByPieceType(board, coord);
-
-			tmpMovesEnd = tmpMoves;
-			if (tmpMovesEnd != NULL)
-			{
-				while (tmpMovesEnd->next != NULL)
-				{
-					tmpMovesEnd = tmpMovesEnd->next;
-				}
-				tmpMovesEnd->next = allMoves;
-				allMoves = tmpMoves;
-			}
-		}
-		ally = 0;
-	}
-	/*if (DEBUG)
-	{
-	printf("\nbefore filtering moves list was:\n");
-	printMovesList(allMoves);
-	}*/
-
-	allMoves = (cMove *)filterOutMoves(allMoves);
-
-	//if (DEBUG)
-	//{
-	//	//printf("\nafter filtering moves list was:\n");
-	//	printMovesList(allMoves);
-	//	printf("\n");
-	//}
-
-	return allMoves;
-}
 
 /*add a new move in the beginning of the linked list*/
 cMove *AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int promote)
@@ -893,17 +846,18 @@ void KnightMoves(board_t board, Coord coord)
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
 
-	Coord tmpCrd = coord,
+	Coord tmpCrd = coord, 
+		tmp0 = offsetCoord(coord, 1, 2),
+		tmp1 = offsetCoord(coord, 2, 1),
+		tmp2 = offsetCoord(coord, 2, -1),
+		tmp3 = offsetCoord(coord, 1, -2),
+		tmp4 = offsetCoord(coord, -1, -2),
+		tmp5 = offsetCoord(coord, -2, -1),
+		tmp6 = offsetCoord(coord, -2, 1),
+		tmp7 = offsetCoord(coord, -1, 2),
 		possibilities[8] =
-	{
-		offsetCoord(coord, 1, 2),
-		offsetCoord(coord, 2, 1),
-		offsetCoord(coord, 2, -1),
-		offsetCoord(coord, 1, -2),
-		offsetCoord(coord, -1, -2),
-		offsetCoord(coord, -2, -1),
-		offsetCoord(coord, -2, 1),
-		offsetCoord(coord, -1, 2)
+	{	 
+		tmp0,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7
 	};
 		
 	for (int i = 0; i < 8; i++)
@@ -923,18 +877,16 @@ void KingMoves(board_t board, Coord coord)
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
 
-	Coord tmpCrd = coord,
-		possibilities[8] =
-	{
-		offsetCoord(coord, 0, 1),
-		offsetCoord(coord, 1, 1),
-		offsetCoord(coord, 1, 0),
-		offsetCoord(coord, 1, -1),
-		offsetCoord(coord, 0, -1),
-		offsetCoord(coord, -1, -1),
-		offsetCoord(coord, -1, 0),
-		offsetCoord(coord, -1, 1)
-	};
+	Coord tmpCrd = coord, 
+		tmp0 = offsetCoord(coord, 0, 1),
+		tmp1 = offsetCoord(coord, 1, 1),
+		tmp2 = offsetCoord(coord, 1, 0),
+		tmp3 = offsetCoord(coord, 1, -1),
+		tmp4 = offsetCoord(coord, 0, -1),
+		tmp5 = offsetCoord(coord, -1, -1),
+		tmp6 = offsetCoord(coord, -1, 0),
+		tmp7 = offsetCoord(coord, -1, 1),
+		possibilities[8] = { tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7	};
 
 	for (int i = 0; i < 8; i++)
 	{
