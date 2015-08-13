@@ -44,7 +44,7 @@
 #define BLACK "black"
 
 #define WHITE_PLAYER 1
-#define BLACK_PLAYER 0
+#define BLACK_PLAYER -1
 
 #define BOARD_SIZE 8
 

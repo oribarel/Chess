@@ -208,12 +208,12 @@ void init_rowsE(board_t board)
 void init_rowP(board_t board, int player)
 {
 	Coord crd;
-	int j = WHITE_PLAYER ? 1 : 6;
+	int j = player == WHITE_PLAYER ? 1 : 6;
 	int i = 0;
 	crd.i_coord = i; crd.j_coord = j;
 	for (; i < BOARD_SIZE; i++)
 	{
-		setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_P : BLACK_P);
+		setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_P : BLACK_P);
 	}
 }
 /*DCLR*/
@@ -221,23 +221,23 @@ void init_rowP(board_t board, int player)
 void init_rowV(board_t board, int player)
 {
 	Coord crd;
-	int j = WHITE_PLAYER ? 0 : 7;
+	int j = player==WHITE_PLAYER ? 0 : 7;
 	int i = 0;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_R : BLACK_R);
-	crd.i_coord++;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_N : BLACK_N);
-	crd.i_coord++;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_B : BLACK_B);
-	crd.i_coord++;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_K : BLACK_K);
-	crd.i_coord++;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_Q : BLACK_Q);
-	crd.i_coord++;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_B : BLACK_B);
-	crd.i_coord++;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_N : BLACK_N);
-	crd.i_coord++;
-	setSlotInBoard(board, crd, WHITE_PLAYER ? WHITE_R : BLACK_R);
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_R : BLACK_R);
+	crd.i_coord++;			  
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_N : BLACK_N);
+	crd.i_coord++;			  
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_B : BLACK_B);
+	crd.i_coord++;			  
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_K : BLACK_K);
+	crd.i_coord++;			  
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_Q : BLACK_Q);
+	crd.i_coord++;			  
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_B : BLACK_B);
+	crd.i_coord++;			 
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_N : BLACK_N);
+	crd.i_coord++;		
+	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_R : BLACK_R);
 }
 
 /*CONVD*/
@@ -712,62 +712,19 @@ int IsAlly(char tool, char myColor)
 }
 
 
-/*DCLR*/
-/*returns all moves that the tool in coord may do with the specific configuration of the board.*/
-cMove *GetMovesOfTool(board_t board, Coord coord)
-{
-	Move *allMoves = NULL, *tmpMoves, *tmpMovesEnd;
-	Coord coord;
-	int ally;
-	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && properties[1] != 1; k++)
-	{
-		coord.i_coord = (int)mod(k, BOARD_SIZE);
-		coord.j_coord = k / BOARD_SIZE; /*(int)floor(k / BOARD_SIZE);*/
-		ally = IsAlly(GetContentOfCoord(board, coord), player);
-		if (ally)
-			/*it is an ally:*/
-		{
-			tmpMoves = movesByPieceType(board, coord);
 
-			tmpMovesEnd = tmpMoves;
-			if (tmpMovesEnd != NULL)
-			{
-				while (tmpMovesEnd->next != NULL)
-				{
-					tmpMovesEnd = tmpMovesEnd->next;
-				}
-				tmpMovesEnd->next = allMoves;
-				allMoves = tmpMoves;
-			}
-		}
-		ally = 0;
-	}
-	/*if (DEBUG)
-	{
-	printf("\nbefore filtering moves list was:\n");
-	printMovesList(allMoves);
-	}*/
-
-	allMoves = (cMove *)filterOutMoves(allMoves);
-
-	//if (DEBUG)
-	//{
-	//	//printf("\nafter filtering moves list was:\n");
-	//	printMovesList(allMoves);
-	//	printf("\n");
-	//}
-
-	return allMoves;
-}
 
 /*add a new move in the beginning of the linked list*/
 cMove * AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int promote)
 {
+	//empty cell -> no eating
+	if (eater == EMPTY)
+		eater = 0;
 	cMove *newMove = (cMove*)calloc(1, sizeof(cMove));
 	newMove->toolType = toolType;
 	newMove->src = src;
 	newMove->dst = dst;
-	newMove->eater = eater;
+	newMove->eaten = eater;
 	newMove->promote = promote;
 	newMove->next = *head;
 	*head = newMove;
@@ -797,10 +754,15 @@ int DoesCrdContainsEnemy(board_t board, Coord coord, char tool)
 
 }
 
+int getColor(board_t board, Coord coord)
+{
+	int color = islower(GetContentOfCoord(board,coord)) ? WHITE_PLAYER : BLACK_PLAYER;
+	return color;
+}
 
 cMove* PawnMoves(board_t board, Coord coord)
 {
-	cMove *head = (cMove*)calloc(1, sizeof(cMove));
+	cMove *head = NULL;
 	int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
@@ -808,151 +770,120 @@ cMove* PawnMoves(board_t board, Coord coord)
 
 	//no eating
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && isKingUnderThreat(board, coord, tmpCoord) && board[i][j + color * 1] == EMPTY)
+	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord) && GetContentOfCoord(board, tmpCoord) == EMPTY)
 	{
-		if ((j + color * 1 == 7 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
+		if ((j + color * 1 == BOARD_SIZE-1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
-			AddMove(head,tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
+			AddMove(&head,tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
 		}
 		else
-			AddMove(head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
 	}
 	
 
-	//south\north-west eating
+	//for black:south-east eating, for white:north-west eating
 	tmpCoord = coord;
 	tmpCoord.i_coord -= color * 1;
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && isKingUnderThreat(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
+	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
 	{
-		if ((j + color * 1 == 7 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
+		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
 		}
 		else
-			AddMove(head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
 	}
 
 
-	//south\north-east eating
+	//for black:south-west eating, for white:north-east eating
 	tmpCoord = coord;
 	tmpCoord.i_coord += color * 1;
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && && isKingUnderThreat(board, coord, tmpCoord)  && DoesCrdContainsEnemy(board, coord, tool))
+	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord)  && DoesCrdContainsEnemy(board, coord, tool))
 	{
-		if ((j + color * 1 == 7 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
+		if ((j + color * 1 == BOARD_SIZE-1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
-			AddMove(head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
 		}
 		else
-			AddMove(head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
 	}
 }
 
-void BishopMoves(char** board, int get_move_call, int i, int j, moves_list *head, int color){
+void BishopMoves(board_t board, Coord coord){
+	cMove *head = NULL;
+	int i = coord.i_coord, j = coord.j_coord;
+	char tool = GetContentOfCoord(board, coord);
+	int color = islower(tool) ? 1 : -1;
+	Coord tmpCoord = coord;
+
+	
+	//north-east
 	int k = 1;
-	while (IsValidSquare(i + k, j + k) == 1) {
-		if (Color(board, i + k, j + k) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i + k, j + k, head, 0);
+	Coord tmpCoord = offsetCoord(coord, k, k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0),0,0);//eating
 			break;
-		} if (board[i + k][j + k] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i + k, j + k, head, 0);
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
 			k++;
 		}
 		else
 			break;
 	}
-	k = 1;
-	while (IsValidSquare(i - k, j + k) == 1) {
-		if (Color(board, i - k, j + k) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i - k, j + k, head, 0);
-			break;
-		} if (board[i - k][j + k] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i - k, j + k, head, 0);
-			k++;
-		}
-		else
-			break;
-	}
-	k = 1;
-	while (IsValidSquare(i + k, j - k) == 1) {
-		if (Color(board, i + k, j - k) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i + k, j - k, head, 0);
-			break;
-		} if (board[i + k][j - k] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i + k, j - k, head, 0);
-			k++;
-		}
-		else
-			break;
-	}
-	k = 1;
-	while (IsValidSquare(i - k, j - k) == 1) {
-		if (Color(board, i - k, j - k) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i - k, j - k, head, 0);
-			break;
-		} if (board[i - k][j - k] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i - k, j - k, head, 0);
-			k++;
-		}
-		else
-			break;
-	}
-}
 
-void RookMoves(char** board, int get_move_call, int i, int j, moves_list *head, int color){
+	//north-west
 	int k = 1;
-	while (IsValidSquare(i, j + k) == 1) {
-		if (Color(board, i, j + k) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i, j + k, head, 0);
+	Coord tmpCoord = offsetCoord(coord, -k, k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
 			break;
-		} if (board[i][j + k] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i, j + k, head, 0);
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
 			k++;
 		}
 		else
 			break;
 	}
-	k = 1;
-	while (IsValidSquare(i, j - k) == 1) {
-		if (Color(board, i, j - k) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i, j - k, head, 0);
+
+
+
+	//south-east
+	int k = 1;
+	Coord tmpCoord = offsetCoord(coord, k, -k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
 			break;
-		} if (board[i][j - k] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i, j - k, head, 0);
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
 			k++;
 		}
 		else
 			break;
 	}
-	k = 1;
-	while (IsValidSquare(i + k, j) == 1) {
-		if (Color(board, i + k, j) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i + k, j, head, 0);
+
+	//south-west
+	int k = 1;
+	Coord tmpCoord = offsetCoord(coord, -k, -k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
 			break;
-		} if (board[i + k][j] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i + k, j, head, 0);
-			k++;
-		}
-		else
-			break;
-	}
-	k = 1;
-	while (IsValidSquare(i - k, j) == 1) {
-		if (Color(board, i - k, j) == color * -1){
-			AddMove(board, color, get_move_call, i, j, i - k, j, head, 0);
-			break;
-		} if (board[i - k][j] == EMPTY){
-			AddMove(board, color, get_move_call, i, j, i - k, j, head, 0);
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -960,59 +891,87 @@ void RookMoves(char** board, int get_move_call, int i, int j, moves_list *head, 
 	}
 }
 
-void KnightMoves(char** board, int get_move_call, int i, int j, moves_list *head, int color){
-	if ((IsValidSquare(i + 2, j + 1) == 1) && ((board[i + 2][j + 1] == EMPTY) || (Color(board, i + 2, j + 1) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i + 2, j + 1, head, 0);
+void RookMoves(board_t board, Coord coord){
+	cMove *head = NULL;
+	int i = coord.i_coord, j = coord.j_coord;
+	char tool = GetContentOfCoord(board, coord);
+	int color = islower(tool) ? 1 : -1;
+	Coord tmpCoord = coord;
+
+
+	//north
+	int k = 1;
+	Coord tmpCoord = offsetCoord(coord, k, k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			break;
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			k++;
+		}
+		else
+			break;
 	}
-	if ((IsValidSquare(i + 2, j - 1) == 1) && ((board[i + 2][j - 1] == EMPTY) || (Color(board, i + 2, j - 1) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i + 2, j - 1, head, 0);
+
+	//south
+	int k = 1;
+	Coord tmpCoord = offsetCoord(coord, -k, k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			break;
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			k++;
+		}
+		else
+			break;
 	}
-	if ((IsValidSquare(i + 1, j + 2) == 1) && ((board[i + 1][j + 2] == EMPTY) || (Color(board, i + 1, j + 2) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i + 1, j + 2, head, 0);
+
+
+
+	//east
+	int k = 1;
+	Coord tmpCoord = offsetCoord(coord, k, -k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			break;
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			k++;
+		}
+		else
+			break;
 	}
-	if ((IsValidSquare(i - 1, j + 2) == 1) && ((board[i - 1][j + 2] == EMPTY) || (Color(board, i - 1, j + 2) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i - 1, j + 2, head, 0);
-	}
-	if ((IsValidSquare(i - 2, j + 1) == 1) && ((board[i - 2][j + 1] == EMPTY) || (Color(board, i - 2, j + 1) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i - 2, j + 1, head, 0);
-	}
-	if ((IsValidSquare(i - 2, j - 1) == 1) && ((board[i - 2][j - 1] == EMPTY) || (Color(board, i - 2, j - 1) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i - 2, j - 1, head, 0);
-	}
-	if ((IsValidSquare(i + 1, j - 2) == 1) && ((board[i + 1][j - 2] == EMPTY) || (Color(board, i + 1, j - 2) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i + 1, j - 2, head, 0);
-	}
-	if ((IsValidSquare(i - 1, j - 2) == 1) && ((board[i - 1][j - 2] == EMPTY) || (Color(board, i - 1, j - 2) == color*-1))){
-		AddMove(board, color, get_move_call, i, j, i - 1, j - 2, head, 0);
+
+	//west
+	int k = 1;
+	Coord tmpCoord = offsetCoord(coord, -k, -k);
+	while (isInBoard(tmpCoord)) {
+		if (getColor(&head, tmpCoord) == color * -1){
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			break;
+		} if (GetContentOfCoord == EMPTY){
+			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			k++;
+		}
+		else
+			break;
 	}
 }
 
-void KingMoves(char** board, int get_move_call, int i, int j, moves_list *head, int color){
-	if (IsValidSquare(i, j + 1) == 1 && (board[i][j + 1] == EMPTY || Color(board, i, j + 1) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i, j + 1, head, 0);
-	}
-	if (IsValidSquare(i, j - 1) == 1 && (board[i][j - 1] == EMPTY || Color(board, i, j - 1) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i, j - 1, head, 0);
-	}
-	if (IsValidSquare(i + 1, j) == 1 && (board[i + 1][j] == EMPTY || Color(board, i + 1, j) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i + 1, j, head, 0);
-	}
-	if (IsValidSquare(i - 1, j) == 1 && (board[i - 1][j] == EMPTY || Color(board, i - 1, j) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i - 1, j, head, 0);
-	}
-	if (IsValidSquare(i + 1, j + 1) == 1 && (board[i + 1][j + 1] == EMPTY || Color(board, i + 1, j + 1) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i + 1, j + 1, head, 0);
-	}
-	if (IsValidSquare(i + 1, j - 1) == 1 && (board[i + 1][j - 1] == EMPTY || Color(board, i + 1, j - 1) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i + 1, j - 1, head, 0);
-	}
-	if (IsValidSquare(i - 1, j + 1) == 1 && (board[i - 1][j + 1] == EMPTY || Color(board, i - 1, j + 1) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i - 1, j + 1, head, 0);
-	}
-	if (IsValidSquare(i - 1, j - 1) == 1 && (board[i - 1][j - 1] == EMPTY || Color(board, i - 1, j - 1) == color*-1)){
-		AddMove(board, color, get_move_call, i, j, i - 1, j - 1, head, 0);
-	}
+
+Coord offsetCoord(Coord coord, int i_offset, int j_offset)
+{
+	Coord res = coord;
+	coord.i_coord += i_offset;
+	coord.j_coord += j_offset;
+	return res;
 }
+
+
 
 
 
