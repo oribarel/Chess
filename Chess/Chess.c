@@ -712,7 +712,13 @@ int IsAlly(char tool, char myColor)
 }
 
 
-
+Coord offsetCoord(Coord coord, int i_offset, int j_offset)
+{
+	Coord res = coord;
+	coord.i_coord += i_offset;
+	coord.j_coord += j_offset;
+	return res;
+}
 
 /*add a new move in the beginning of the linked list*/
 cMove * AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int promote)
@@ -825,7 +831,7 @@ void BishopMoves(board_t board, Coord coord){
 	int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
-	Coord tmpCoord = coord;
+
 
 	
 	//north-east
@@ -833,10 +839,10 @@ void BishopMoves(board_t board, Coord coord){
 	Coord tmpCoord = offsetCoord(coord, k, k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0),0,0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord),0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -844,14 +850,14 @@ void BishopMoves(board_t board, Coord coord){
 	}
 
 	//north-west
-	int k = 1;
-	Coord tmpCoord = offsetCoord(coord, -k, k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, -k, k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -861,14 +867,14 @@ void BishopMoves(board_t board, Coord coord){
 
 
 	//south-east
-	int k = 1;
-	Coord tmpCoord = offsetCoord(coord, k, -k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, k, -k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -876,14 +882,14 @@ void BishopMoves(board_t board, Coord coord){
 	}
 
 	//south-west
-	int k = 1;
-	Coord tmpCoord = offsetCoord(coord, -k, -k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, -k, -k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -896,7 +902,6 @@ void RookMoves(board_t board, Coord coord){
 	int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
-	Coord tmpCoord = coord;
 
 
 	//north
@@ -904,10 +909,10 @@ void RookMoves(board_t board, Coord coord){
 	Coord tmpCoord = offsetCoord(coord, k, k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -915,14 +920,14 @@ void RookMoves(board_t board, Coord coord){
 	}
 
 	//south
-	int k = 1;
-	Coord tmpCoord = offsetCoord(coord, -k, k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, -k, k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -932,14 +937,14 @@ void RookMoves(board_t board, Coord coord){
 
 
 	//east
-	int k = 1;
-	Coord tmpCoord = offsetCoord(coord, k, -k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, k, -k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -947,14 +952,14 @@ void RookMoves(board_t board, Coord coord){
 	}
 
 	//west
-	int k = 1;
-	Coord tmpCoord = offsetCoord(coord, -k, -k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, -k, -k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord, 0), 0, 0);//eating
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0, 0);//no-eating
+			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -963,13 +968,7 @@ void RookMoves(board_t board, Coord coord){
 }
 
 
-Coord offsetCoord(Coord coord, int i_offset, int j_offset)
-{
-	Coord res = coord;
-	coord.i_coord += i_offset;
-	coord.j_coord += j_offset;
-	return res;
-}
+
 
 
 
