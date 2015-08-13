@@ -33,12 +33,12 @@
 #define BLACK_K 'K'
 #define EMPTY ' '
 
-#define PAWN "pawn"		//pawn		hayal
-#define BISHOP "bishop"		//bishop	ratz
-#define KNIGHT "knight"		//knight	parash
-#define ROOK "rook"		//rook		tzariakh
-#define QUEEN "queen"		//queen		malka
-#define KING "king"		//king		melekh
+#define PAWN	"pawn"		//pawn		hayal
+#define BISHOP	"bishop"	//bishop	ratz
+#define KNIGHT	"knight"	//knight	parash
+#define ROOK	"rook"		//rook		tzariakh
+#define QUEEN	"queen"		//queen		malka
+#define KING	"king"		//king		melekh
 
 #define WHITE "white"
 #define BLACK "black"
