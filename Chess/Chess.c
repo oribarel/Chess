@@ -219,23 +219,23 @@ void init_rowP(board_t board, int player)
 void init_rowV(board_t board, int player)
 {
 	Coord crd;
-	int j = player==WHITE_PLAYER ? 0 : 7;
+	int j = player == WHITE_PLAYER ? 0 : 7;
 	int i = 0;
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_R : BLACK_R);
-	crd.i_coord++;			  
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_N : BLACK_N);
-	crd.i_coord++;			  
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_B : BLACK_B);
-	crd.i_coord++;			  
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_K : BLACK_K);
-	crd.i_coord++;			  
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_Q : BLACK_Q);
-	crd.i_coord++;			  
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_B : BLACK_B);
-	crd.i_coord++;			 
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_N : BLACK_N);
-	crd.i_coord++;		
-	setSlotInBoard(board, crd,player==WHITE_PLAYER ? WHITE_R : BLACK_R);
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_R : BLACK_R);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_N : BLACK_N);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_B : BLACK_B);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_K : BLACK_K);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_Q : BLACK_Q);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_B : BLACK_B);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_N : BLACK_N);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_R : BLACK_R);
 }
 
 /*CONVD*/
@@ -311,8 +311,8 @@ Move *kingMoves(board_t board, Coord coord)
 cMove *QueenMoves(board_t board, Coord coord)
 {
 	cMove *rookAspect = NULL, *bishopAspect = NULL, *tmp;
-	rookAspect = RookMoves(board, coord);
-	bishopAspect = BishopMoves(board, coord);
+	rookAspect = (cMove *) RookMoves(board, coord);
+	bishopAspect = (cMove *) BishopMoves(board, coord);
 	if (rookAspect == NULL)
 		return bishopAspect;
 	else
@@ -780,7 +780,7 @@ int DoesCrdContainsEnemy(board_t board, Coord coord, char tool)
 
 int getColor(board_t board, Coord coord)
 {
-	int color = islower(GetContentOfCoord(board,coord)) ? WHITE_PLAYER : BLACK_PLAYER;
+	int color = islower(GetContentOfCoord(board, coord)) ? WHITE_PLAYER : BLACK_PLAYER;
 	return color;
 }
 
@@ -796,9 +796,9 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord.j_coord += color * 1;
 	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord) && GetContentOfCoord(board, tmpCoord) == EMPTY)
 	{
-		if ((j + color * 1 == BOARD_SIZE-1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
+		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
-			AddMove(&head,tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
+			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
 			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
 			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
 			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
@@ -830,9 +830,9 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord = coord;
 	tmpCoord.i_coord += color * 1;
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord)  && DoesCrdContainsEnemy(board, coord, tool))
+	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
 	{
-		if ((j + color * 1 == BOARD_SIZE-1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
+		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
 			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
 			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
@@ -842,50 +842,67 @@ cMove* PawnMoves(board_t board, Coord coord)
 		else
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
 	}
+	return head;
 }
 
-void BishopMoves(board_t board, Coord coord){
+cMove* BishopMoves(board_t board, Coord coord){
 	cMove *head = NULL;
 	int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
 
 
-	
+
 	//north-east
+	int k = 1;
 	Coord tmpCoord = offsetCoord(coord, k, k);
-	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord),0);//eating
-		} if (GetContentOfCoord == EMPTY){
+	while (isInBoard(tmpCoord))
+	{
+		if (getColor(board, tmpCoord) == color * -1)
+		{
+			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+		}
+		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
+		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+		}
+	}
 
 	//north-west
 	tmpCoord = offsetCoord(coord, -k, k);
 	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord == EMPTY){
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+		}
+	}
 
 
 
 	//south-east
 	tmpCoord = offsetCoord(coord, k, -k);
 	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord == EMPTY){
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+		}
+	}
 
 	//south-west
 	tmpCoord = offsetCoord(coord, -k, -k);
 	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord == EMPTY){
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
-void RookMoves(board_t board, Coord coord){
+		}
+	}
+	return head;
+}
+
+cMove* RookMoves(board_t board, Coord coord){
 	cMove *head = NULL;
 	int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
@@ -893,52 +910,63 @@ void RookMoves(board_t board, Coord coord){
 
 
 	//north
+	int k = 1;
 	Coord tmpCoord = offsetCoord(coord, k, k);
 	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord == EMPTY){
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+		}
+	}
 
 	//south
 	tmpCoord = offsetCoord(coord, -k, k);
 	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord == EMPTY){
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+		}
+	}
 
 
 
 	//east
 	tmpCoord = offsetCoord(coord, k, -k);
 	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord == EMPTY){
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+		}
+	}
 
 	//west
 	tmpCoord = offsetCoord(coord, -k, -k);
 	while (isInBoard(tmpCoord)) {
-		if (getColor(&head, tmpCoord) == color * -1){
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord == EMPTY){
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+		}
+	}
+	return head;
+}
 
 
 
 
 
 
-void KnightMoves(board_t board, Coord coord)
+cMove* KnightMoves(board_t board, Coord coord)
 {
 	cMove *head = NULL;
-	
+
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
 
-	Coord tmpCrd = coord, 
+	Coord tmpCrd = coord,
 		tmp0 = offsetCoord(coord, 1, 2),
 		tmp1 = offsetCoord(coord, 2, 1),
 		tmp2 = offsetCoord(coord, 2, -1),
@@ -948,28 +976,29 @@ void KnightMoves(board_t board, Coord coord)
 		tmp6 = offsetCoord(coord, -2, 1),
 		tmp7 = offsetCoord(coord, -1, 2),
 		possibilities[8] =
-	{	 
-		tmp0,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7
+	{
+		tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7
 	};
-		
+
 	for (int i = 0; i < 8; i++)
 	{
-		if (isInBoard(possibilities[i]) && 
+		if (isInBoard(possibilities[i]) &&
 			(GetContentOfCoord(board, possibilities[i]) == EMPTY || DoesCrdContainsEnemy(board, possibilities[i], tool)))
 		{
-			AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]) , 0);
+			AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]), 0);
 		}
 	}
+	return head;
 }
 
-void KingMoves(board_t board, Coord coord)
+cMove* KingMoves(board_t board, Coord coord)
 {
 	cMove *head = NULL;
 
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
 
-	Coord tmpCrd = coord, 
+	Coord tmpCrd = coord,
 		tmp0 = offsetCoord(coord, 0, 1),
 		tmp1 = offsetCoord(coord, 1, 1),
 		tmp2 = offsetCoord(coord, 1, 0),
@@ -978,7 +1007,7 @@ void KingMoves(board_t board, Coord coord)
 		tmp5 = offsetCoord(coord, -1, -1),
 		tmp6 = offsetCoord(coord, -1, 0),
 		tmp7 = offsetCoord(coord, -1, 1),
-		possibilities[8] = { tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7	};
+		possibilities[8] = { tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7 };
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -988,6 +1017,7 @@ void KingMoves(board_t board, Coord coord)
 			AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]) != EMPTY, 0);
 		}
 	}
+	return head;
 }
 
 
@@ -1135,9 +1165,9 @@ int CountToolsOfType(board_t board, char type)
 {
 	int counter = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
-	for (int j = 0; j < BOARD_SIZE; j++)
-	if (board[i][j] == type)
-		counter++;
+		for (int j = 0; j < BOARD_SIZE; j++)
+			if (board[i][j] == type)
+				counter++;
 	return counter;
 }
 
@@ -1570,14 +1600,14 @@ board_t GenerateRandomConfiguration()
 	brd = createBoard();
 	//initialize places array
 	for (int i = 0; i < BOARD_SIZE; i++)
-	for (int j = 0; j < BOARD_SIZE; j++)
-	{
-		if ((i + j) % 2 == 0)
+		for (int j = 0; j < BOARD_SIZE; j++)
 		{
-			places[index] = i * 10 + j;
-			index++;
+			if ((i + j) % 2 == 0)
+			{
+				places[index] = i * 10 + j;
+				index++;
+			}
 		}
-	}
 	assert(index == numberOfFreePlaces);
 
 	//set white tools:
@@ -1920,7 +1950,7 @@ int Parse(char *line, board_t board)
 				{
 					{
 						if (!properties[1])
-						printf(ILLEGAL_COMMAND);
+							printf(ILLEGAL_COMMAND);
 						return 0;
 					}
 				}
@@ -1975,7 +2005,7 @@ int Parse(char *line, board_t board)
 		else if (strcmp(token, cmmd11) == 0)
 			//start
 		{
-			if (CountToolsOfType(board, WHITE_K)<1 || CountToolsOfType(board, BLACK_K)<1)
+			if (CountToolsOfType(board, WHITE_K) < 1 || CountToolsOfType(board, BLACK_K) < 1)
 			{
 				if (!properties[1])
 					printf(WROND_BOARD_INITIALIZATION);
@@ -2159,12 +2189,12 @@ Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 			continue;
 		}
 		for (int i = 0; i <= index; i++)
-		if (route[i].i_coord != allPossibleMoves->route[i].i_coord ||
-			route[i].j_coord != allPossibleMoves->route[i].j_coord)
-		{
-			difference = 1;
-			break;
-		}
+			if (route[i].i_coord != allPossibleMoves->route[i].i_coord ||
+				route[i].j_coord != allPossibleMoves->route[i].j_coord)
+			{
+				difference = 1;
+				break;
+			}
 		if (difference == 0)//if a legal move has been found
 			return allPossibleMoves;
 		allPossibleMoves = allPossibleMoves->next;

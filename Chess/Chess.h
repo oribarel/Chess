@@ -118,8 +118,8 @@ char *getLine(void);
 void print_line();
 board_t createBoard(void);
 void copyBoard(board_t, board_t);
-void printMove(Move *);
-void printMovesList(Move *);
+void printMove(cMove *move);
+void printMovesList(cMove *move);
 Move *createRegularMove(Coord src, Coord dst, int depth, int eater);
 Move *kingMoves(board_t board, Coord coord);
 Move *kingMovesDirected(board_t board, Coord coord, int n, int m);
@@ -132,7 +132,7 @@ char GetContentOfCoord(board_t board, Coord coord);
 void setSlotInBoard(board_t board, Coord slot, char ch);
 Move *manMoves(board_t board, Coord coord, int depth);
 int IsAlly(char tool, char player);
-Move *getMoves(board_t board, char player);
+Move *getMoves(board_t board, int player);
 Move *filterOutMoves(Move *moves);
 int isEaterMove(Move *move);
 void setSlot(board_t board, char *horiz, char *vert, char type);
@@ -163,6 +163,7 @@ Move* chooseMoveRandonly(board_t brd);
 char getCorrespondingKing(char type);
 int printWinner(int computerWins);
 void quit(board_t brd, int freeBoard);
+int getColor(board_t board, Coord coord);
 
 
 
