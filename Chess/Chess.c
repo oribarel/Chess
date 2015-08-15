@@ -756,13 +756,29 @@ int addToDangerZone(int playerColor, Coord crd)
 	}
 }
 
-
+int ResetDangerZone(int playerColor)
+{
+	int j;
+	Coord *dangerZone = playerColor == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
+	if (playerColor == WHITE_PLAYER)
+		j = 0;
+	else
+		j = 1;
+	for (int i = 0; i < gameInfo[j]; i++)
+	{
+		dangerZone[i].i_coord = 0;
+		dangerZone[i].j_coord = 0;
+	}
+	gameInfo[j] = 0;
+}
 
 int UpdateDangerZone(board_t board, int playerColor)
 {
 	Coord KingCrd = (playerColor == WHITE_PLAYER) ? WhiteKing : BlackKing;
 	Coord tmp = KingCrd, possibilities[8];
 	int d = playerColor == WHITE_PLAYER ? 1 : -1;
+	ResetDangerZone(playerColor);
+	gameInfo[playerColor == WHITE_PLAYER ? 0 : 1] = 0;
 	
 	//pawns
 	tmp = offsetCoord(KingCrd, -1, d);
@@ -835,7 +851,6 @@ int UpdateDangerZone(board_t board, int playerColor)
 	//These above include Queen. Assumption is that King never threatens another king. (Should be true)
 
 }
-
 
 
 int DoesCrdContainsEnemy(board_t board, Coord coord, char tool)
