@@ -8,11 +8,15 @@
 #include <time.h>
 #include <ctype.h>
 
-#define WHITE_M //damka
-#define BLACK_M //damka
-#define PLAYER_WINS //damka
+//damka
+#define WHITE_M 0
+//damka
+#define BLACK_M 1
 
-#define DEBUG 0
+
+#define PLAYER_WINS "player wins!"
+#define DEBUG 1
+#define DAMKA 1
 
 #define MIN 0
 #define MAX 1
@@ -104,12 +108,17 @@ typedef struct chessMove {
 	struct chessMove *next;
 } cMove;
 
+typedef enum Tool
+{
+	Pawn, Knight, Bishop, Rook, Queen, King
+}tool;
+
+
 /*typedef struct chessMoveArray {
 	cMove *arr;
 	int length;
 	int nonEmptyNum;
 } chessMoveArr;*/
-
 
 void print_board(char **);
 void init_board(char **);

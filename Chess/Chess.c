@@ -1,8 +1,8 @@
 /*
 The structs are:
 - Coord: a coordinate on the board. see header file.
-- Move(functions as a linked list node): which contains some data about the movement,
-and also the route of coordinates (as an array) that the designated disk should do while making the move.
+- cMove(functions as a linked list node): which contains some data about the movement,
+and also the type of the eaten tool if exists.
 
 A brief explaination about implementation:
 the board is two-dim char array, allocated statically only once in the main.
@@ -39,6 +39,19 @@ properties[3] = 0;	//Default player color white
 properties[4] = 0 //It is now white's\black's turn: 0 for white, 1 for black
 properties[5] = 1;	//Default game mode is "two players mode"
 */
+
+int gameInfo[6] = { 0, 0, 0, 0, 0, 0 };
+/*
+'number of black tools in White King's danger zone'		0
+'number of white tools in Black King's danger zone		1
+*/
+
+Coord WhiteKing;
+Coord BlackKing;
+
+Coord WhiteKingDangerZone[BOARD_SIZE * 2] = { 0 };
+Coord BlackKingDangerZone[BOARD_SIZE * 2] = { 0 };
+
 const char *constWhite = "white";
 const char *constBlack = "black";
 
@@ -201,6 +214,7 @@ void init_rowsE(board_t board)
 		}
 	}
 }
+
 /*DCLR*/
 //pawns row
 void init_rowP(board_t board, int player)
@@ -214,6 +228,7 @@ void init_rowP(board_t board, int player)
 		setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_P : BLACK_P);
 	}
 }
+
 /*DCLR*/
 //higher tools row
 void init_rowV(board_t board, int player)
@@ -258,6 +273,48 @@ void printMovesList(cMove *move)
 	{
 		printMove(move);
 		move = move->next;
+	}
+}
+
+int generateEnemyColor(int playerColor)
+{
+	if (playerColor == WHITE_PLAYER)
+		return BLACK_PLAYER;
+	else
+		return WHITE_PLAYER;
+}
+
+char generateTool(int player, tool type)
+{
+	if (player == WHITE_PLAYER)
+	{
+		if (type == Pawn)
+			return WHITE_P;
+		if (type == Knight)
+			return WHITE_N;
+		if (type == Rook)
+			return WHITE_R;
+		if (type == Bishop)
+			return WHITE_B;
+		if (type == Queen)
+			return WHITE_Q;
+		if (type == King)
+			return WHITE_K;
+	}
+	if (player == BLACK_PLAYER)
+	{
+		if (type == Pawn)
+			return BLACK_P;
+		if (type == Knight)
+			return BLACK_N;
+		if (type == Rook)
+			return BLACK_R;
+		if (type == Bishop)
+			return BLACK_B;
+		if (type == Queen)
+			return BLACK_Q;
+		if (type == King)
+			return BLACK_K;
 	}
 }
 
@@ -311,8 +368,8 @@ Move *kingMoves(board_t board, Coord coord)
 cMove *QueenMoves(board_t board, Coord coord)
 {
 	cMove *rookAspect = NULL, *bishopAspect = NULL, *tmp;
-	rookAspect = (cMove *) RookMoves(board, coord);
-	bishopAspect = (cMove *) BishopMoves(board, coord);
+	rookAspect = (cMove *)RookMoves(board, coord);
+	bishopAspect = (cMove *)BishopMoves(board, coord);
 	if (rookAspect == NULL)
 		return bishopAspect;
 	else
@@ -326,77 +383,6 @@ cMove *QueenMoves(board_t board, Coord coord)
 		return rookAspect;
 	}
 
-}
-
-/*called by KingMoves func, returns the moves a king may do in (n,m) direction.*/
-Move *kingMovesDirected(board_t board, Coord coord, int n, int m)
-/* n,m are the directions in which the king traverses the board.*/
-{
-
-	Move *allMoves = NULL, *tmpMoves = allMoves, *recursionMoves;
-
-	Coord crd;
-	crd = coord;
-	crd.i_coord += n; crd.j_coord += m;
-
-	char myColor = GetContentOfCoord(board, coord);
-
-	while (isInBoard(crd) && GetContentOfCoord(board, crd) == EMPTY)
-		/* i.e. before eating anything: every empty slot on the way is a possible move, allegedly.*/
-	{
-		tmpMoves = allMoves;
-		allMoves = createRegularMove(coord, crd, 0, 0);
-		if (allMoves == NULL) //safety
-			return tmpMoves;
-		allMoves->next = tmpMoves;
-		crd.i_coord += n; crd.j_coord += m;
-	}
-	if (isInBoard(crd) && IsEnemy(GetContentOfCoord(board, crd), myColor))
-		/*enemy found in way.*/
-	{
-		crd.i_coord += n; crd.j_coord += m;
-		if (isInBoard(crd) && GetContentOfCoord(board, crd) == EMPTY)
-			/*there is an empty slot beyond the enemy.*/
-		{
-			//perform the capture:
-			setSlotInBoard(board, coord, EMPTY);
-			/*we are now on the far, empty slot. going back to the occupied one*/
-			crd.i_coord -= n; crd.j_coord -= m;
-			char tmpType = GetContentOfCoord(board, crd);
-			setSlotInBoard(board, crd, EMPTY);
-			/*advancing again to the far, empty slot.*/
-			crd.i_coord += n; crd.j_coord += m;
-			setSlotInBoard(board, crd, myColor);
-
-
-			recursionMoves = (Move *)manMoves(board, crd, 1);
-
-			/*turning back config to what it was:*/
-			setSlotInBoard(board, crd, EMPTY);
-
-			crd.i_coord -= n; crd.j_coord -= m;
-			setSlotInBoard(board, crd, tmpType);
-
-			setSlotInBoard(board, coord, myColor);
-
-			crd.i_coord += n; crd.j_coord += m;
-			if (recursionMoves == NULL)
-			{
-				tmpMoves = allMoves;
-				allMoves = createRegularMove(coord, crd, 0, 1);
-				if (allMoves == NULL) //safety
-					return tmpMoves;
-				allMoves->next = tmpMoves;
-			}
-			else
-			{
-				tmpMoves = (Move *)moveAfterRec(coord, 0, recursionMoves);
-				tmpMoves->next = allMoves;
-				allMoves = recursionMoves;
-			}
-		}
-	}
-	return allMoves;
 }
 
 /*CONVD*/
@@ -741,10 +727,11 @@ Coord offsetCoord(Coord coord, int i_offset, int j_offset)
 /*add a new move in the beginning of the linked list*/
 cMove *AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int promote)
 {
+	cMove *newMove = NULL;
 	//empty cell -> no eating
 	if (eater == EMPTY)
 		eater = 0;
-	cMove *newMove = (cMove*)calloc(1, sizeof(cMove));
+	newMove = (cMove*)calloc(1, sizeof(cMove));
 	newMove->toolType = toolType;
 	newMove->src = src;
 	newMove->dst = dst;
@@ -754,6 +741,82 @@ cMove *AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int
 	*head = newMove;
 	return *head;
 }
+
+int addToDangerZone(int playerColor, Coord crd)
+{
+	if (playerColor == WHITE_PLAYER)
+	{
+		WhiteKingDangerZone[gameInfo[0]] = crd;
+		gameInfo[0]++;
+	}
+	else
+	{
+		BlackKingDangerZone[gameInfo[1]] = crd;
+		gameInfo[1]++;
+	}
+}
+
+
+
+int UpdateDangerZone(board_t board, int playerColor)
+{
+	Coord KingCrd = (playerColor == WHITE_PLAYER) ? WhiteKing : BlackKing;
+	Coord tmp = KingCrd;
+	int d = playerColor == WHITE_PLAYER ? 1 : -1;
+	//pawns
+	tmp = offsetCoord(KingCrd, -1, d);
+	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
+				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
+		addToDangerZone(playerColor, tmp);
+
+	tmp = offsetCoord(KingCrd,  1, d);
+	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
+		GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
+		addToDangerZone(playerColor, tmp);
+
+	//knights
+	Coord possibilities[8];
+	possibilities[0] = offsetCoord(KingCrd, 1, 2);
+	possibilities[1] = offsetCoord(KingCrd, 2, 1);
+	possibilities[2] = offsetCoord(KingCrd, 2, -1);
+	possibilities[3] = offsetCoord(KingCrd, 1, -2);
+	possibilities[4] = offsetCoord(KingCrd, -1, -2);
+	possibilities[5] = offsetCoord(KingCrd, -2, -1);
+	possibilities[6] = offsetCoord(KingCrd, -2, 1);
+	possibilities[7] = offsetCoord(KingCrd, -1, 2);
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (isInBoard(possibilities[i]) && 
+			GetContentOfCoord(board, possibilities[i]) == generateTool(generateEnemyColor(playerColor), Knight))
+			addToDangerZone(playerColor, possibilities[i]);
+	}
+
+	//rooks
+	tmp = KingCrd;
+	for (int h = -1; h < 2; h+=2)
+	{
+		while (isInBoard(tmp))
+		{
+			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
+				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
+				addToDangerZone(playerColor, tmp);
+			tmp = offsetCoord(tmp, h, 0);
+		}
+	}
+	for (int v = -1; v < 2; v+=2)
+	{
+		while (isInBoard(tmp))
+		{
+			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
+				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
+				addToDangerZone(playerColor, tmp);
+			tmp = offsetCoord(tmp, 0, v);
+		}
+	}
+	
+}
+
 
 
 int DoesCrdContainsEnemy(board_t board, Coord coord, char tool)
@@ -784,6 +847,13 @@ int getColor(board_t board, Coord coord)
 	return color;
 }
 
+int openKingDefences(board_t board, Coord coord, Coord tmpCoord)
+{
+	int player = getColor(board, coord);
+
+}
+
+
 cMove* PawnMoves(board_t board, Coord coord)
 {
 	cMove *head = NULL;
@@ -794,7 +864,7 @@ cMove* PawnMoves(board_t board, Coord coord)
 
 	//no eating
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord) && GetContentOfCoord(board, tmpCoord) == EMPTY)
+	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && GetContentOfCoord(board, tmpCoord) == EMPTY)
 	{
 		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
@@ -812,7 +882,7 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord = coord;
 	tmpCoord.i_coord -= color * 1;
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
+	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
 	{
 		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
@@ -830,7 +900,7 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord = coord;
 	tmpCoord.i_coord += color * 1;
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && !isKingUnderThreat(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
+	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
 	{
 		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
@@ -966,20 +1036,15 @@ cMove* KnightMoves(board_t board, Coord coord)
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
 
-	Coord tmpCrd = coord,
-		tmp0 = offsetCoord(coord, 1, 2),
-		tmp1 = offsetCoord(coord, 2, 1),
-		tmp2 = offsetCoord(coord, 2, -1),
-		tmp3 = offsetCoord(coord, 1, -2),
-		tmp4 = offsetCoord(coord, -1, -2),
-		tmp5 = offsetCoord(coord, -2, -1),
-		tmp6 = offsetCoord(coord, -2, 1),
-		tmp7 = offsetCoord(coord, -1, 2),
-		possibilities[8] =
-	{
-		tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7
-	};
-
+	Coord tmpCrd = coord, possibilities[8];
+	possibilities[0] = offsetCoord(coord, 1, 2);
+	possibilities[1] = offsetCoord(coord, 2, 1);
+	possibilities[2] = offsetCoord(coord, 2, -1);
+	possibilities[3] = offsetCoord(coord, 1, -2);
+	possibilities[4] = offsetCoord(coord, -1, -2);
+	possibilities[5] = offsetCoord(coord, -2, -1);
+	possibilities[6] = offsetCoord(coord, -2, 1);
+	possibilities[7] = offsetCoord(coord, -1, 2);
 	for (int i = 0; i < 8; i++)
 	{
 		if (isInBoard(possibilities[i]) &&
@@ -998,16 +1063,16 @@ cMove* KingMoves(board_t board, Coord coord)
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
 
-	Coord tmpCrd = coord,
-		tmp0 = offsetCoord(coord, 0, 1),
-		tmp1 = offsetCoord(coord, 1, 1),
-		tmp2 = offsetCoord(coord, 1, 0),
-		tmp3 = offsetCoord(coord, 1, -1),
-		tmp4 = offsetCoord(coord, 0, -1),
-		tmp5 = offsetCoord(coord, -1, -1),
-		tmp6 = offsetCoord(coord, -1, 0),
-		tmp7 = offsetCoord(coord, -1, 1),
-		possibilities[8] = { tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7 };
+	Coord tmpCrd = coord, possibilities[8];
+	possibilities[0] = offsetCoord(coord, 0, 1);
+	possibilities[1] = offsetCoord(coord, 1, 1);
+	possibilities[2] = offsetCoord(coord, 1, 0);
+	possibilities[3] = offsetCoord(coord, 1, -1);
+	possibilities[4] = offsetCoord(coord, 0, -1);
+	possibilities[5] = offsetCoord(coord, -1, -1);
+	possibilities[6] = offsetCoord(coord, -1, 0);
+	possibilities[7] = offsetCoord(coord, -1, 1);
+
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -1020,61 +1085,20 @@ cMove* KingMoves(board_t board, Coord coord)
 	return head;
 }
 
-
-/*returns all moves that a player may do with the specific configuration of the board (filtered).*/
-cMove *getMoves(board_t board, int player)
+//TODO: implement 
+cMove *movesByPieceType(board, coord)
 {
-	Move *allMoves = NULL, *tmpMoves, *tmpMovesEnd;
-	Coord coord;
-	int ally;
-	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && properties[1] != 1; k++)
-	{
-		coord.i_coord = (int)mod(k, BOARD_SIZE);
-		coord.j_coord = k / BOARD_SIZE; /*(int)floor(k / BOARD_SIZE);*/
-		ally = IsAlly(GetContentOfCoord(board, coord), player);
-		if (ally)
-			/*it is an ally:*/
-		{
-			tmpMoves = movesByPieceType(board, coord);
 
-			tmpMovesEnd = tmpMoves;
-			if (tmpMovesEnd != NULL)
-			{
-				while (tmpMovesEnd->next != NULL)
-				{
-					tmpMovesEnd = tmpMovesEnd->next;
-				}
-				tmpMovesEnd->next = allMoves;
-				allMoves = tmpMoves;
-			}
-		}
-		ally = 0;
-	}
-	/*if (DEBUG)
-	{
-	printf("\nbefore filtering moves list was:\n");
-	printMovesList(allMoves);
-	}*/
-
-	allMoves = (cMove *)filterOutMoves(allMoves);
-
-	//if (DEBUG)
-	//{
-	//	//printf("\nafter filtering moves list was:\n");
-	//	printMovesList(allMoves);
-	//	printf("\n");
-	//}
-
-	return allMoves;
 }
-
 
 
 /*filters out of the linked list of moves  which are illegal because
 there are other moves that may eat more enemy discs*/
-Move *filterOutMoves(Move *moves)
+cMove *filterOutMoves(cMove *moves)
 {
-	Move *start = moves, *include = NULL, *exclude = NULL, *next;
+	return NULL;
+#ifndef DAMKA
+	cMove *start = moves, *include = NULL, *exclude = NULL, *next;
 	int maxLen = 0;
 	int filterNonEaters = 0;
 	/*check whether filtering is required, and the maximal length of any move.*/
@@ -1113,7 +1137,58 @@ Move *filterOutMoves(Move *moves)
 		return include;
 	}
 	return moves;
+#endif
 }
+
+/*returns all moves that a player may do with the specific configuration of the board (filtered).*/
+cMove *getMoves(board_t board, int player)
+{
+	cMove *allMoves = NULL, *tmpMoves, *tmpMovesEnd;
+	Coord coord;
+	int ally;
+	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && properties[1] != 1; k++)
+	{
+		coord.i_coord = (int)mod(k, BOARD_SIZE);
+		coord.j_coord = k / BOARD_SIZE; /*(int)floor(k / BOARD_SIZE);*/
+		ally = IsAlly(GetContentOfCoord(board, coord), player);
+		if (ally)
+			/*it is an ally:*/
+		{
+			tmpMoves = movesByPieceType(board, coord);
+
+			tmpMovesEnd = tmpMoves;
+			if (tmpMovesEnd != NULL)
+			{
+				while (tmpMovesEnd->next != NULL)
+				{
+					tmpMovesEnd = tmpMovesEnd->next;
+				}
+				tmpMovesEnd->next = allMoves;
+				allMoves = tmpMoves;
+			}
+		}
+		ally = 0;
+	}
+	/*if (DEBUG)
+	{
+	printf("\nbefore filtering moves list was:\n");
+	printMovesList(allMoves);
+	}*/
+
+	allMoves = filterOutMoves(allMoves);
+
+	//if (DEBUG)
+	//{
+	//	//printf("\nafter filtering moves list was:\n");
+	//	printMovesList(allMoves);
+	//	printf("\n");
+	//}
+
+	return allMoves;
+}
+
+
+
 
 /* UNUSED */
 int isEaterMove(Move *move)
@@ -1165,9 +1240,9 @@ int CountToolsOfType(board_t board, char type)
 {
 	int counter = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
-		for (int j = 0; j < BOARD_SIZE; j++)
-			if (board[i][j] == type)
-				counter++;
+	for (int j = 0; j < BOARD_SIZE; j++)
+	if (board[i][j] == type)
+		counter++;
 	return counter;
 }
 
@@ -1249,6 +1324,7 @@ if (!playerExists && opponentExists){ return -100; }
 return score;
 }*/
 
+#ifndef DAMKA
 /* an O(1) function to see if a disc is movable or stuck.
 returns 1 if movable and 0 otherwise.*/
 int canMoveThisTool(board_t board, Coord coord)
@@ -1266,7 +1342,7 @@ int canMoveThisTool(board_t board, Coord coord)
 			crd2 = coord;
 			crd1.i_coord += i; crd1.j_coord += j;
 			crd2.i_coord += 2 * i; crd2.j_coord += 2 * j;
-			if (tool == WHITE_K || tool == BLACK_K || (tool == WHITE_M && crd1.j_coord > coord.j_coord) || (tool == BLACK_M && crd1.j_coord < coord.j_coord))
+			if (tool == WHITE_K || tool == BLACK_K || ((tool == WHITE_M) && (crd1.j_coord > coord.j_coord)) || (tool == BLACK_M && crd1.j_coord < coord.j_coord))
 			{
 				if (isInBoard(crd1) && GetContentOfCoord(board, crd1) == EMPTY)//if there is any empty adjacent diagonal cell
 					return 1;
@@ -1288,6 +1364,7 @@ int canMoveThisTool(board_t board, Coord coord)
 	return 0;
 
 }
+#endif
 
 /* the scoring function:
 See instructions for more details.*/
@@ -1370,11 +1447,6 @@ return score(board, player);
 }
 }*/
 
-/*if player is any white tool return black man. else, return white man*/
-char getEnemy(char player)
-{
-	return (player == WHITE_K || player == WHITE_M) ? BLACK_M : WHITE_M;
-}
 
 /* the minimax function as instructed.
 pay attention: this function only returns integers. the argument bestMove
@@ -1461,6 +1533,7 @@ int minimax_score(board_t board, char player, int depth, int minOrMax, Move **be
 	}
 }
 
+#ifndef DAMKA
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
 int makeMove_ComputeScore_Undo(board_t board, Move *move, char player, int depth, int minOrMax)
 /*Saves all the eaten tool types in the eatenTools array, all while making the move on the given board.
@@ -1516,6 +1589,7 @@ Then, run minimax algorithm in recursion to produce a score. At last, undo the m
 	return scr;
 
 }
+#endif
 
 /*changes the board so it describes the state created after the move is made.*/
 int makeMove(board_t board, Move *move)
@@ -1563,7 +1637,7 @@ int imin(int a, int b)
 	return b;
 }
 
-
+#ifndef DAMKA
 /*DEBUG*/
 long random_at_most(long max) {
 	// Assumes 0 <= max <= RAND_MAX
@@ -1586,7 +1660,9 @@ long random_at_most(long max) {
 	// Truncated division is intentional
 	return x / bin_size;*/
 }
+#endif
 
+#ifndef DAMKA
 /*DEBUG: automatic random configuration generator*/
 board_t GenerateRandomConfiguration()
 {
@@ -1600,14 +1676,14 @@ board_t GenerateRandomConfiguration()
 	brd = createBoard();
 	//initialize places array
 	for (int i = 0; i < BOARD_SIZE; i++)
-		for (int j = 0; j < BOARD_SIZE; j++)
+	for (int j = 0; j < BOARD_SIZE; j++)
+	{
+		if ((i + j) % 2 == 0)
 		{
-			if ((i + j) % 2 == 0)
-			{
-				places[index] = i * 10 + j;
-				index++;
-			}
+			places[index] = i * 10 + j;
+			index++;
 		}
+	}
 	assert(index == numberOfFreePlaces);
 
 	//set white tools:
@@ -1648,7 +1724,7 @@ board_t GenerateRandomConfiguration()
 	assert(numberOfTooleToSet == 0);
 	return brd;
 }
-
+#endif
 
 /*DEBUG: configurations generator.*/
 char *configuration(int num)
@@ -1731,6 +1807,7 @@ char *configuration(int num)
 }
 
 /*DEBUG*/
+#ifndef DAMKA
 board_t unitTest_movements(int i)
 {
 	board_t brd = NULL;
@@ -1751,6 +1828,7 @@ board_t unitTest_movements(int i)
 	printMovesList(moves);
 	return brd;
 }
+#endif
 
 /*Parses the input inserted by the user and operates accordingly.
 returns ints for convenience. specifically 10 is an important returned value: see inside.*/
@@ -1950,7 +2028,7 @@ int Parse(char *line, board_t board)
 				{
 					{
 						if (!properties[1])
-							printf(ILLEGAL_COMMAND);
+						printf(ILLEGAL_COMMAND);
 						return 0;
 					}
 				}
@@ -2100,6 +2178,7 @@ char ToolNameToChar(char *toolFullName)
 
 }
 
+#ifndef DAMKA
 /*return NULL if the move is illegal, and a pointer to the move otherwise*/
 Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 {
@@ -2131,10 +2210,6 @@ Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 		if (isupper(GetContentOfCoord(board, source)))
 			promoteTo = toupper(promoteTo);
 	}
-
-
-
-
 
 	char *currentPosition = token;
 	char x_coor;
@@ -2189,19 +2264,20 @@ Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 			continue;
 		}
 		for (int i = 0; i <= index; i++)
-			if (route[i].i_coord != allPossibleMoves->route[i].i_coord ||
-				route[i].j_coord != allPossibleMoves->route[i].j_coord)
-			{
-				difference = 1;
-				break;
-			}
+		if (route[i].i_coord != allPossibleMoves->route[i].i_coord ||
+			route[i].j_coord != allPossibleMoves->route[i].j_coord)
+		{
+			difference = 1;
+			break;
+		}
 		if (difference == 0)//if a legal move has been found
 			return allPossibleMoves;
 		allPossibleMoves = allPossibleMoves->next;
 	}
 	return NULL;
-
 }
+#endif
+
 
 /*CONVED*/
 /*token is a part of the command the used inserted and should represent all valid coordinations.
@@ -2359,7 +2435,6 @@ int printWinner(int computerWins)
 		printf("%s", getPlayerColor());
 	printf(" %s", PLAYER_WINS);
 	return 0;
-
 }
 
 /*DCLR*/
@@ -2439,12 +2514,6 @@ int LoadFromFile(char* file_path, board_t board){
 }
 
 
-
-
-
-
-
-
 /* UNUSED*/
 void quit(board_t brd, int freeBoard)
 {
@@ -2480,16 +2549,6 @@ int main()
 	Move *computerMove = NULL;
 	Move *allPossibleMoves = NULL, *tmp;
 
-
-
-
-	//freeBoard = 0;// TODO: experiement
-	//brd = //createBoard(); TODO: experiement
-	/*if (brd == NULL)
-	{
-	freeBoard = 0;
-	}*/
-
 	init_board(brd);
 
 	/*if (DEBUG)
@@ -2523,9 +2582,9 @@ int main()
 
 			//run MINIMAX
 			if (properties[3])//if computer's color is white
-				minimax_score(brd, WHITE_M, properties[2], 1, &computerMove);
+				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove);
 			else
-				minimax_score(brd, BLACK_M, properties[2], 1, &computerMove);
+				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove);
 
 			//print computer's move
 			if (computerMove != NULL)
