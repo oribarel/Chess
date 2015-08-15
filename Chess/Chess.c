@@ -20,8 +20,7 @@ Functions that are labeled:
 
 
 #include "Chess.h"
-
-
+#include "GUI.h"
 
 int properties[6] = { 1, 0, 1, 0, 0, 0 };
 /*	'settings'		0
@@ -55,7 +54,7 @@ Coord BlackKingDangerZone[BOARD_SIZE * 2] = { 0 };
 const char *constWhite = "white";
 const char *constBlack = "black";
 
-Move *pMove;
+cMove *pMove;
 
 /*DEBUG: simulate failure of allocation*/
 void *myalloc(int a, int b)
@@ -236,6 +235,8 @@ void init_rowV(board_t board, int player)
 	Coord crd;
 	int j = player == WHITE_PLAYER ? 0 : 7;
 	int i = 0;
+	crd.i_coord = i;
+	crd.j_coord = j;
 	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_R : BLACK_R);
 	crd.i_coord++;
 	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_N : BLACK_N);
@@ -316,54 +317,10 @@ char generateTool(int player, eTool type)
 		if (type == King)
 			return BLACK_K;
 	}
+	return EMPTY;
 }
 
-/*DCLR*/
-/*CONVD*/
-Move *createMove(Coord src, Coord dst, char eaten)
-{
-	cMove *move = (cMove *)calloc(1, sizeof(cMove)); //TODO:cast like that in all allocs
-	if (move == NULL) // safety
-	{
-		if (!properties[1])
-			perror_message("calloc");
-		properties[1] = 1;
-		return NULL;
-	}
 
-	(move->src).i_coord = src.i_coord;
-	(move->src).j_coord = src.j_coord;
-
-	(move->dst).i_coord = dst.i_coord;
-	(move->dst).j_coord = dst.j_coord;
-
-	move->eaten = eaten;
-}
-
-/*returns a linked list of moves the king in the coordinate coord may do (unfiltered)*/
-Move *kingMoves(board_t board, Coord coord)
-{
-	Move *allMoves = NULL, *tmpMoves = allMoves, *recursionMoves;
-
-	for (int n = -1; n < 2; n += 2)
-	{
-		for (int m = -1; m < 2; m += 2)
-		{
-			recursionMoves = (Move *)kingMovesDirected(board, coord, n, m);
-			if (recursionMoves != NULL)
-			{
-				tmpMoves = recursionMoves;
-				while (recursionMoves->next != NULL)
-				{
-					recursionMoves = recursionMoves->next;
-				}
-				recursionMoves->next = allMoves;
-				allMoves = tmpMoves;
-			}
-		}
-	}
-	return allMoves;
-}
 
 cMove *QueenMoves(board_t board, Coord coord)
 {
@@ -441,6 +398,7 @@ int IsEnemy(char slot, char myColor)
 			return 0;
 		}
 	}
+	return 0; //shouldn't get here
 }
 
 /*returns 1 if coord is within the boundaries of the board.*/
@@ -509,149 +467,7 @@ void setSlotInBoard(board_t board, Coord slot, char ch)
 	board[slot.i_coord][slot.j_coord] = ch;
 }
 
-/* j is rows, i is columns
-when depth is 0 we create a new moves list for the man on i,j
-when depth is greater that 0 it means we recursively determine a complex move.
-Ultimately, returns all the moves a man on the coord in the board may do.*/
-Move *manMoves(board_t board, Coord coord, int depth)
-{
 
-	Move *allMoves = NULL, *tmpMoves = allMoves, *recursionMoves;
-	char myType = GetContentOfCoord(board, coord);
-	char tmpType;
-	int d;
-	Coord crd;
-	Coord exCrd;
-
-	//d = (myType == WHITE_M || myType == WHITE_K) ? 1 : -1; //White or Black plays
-	d = 1;
-
-	//W northwest move (B southeast move):
-	//W northeast move (B southwest move):
-	for (int dx = -1; dx < 2; dx += 2)
-	{
-		crd = coord;
-		//adjacent
-		crd.i_coord += d*dx; crd.j_coord += d;
-		if (isInBoard(crd))
-		{
-			//if empty slot:
-			if (GetContentOfCoord(board, crd) == EMPTY && depth == 0)
-			{
-				tmpMoves = allMoves;
-				allMoves = createRegularMove(coord, crd, depth, 0);
-				if (allMoves == NULL)
-					return tmpMoves;
-				allMoves->next = tmpMoves;
-			}
-			//if occupied by enemy
-			else if (IsEnemy(GetContentOfCoord(board, crd), myType))
-			{
-				//exCrd <- coordinate beyond crd
-				exCrd = crd;
-				exCrd.i_coord += d*dx; exCrd.j_coord += d;
-				//if there is an empty slot beyond
-				if (isInBoard(exCrd) && GetContentOfCoord(board, exCrd) == EMPTY)
-				{
-					if (anointAKing(exCrd.j_coord, myType)) //anoints the king and stops its turn.
-					{
-						tmpMoves = allMoves;
-						allMoves = createRegularMove(coord, exCrd, depth, 1);
-						if (allMoves == NULL)
-							return tmpMoves;
-						allMoves->next = tmpMoves;
-					}
-					else //no new king was anointed.
-					{
-						tmpType = GetContentOfCoord(board, crd); //the tool that is being eaten
-
-						//performing the capture on board
-						setSlotInBoard(board, coord, EMPTY);
-						setSlotInBoard(board, crd, EMPTY);
-						setSlotInBoard(board, exCrd, myType);
-
-
-						//the list of possible moves that can be done from this position
-						recursionMoves = manMoves(board, exCrd, depth + 1);
-
-						//turning the board back to its original configuration before performing the capture.
-						setSlotInBoard(board, coord, myType);
-						setSlotInBoard(board, crd, tmpType);
-						setSlotInBoard(board, exCrd, EMPTY);
-
-						if (recursionMoves == NULL)
-						{
-							tmpMoves = allMoves;
-							allMoves = createRegularMove(coord, exCrd, depth, 1);
-							if (allMoves == NULL)
-								return tmpMoves;
-							allMoves->next = tmpMoves;
-						}
-						else
-						{
-							//adding coord to the route of each of the moves in the list recursionMoves
-							tmpMoves = moveAfterRec(coord, depth, recursionMoves);
-							tmpMoves->next = allMoves;
-							allMoves = recursionMoves;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	//W southwest move (B northeast move):
-	//W southeast move (B northwest move):
-	for (int dx = -1; dx < 2; dx += 2)
-	{
-		exCrd = coord;
-		crd = coord;
-		crd.i_coord += d*dx; crd.j_coord -= d;
-		exCrd.i_coord += 2 * d*dx; exCrd.j_coord -= 2 * d;
-
-		//(W) if far coord to the southeast is in board
-		if (isInBoard(exCrd))
-		{
-			//and the close one is occupied by enemy:
-			if (IsEnemy(GetContentOfCoord(board, crd), myType))
-			{
-				//if there is an empty slot beyond
-				if (GetContentOfCoord(board, exCrd) == EMPTY)
-				{
-
-					tmpType = GetContentOfCoord(board, crd);
-
-					setSlotInBoard(board, coord, EMPTY);
-					setSlotInBoard(board, crd, EMPTY);
-					setSlotInBoard(board, exCrd, myType);
-
-					recursionMoves = manMoves(board, exCrd, depth + 1);
-
-					setSlotInBoard(board, coord, myType);
-					setSlotInBoard(board, crd, tmpType);
-					setSlotInBoard(board, exCrd, EMPTY);
-
-					if (recursionMoves == NULL)
-					{
-						tmpMoves = allMoves;
-						allMoves = createRegularMove(coord, exCrd, depth, 1);
-						if (allMoves == NULL)
-							return tmpMoves;
-						allMoves->next = tmpMoves;
-					}
-					else
-					{
-						tmpMoves = moveAfterRec(coord, depth, recursionMoves);
-						tmpMoves->next = allMoves;
-						allMoves = recursionMoves;
-					}
-				}
-			}
-		}
-	}
-	tmpMoves = allMoves;
-	return tmpMoves;
-}
 
 /*CONVD*/
 /*returns 0 if tool is an oponnent tool
@@ -754,6 +570,7 @@ int addToDangerZone(int playerColor, Coord crd)
 		BlackKingDangerZone[gameInfo[1]] = crd;
 		gameInfo[1]++;
 	}
+	return 0;
 }
 
 int ResetDangerZone(int playerColor)
@@ -770,6 +587,7 @@ int ResetDangerZone(int playerColor)
 		dangerZone[i].j_coord = 0;
 	}
 	gameInfo[j] = 0;
+	return 0;
 }
 
 int UpdateDangerZone(board_t board, int playerColor)
@@ -849,7 +667,7 @@ int UpdateDangerZone(board_t board, int playerColor)
 	}
 
 	//These above include Queen. Assumption is that King never threatens another king. (Should be true)
-
+	return 0;
 }
 
 
@@ -881,7 +699,8 @@ int getColor(board_t board, Coord coord)
 	return color;
 }
 
-int getType(board_t board, Coord crd){
+int getType(board_t board, Coord crd)
+{
 	char ch = GetContentOfCoord(board, crd);
 	if (ch == WHITE_P || ch == BLACK_P)
 		return Pawn;
@@ -895,6 +714,7 @@ int getType(board_t board, Coord crd){
 		return Queen;
 	if (ch == WHITE_K || ch == BLACK_K)
 		return King;
+	return EMPTY;
 }
 
 int AreTwoCoordsEqual(Coord c1, Coord c2)
@@ -1012,7 +832,8 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 	}
 }
 
-
+/*returns 1 when moving src tool to dst coord will open king defences
+Not to be used when src tool is the King itself*/
 int openKingDefences(board_t board, Coord src, Coord dst)
 {
 	int player = getColor(board, src);
@@ -1032,6 +853,39 @@ int openKingDefences(board_t board, Coord src, Coord dst)
 	{
 		result |= isAttacking(board, dangerZone[i], kingCrd);
 	}
+	
+	setSlotInBoard(board, src, srcType);
+	setSlotInBoard(board, dst, dstType);
+
+	return result;
+}
+
+/*Pre: dst coord is adjacent to KingCrd coord*/
+int safeToMoveKing(board_t board, int player, Coord dst)
+{
+	char dstType = GetContentOfCoord(board, dst);
+	Coord *dangerZone, kingCrd;
+	int dangerZone_AmountOfPieces;
+	
+	kingCrd = player == WHITE_PLAYER ? WhiteKing : BlackKing;
+
+	setSlotInBoard(board, kingCrd, EMPTY);
+	setSlotInBoard(board, dst, generateTool(player, King));
+
+	UpdateDangerZone(board, player);
+	dangerZone = player == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
+	dangerZone_AmountOfPieces = player == WHITE_PLAYER ? gameInfo[0] : gameInfo[1];
+
+	int result = 1;
+	for (int i = 0; i < dangerZone_AmountOfPieces; i++)
+	{
+		result &= !isAttacking(board, dangerZone[i], kingCrd);
+	}
+
+	setSlotInBoard(board, kingCrd, generateTool(player,King));
+	setSlotInBoard(board, dst, dstType);
+	UpdateDangerZone(board, player);
+
 	return result;
 }
 
@@ -1261,7 +1115,8 @@ cMove* KingMoves(board_t board, Coord coord)
 		if (isInBoard(possibilities[i]) &&
 			(GetContentOfCoord(board, possibilities[i]) == EMPTY || DoesCrdContainsEnemy(board, possibilities[i], tool)))
 		{
-			AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]) != EMPTY, 0);
+			if (safeToMoveKing(board, color, possibilities[i]))
+				AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]) != EMPTY, 0);
 		}
 	}
 	return head;
@@ -1270,7 +1125,7 @@ cMove* KingMoves(board_t board, Coord coord)
 //TODO: implement 
 cMove *movesByPieceType(board, coord)
 {
-
+	return NULL;
 }
 
 #ifndef DAMKA
@@ -1356,7 +1211,7 @@ cMove *getMoves(board_t board, int player)
 	printMovesList(allMoves);
 	}*/
 
-	allMoves = filterOutMoves(allMoves);
+	/*allMoves = filterOutMoves(allMoves);*/
 
 	//if (DEBUG)
 	//{
@@ -1586,6 +1441,9 @@ int score(board_t board, char player)
 	return score;
 }
 
+//TODO: implement if needed
+int canMoveThisTool(board, coord){ return 1; }
+
 /*returns 1 if type is white and 0 otherwise.*/
 int isWhite(char type)
 {
@@ -1635,6 +1493,7 @@ is an address to a pointer that exists outside of minimax_score, and when obtain
 which move is truely optimal (due to depth restrictions) the content of the address is set to the address of that said move. */
 int minimax_score(board_t board, char player, int depth, int minOrMax, Move **bestMove)
 {
+#ifndef DAMKA
 	Move *movesList, *tmp;
 	int bestValue, val;
 	if (depth == 0)//base case
@@ -1712,6 +1571,8 @@ int minimax_score(board_t board, char player, int depth, int minOrMax, Move **be
 		}
 		return bestValue;
 	}
+#endif
+	return 0;
 }
 
 #ifndef DAMKA
@@ -1907,85 +1768,6 @@ board_t GenerateRandomConfiguration()
 }
 #endif
 
-/*DEBUG: configurations generator.*/
-char *configuration(int num)
-{
-	char *res;
-	const char *config1 = "c,3,k c,5,M e,5,M e,7,K g,9,m i,9,k";
-	const char *config2 = "c,3,m d,4,M d,6,K";
-	const char *config3 = "b,4,M c,5,m e,7,k g,9,m i,9,m";
-	const char *config4 = "b,4,m c,5,M e,7,K g,9,M i,9,M";
-	const char *config7 = "b,4,m";//no black tools
-	const char *config8 = "c,1,M";//no white tools + check the auto-anoint of a man to a king in the stage of settings
-	//const char *config9 = "a,1,K b,2,m c,3,m";//black is blocked
-	//const char *config9 = "a,9,M b,8,k c,7,m";//black is blocked
-	//const char *config9 = "a,3,m b,4,K c,5,M";//white is blocked
-	//const char *config9 = "a,1,K b,2,M c,1,m";//black is blocked
-	const char *config9 = "a,3,M b,2,k c,1,m c,5,m";//black is blocked
-	const char *config10 = "a,1,m b,2,K c,3,K";//white black tools
-	//const char *config11 = "c,3,K a,3,m";//exception - problem!!!
-	const char *config11 = "a,1,K b,2,m";//exception - problem!!!
-	const char *filtering1 = "a,1,m b,2,M b,4,M d,4,K d,6,M e,7,m";
-	const char *checkKing = "b,2,k f,6,M";
-
-	if (num == 1)
-	{
-		res = calloc(strlen(config1) + 1, 1);
-		strcpy(res, config1);
-	}
-
-	if (num == 2)
-	{
-		res = calloc(strlen(config2) + 1, 1);
-		strcpy(res, config2);
-	}
-	if (num == 3)
-	{
-		res = calloc(strlen(config3) + 1, 1);
-		strcpy(res, config3);
-	}
-	if (num == 4)
-	{
-		res = calloc(strlen(config4) + 1, 1);
-		strcpy(res, config4);
-	}
-	if (num == 5)
-	{
-		res = calloc(strlen(filtering1) + 1, 1);
-		strcpy(res, filtering1);
-	}
-	if (num == 6)
-	{
-		res = calloc(strlen(checkKing) + 1, 1);
-		strcpy(res, checkKing);
-	}
-	if (num == 7)
-	{
-		res = calloc(strlen(config7) + 1, 1);
-		strcpy(res, config7);
-	}
-	if (num == 8)
-	{
-		res = calloc(strlen(config8) + 1, 1);
-		strcpy(res, config8);
-	}
-	if (num == 9)
-	{
-		res = calloc(strlen(config9) + 1, 1);
-		strcpy(res, config9);
-	}
-	if (num == 10)
-	{
-		res = calloc(strlen(config10) + 1, 1);
-		strcpy(res, config10);
-	}
-	if (num == 11)
-	{
-		res = calloc(strlen(config11) + 1, 1);
-		strcpy(res, config11);
-	}
-	return res;
-}
 
 /*DEBUG*/
 #ifndef DAMKA
@@ -2063,9 +1845,9 @@ int Parse(char *line, board_t board)
 			{
 				properties[5] = (int)mode;
 				if (mode == 1)
-					prinft("%s", TWO_PLAYERS_GAME_MODE);
+					printf("%s", TWO_PLAYERS_GAME_MODE);
 				else
-					prinft("%s", PLAYER_VS_AI_GAME_MODE);
+					printf("%s", PLAYER_VS_AI_GAME_MODE);
 			}
 			else
 			{
@@ -2359,7 +2141,7 @@ char ToolNameToChar(char *toolFullName)
 
 }
 
-#ifndef DAMKA
+
 /*return NULL if the move is illegal, and a pointer to the move otherwise*/
 Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 {
@@ -2392,13 +2174,11 @@ Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 			promoteTo = toupper(promoteTo);
 	}
 
-	char *currentPosition = token;
-	char x_coor;
-	int y_coor;
+	currentPosition = token;
 	int numOfCoords = 0;
 	int index = 0;
 	int difference = 0;
-	Coord route[MAX_NUMBER_OF_TOOLS_PER_PLAYER + 1];
+	Coord route[20 + 1];
 
 
 	//counte number of coordinates
@@ -2410,7 +2190,7 @@ Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 		}
 		currentPosition++;
 	}
-	if (numOfCoords > MAX_NUMBER_OF_TOOLS_PER_PLAYER + 1)
+	if (numOfCoords > 20 + 1)
 		return NULL;
 
 
@@ -2457,7 +2237,7 @@ Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 	}
 	return NULL;
 }
-#endif
+
 
 
 /*CONVED*/
@@ -2575,6 +2355,7 @@ char getGenericTool(int isComputer)
 }
 
 /*DEBUG*/
+#ifndef DAMKA
 Move* chooseMoveRandonly(board_t brd)
 {
 	int counter = 0;
@@ -2595,6 +2376,7 @@ Move* chooseMoveRandonly(board_t brd)
 		tmp = tmp->next;
 	return tmp;
 }
+#endif
 
 /*returns the corresponding king of that arg type*/
 char getCorrespondingKing(char type)
@@ -2690,22 +2472,10 @@ int LoadFromFile(char* file_path, board_t board){
 	}
 
 	fclose(file);
-	PrintBoard(board);
+	print_board(board);
 	return 0;
 }
 
-
-/* UNUSED*/
-void quit(board_t brd, int freeBoard)
-{
-	if (freeBoard)
-	{
-		for (int i = 0; i < BOARD_SIZE; i++)
-			free(brd[i]);
-		free(brd);
-	}
-	exit(1);
-}
 
 
 int main()
@@ -2722,8 +2492,14 @@ int main()
 	char row5[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
 	char row6[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
 	char row7[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	board[0] = row0; board[1] = row1; board[2] = row2; board[3] = row3; board[4] = row4;
-	board[5] = row5; board[6] = row6; board[7] = row7;
+	board[0] = row0;
+	board[1] = row1;
+	board[2] = row2;
+	board[3] = row3;
+	board[4] = row4;
+	board[5] = row5;
+	board[6] = row6;
+	board[7] = row7;
 
 	board_t brd = board;//= NULL; TODO: experiement
 	char *input = NULL;
@@ -2772,7 +2548,7 @@ int main()
 			{
 				if (!properties[1])
 					printf("Computer: move ");
-				printMove(computerMove);
+//				printMove(computerMove);
 				makeMove(brd, computerMove);
 				free(computerMove->route);
 				free(computerMove);
@@ -2819,7 +2595,7 @@ int main()
 			if (properties[4] == 0)
 				printf(WHT_ENTER_YOUR_MOVE);
 			else
-				prinft(BLK_ENTER_YOUR_MOVE);
+				printf(BLK_ENTER_YOUR_MOVE);
 
 
 		}
