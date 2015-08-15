@@ -111,7 +111,7 @@ typedef struct chessMove {
 typedef enum Tool
 {
 	Pawn, Knight, Bishop, Rook, Queen, King
-}tool;
+}eTool;
 
 
 /*typedef struct chessMoveArray {

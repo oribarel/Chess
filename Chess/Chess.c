@@ -284,7 +284,7 @@ int generateEnemyColor(int playerColor)
 		return WHITE_PLAYER;
 }
 
-char generateTool(int player, tool type)
+char generateTool(int player, eTool type)
 {
 	if (player == WHITE_PLAYER)
 	{
@@ -500,7 +500,7 @@ char GetContentOfCoord(board_t board, Coord coord)
 }
 
 /*TODO: consider this*/
-/*sets the coordinate coord in the board to be ch.*/
+/*sets the coordinate slot in the board to be ch.*/
 void setSlotInBoard(board_t board, Coord slot, char ch)
 {
 	/*if (anointAKing(slot.j_coord, ch))
@@ -761,8 +761,9 @@ int addToDangerZone(int playerColor, Coord crd)
 int UpdateDangerZone(board_t board, int playerColor)
 {
 	Coord KingCrd = (playerColor == WHITE_PLAYER) ? WhiteKing : BlackKing;
-	Coord tmp = KingCrd;
+	Coord tmp = KingCrd, possibilities[8];
 	int d = playerColor == WHITE_PLAYER ? 1 : -1;
+	
 	//pawns
 	tmp = offsetCoord(KingCrd, -1, d);
 	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
@@ -775,7 +776,6 @@ int UpdateDangerZone(board_t board, int playerColor)
 		addToDangerZone(playerColor, tmp);
 
 	//knights
-	Coord possibilities[8];
 	possibilities[0] = offsetCoord(KingCrd, 1, 2);
 	possibilities[1] = offsetCoord(KingCrd, 2, 1);
 	possibilities[2] = offsetCoord(KingCrd, 2, -1);
@@ -804,6 +804,7 @@ int UpdateDangerZone(board_t board, int playerColor)
 			tmp = offsetCoord(tmp, h, 0);
 		}
 	}
+	tmp = KingCrd;
 	for (int v = -1; v < 2; v+=2)
 	{
 		while (isInBoard(tmp))
@@ -814,7 +815,25 @@ int UpdateDangerZone(board_t board, int playerColor)
 			tmp = offsetCoord(tmp, 0, v);
 		}
 	}
-	
+
+	//Bishops
+	for (int h = -1; h < 2; h += 2)
+	{
+		for (int v = -1; v < 2; v += 2)
+		{
+			tmp = offsetCoord(KingCrd,h,v);
+			while (isInBoard(tmp))
+			{
+				if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Bishop) ||
+					GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
+					addToDangerZone(playerColor, tmp);
+				tmp = offsetCoord(tmp, h, 0);
+			}
+		}
+	}
+
+	//These above include Queen. Assumption is that King never threatens another king. (Should be true)
+
 }
 
 
@@ -847,10 +866,158 @@ int getColor(board_t board, Coord coord)
 	return color;
 }
 
-int openKingDefences(board_t board, Coord coord, Coord tmpCoord)
-{
-	int player = getColor(board, coord);
+int getType(board_t board, Coord crd){
+	char ch = GetContentOfCoord(board, crd);
+	if (ch == WHITE_P || ch == BLACK_P)
+		return Pawn;
+	if (ch == WHITE_N || ch == BLACK_N)
+		return Knight;
+	if (ch == WHITE_R || ch == BLACK_R)
+		return Rook;
+	if (ch == WHITE_B || ch == BLACK_B)
+		return Bishop;
+	if (ch == WHITE_Q || ch == BLACK_Q)
+		return Queen;
+	if (ch == WHITE_K || ch == BLACK_K)
+		return King;
+}
 
+int AreTwoCoordsEqual(Coord c1, Coord c2)
+{
+	if (c1.i_coord == c2.i_coord && c1.j_coord == c2.j_coord)
+		return 1;
+	else
+		return 0;
+}
+
+int isAttacking(board_t board, Coord attacker, Coord victim)
+{
+	int h, v;
+	Coord tmp;
+	if (getColor(board, attacker) == getColor(board, victim))
+	{
+		return 0;
+	}
+	else
+	{
+		if (getType(board, attacker) == Pawn)
+		{
+			int d = getColor(board, attacker) == WHITE_PLAYER ? 1 : -1;
+			if (attacker.j_coord + d == victim.j_coord &&
+				(attacker.i_coord + 1 == victim.i_coord) || (attacker.i_coord - 1 == victim.i_coord))
+			{
+				return 1;
+			}
+		}
+		else if (getType(board, attacker) == Knight)
+		{
+			if (AreTwoCoordsEqual(offsetCoord(victim, 1, 2), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, 2, 1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, 2, -1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, 1, -2), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, -1, -2), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, -2, -1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, -2, 1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, -1, 2), attacker))
+			{
+				return 1;
+			}
+		}
+		else if (getType(board, attacker) == Bishop || getType(board, attacker) == Queen)
+		{
+			if (abs(attacker.i_coord - victim.i_coord) == abs(attacker.j_coord - victim.j_coord)) //are the two tools on the same diagonal
+			{
+				h = (attacker.i_coord > victim.i_coord) ? 1 : -1;
+				v = (attacker.j_coord > victim.j_coord) ? 1 : -1;
+				tmp = victim;
+				tmp = offsetCoord(tmp, h, v);
+				while (!AreTwoCoordsEqual(tmp, attacker))
+				{
+					if (GetContentOfCoord(board, tmp) != EMPTY)
+						return 0;
+					tmp = offsetCoord(tmp, h, v);
+				}
+				return 1;
+			}
+			else
+				return 0;
+		}
+		else if (getType(board, attacker) == Rook || getType(board, attacker) == Queen)
+		{
+			if (attacker.i_coord == victim.i_coord)  //are the two tools on the same column
+			{
+				h = (attacker.i_coord > victim.i_coord) ? 1 : -1;
+				
+				tmp = victim;
+				tmp = offsetCoord(tmp, h, 0);
+				while (!AreTwoCoordsEqual(tmp, attacker))
+				{
+					if (GetContentOfCoord(board, tmp) != EMPTY)
+						return 0;
+					tmp = offsetCoord(tmp, h, 0);
+				}
+				return 1;
+			}
+			if (attacker.j_coord == victim.j_coord) //are the two tools on the same row
+			{
+				v = (attacker.j_coord > victim.j_coord) ? 1 : -1;
+
+				tmp = victim;
+				tmp = offsetCoord(tmp, 0, v);
+				while (!AreTwoCoordsEqual(tmp, attacker))
+				{
+					if (GetContentOfCoord(board, tmp) != EMPTY)
+						return 0;
+					tmp = offsetCoord(tmp, 0, v);
+				}
+				return 1;
+			}
+			else
+				return 0;
+		}
+		else if (getType(board, attacker) == King)
+		{
+			if (AreTwoCoordsEqual(offsetCoord(victim, 0, 1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, 1, 1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, 1, 0), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, 1, -1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, 0, -1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, -1, -1), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, -1, 0), attacker) ||
+				AreTwoCoordsEqual(offsetCoord(victim, -1, 1), attacker))
+			{
+				return 1;
+			}
+			else
+				return 0;
+
+		}
+
+		return 0;
+	}
+}
+
+
+int openKingDefences(board_t board, Coord src, Coord dst)
+{
+	int player = getColor(board, src);
+	char srcType = GetContentOfCoord(board, src);
+	char dstType = GetContentOfCoord(board, dst);
+	Coord *dangerZone, kingCrd;
+	int dangerZone_AmountOfPieces;
+	dangerZone = player == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
+	dangerZone_AmountOfPieces = player == WHITE_PLAYER ? gameInfo[0] : gameInfo[1];
+	kingCrd = player == WHITE_PLAYER ? WhiteKing: BlackKing;
+
+	setSlotInBoard(board, src, EMPTY);
+	setSlotInBoard(board, dst, srcType);
+	
+	int result = 0;
+	for (int i = 0; i < dangerZone_AmountOfPieces; i++)
+	{
+		result |= isAttacking(board, dangerZone[i], kingCrd);
+	}
+	return result;
 }
 
 
@@ -1091,13 +1258,11 @@ cMove *movesByPieceType(board, coord)
 
 }
 
-
+#ifndef DAMKA
 /*filters out of the linked list of moves  which are illegal because
 there are other moves that may eat more enemy discs*/
 cMove *filterOutMoves(cMove *moves)
 {
-	return NULL;
-#ifndef DAMKA
 	cMove *start = moves, *include = NULL, *exclude = NULL, *next;
 	int maxLen = 0;
 	int filterNonEaters = 0;
@@ -1137,8 +1302,9 @@ cMove *filterOutMoves(cMove *moves)
 		return include;
 	}
 	return moves;
-#endif
+
 }
+#endif
 
 /*returns all moves that a player may do with the specific configuration of the board (filtered).*/
 cMove *getMoves(board_t board, int player)
