@@ -18,9 +18,15 @@
     <ClCompile Include="Chess.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GUI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
