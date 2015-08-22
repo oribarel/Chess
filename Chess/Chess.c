@@ -262,8 +262,16 @@ void printMove(cMove *move)
 		return;
 	printf("<%c,%u> to ", (char)((move->src).i_coord) + 97, (move->src).j_coord + 1);
 
-	printf("<%c,%u>\n", (char)((move->dst).i_coord) + 97, (move->dst).j_coord + 1);
-	//TODO: promotion
+	printf("<%c,%u>", (char)((move->dst).i_coord) + 97, (move->dst).j_coord + 1);
+
+	//if promotion needed
+	if (move->promote)
+		printf("%s", ToolCharToName(move->promote));
+
+	//print end of line
+	printf("\n");
+
+
 }
 
 /*CONVD*/
@@ -597,14 +605,14 @@ int UpdateDangerZone(board_t board, int playerColor)
 	int d = playerColor == WHITE_PLAYER ? 1 : -1;
 	ResetDangerZone(playerColor);
 	gameInfo[playerColor == WHITE_PLAYER ? 0 : 1] = 0;
-	
+
 	//pawns
 	tmp = offsetCoord(KingCrd, -1, d);
 	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
-				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
+		GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
 		addToDangerZone(playerColor, tmp);
 
-	tmp = offsetCoord(KingCrd,  1, d);
+	tmp = offsetCoord(KingCrd, 1, d);
 	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
 		GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
 		addToDangerZone(playerColor, tmp);
@@ -621,14 +629,14 @@ int UpdateDangerZone(board_t board, int playerColor)
 
 	for (int i = 0; i < 8; i++)
 	{
-		if (isInBoard(possibilities[i]) && 
+		if (isInBoard(possibilities[i]) &&
 			GetContentOfCoord(board, possibilities[i]) == generateTool(generateEnemyColor(playerColor), Knight))
 			addToDangerZone(playerColor, possibilities[i]);
 	}
 
 	//rooks
 	tmp = KingCrd;
-	for (int h = -1; h < 2; h+=2)
+	for (int h = -1; h < 2; h += 2)
 	{
 		while (isInBoard(tmp))
 		{
@@ -639,7 +647,7 @@ int UpdateDangerZone(board_t board, int playerColor)
 		}
 	}
 	tmp = KingCrd;
-	for (int v = -1; v < 2; v+=2)
+	for (int v = -1; v < 2; v += 2)
 	{
 		while (isInBoard(tmp))
 		{
@@ -655,7 +663,7 @@ int UpdateDangerZone(board_t board, int playerColor)
 	{
 		for (int v = -1; v < 2; v += 2)
 		{
-			tmp = offsetCoord(KingCrd,h,v);
+			tmp = offsetCoord(KingCrd, h, v);
 			while (isInBoard(tmp))
 			{
 				if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Bishop) ||
@@ -782,7 +790,7 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 			if (attacker.i_coord == victim.i_coord)  //are the two tools on the same column
 			{
 				h = (attacker.i_coord > victim.i_coord) ? 1 : -1;
-				
+
 				tmp = victim;
 				tmp = offsetCoord(tmp, h, 0);
 				while (!AreTwoCoordsEqual(tmp, attacker))
@@ -843,17 +851,17 @@ int openKingDefences(board_t board, Coord src, Coord dst)
 	int dangerZone_AmountOfPieces;
 	dangerZone = player == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
 	dangerZone_AmountOfPieces = player == WHITE_PLAYER ? gameInfo[0] : gameInfo[1];
-	kingCrd = player == WHITE_PLAYER ? WhiteKing: BlackKing;
+	kingCrd = player == WHITE_PLAYER ? WhiteKing : BlackKing;
 
 	setSlotInBoard(board, src, EMPTY);
 	setSlotInBoard(board, dst, srcType);
-	
+
 	int result = 0;
 	for (int i = 0; i < dangerZone_AmountOfPieces; i++)
 	{
 		result |= isAttacking(board, dangerZone[i], kingCrd);
 	}
-	
+
 	setSlotInBoard(board, src, srcType);
 	setSlotInBoard(board, dst, dstType);
 
@@ -866,7 +874,7 @@ int safeToMoveKing(board_t board, int player, Coord dst)
 	char dstType = GetContentOfCoord(board, dst);
 	Coord *dangerZone, kingCrd;
 	int dangerZone_AmountOfPieces;
-	
+
 	kingCrd = player == WHITE_PLAYER ? WhiteKing : BlackKing;
 
 	setSlotInBoard(board, kingCrd, EMPTY);
@@ -882,7 +890,7 @@ int safeToMoveKing(board_t board, int player, Coord dst)
 		result &= !isAttacking(board, dangerZone[i], kingCrd);
 	}
 
-	setSlotInBoard(board, kingCrd, generateTool(player,King));
+	setSlotInBoard(board, kingCrd, generateTool(player, King));
 	setSlotInBoard(board, dst, dstType);
 	UpdateDangerZone(board, player);
 
@@ -1123,8 +1131,39 @@ cMove* KingMoves(board_t board, Coord coord)
 }
 
 //TODO: implement 
-cMove *movesByPieceType(board, coord)
+cMove *movesByPieceType(board_t board, Coord coord)
 {
+	char cordTool = GetContentOfCoord(board, coord);
+	switch (cordTool)
+	{
+	case WHITE_P:
+	case BLACK_P:
+		PawnMoves(board, coord);
+		break;
+	case WHITE_B:
+	case BLACK_B:
+		BishopMoves(board, coord);
+		break;
+	case WHITE_N:
+	case BLACK_N:
+		return KnightMoves(board, coord);
+		break;
+	case WHITE_R:
+	case BLACK_R:
+		return RookMoves(board, coord);
+		break;
+	case WHITE_Q:
+	case BLACK_Q:
+		return QueenMoves(board, coord);
+		break;
+	case WHITE_K:
+	case BLACK_K:
+		return KingMoves(board, coord);
+		break;
+	default:
+		return NULL;
+		break;
+	}
 	return NULL;
 }
 
@@ -1634,30 +1673,15 @@ Then, run minimax algorithm in recursion to produce a score. At last, undo the m
 #endif
 
 /*changes the board so it describes the state created after the move is made.*/
-int makeMove(board_t board, Move *move)
+int makeMove(board_t board, cMove *move)
 {
-	char myColor = GetContentOfCoord(board, move->route[0]);
-	Coord crd = move->route[0];
+	char myColor = GetContentOfCoord(board, move->dst);
+	Coord crd = move->dst;
 	setSlotInBoard(board, crd, EMPTY);
-
-	if (move->eater)
-	{
-
-		for (int i = 1; i <= move->len; i++)
-		{
-			int dx = (move->route[i].i_coord > move->route[i - 1].i_coord) ? 1 : -1;
-			int dy = (move->route[i].j_coord > move->route[i - 1].j_coord) ? 1 : -1;
-
-			do
-			{
-				crd.i_coord += dx; crd.j_coord += dy;
-			} while (!isTool(GetContentOfCoord(board, crd)));
-
-			setSlotInBoard(board, crd, EMPTY);
-			crd.i_coord += dx; crd.j_coord += dy;
-		}
-	}
-	setSlotInBoard(board, move->route[move->len], myColor);
+	if (move->promote)
+		setSlotInBoard(board, move->dst, move->promote);
+	else
+		setSlotInBoard(board, move->dst, move->toolType);
 	return 0;
 
 
@@ -2081,7 +2105,7 @@ int Parse(char *line, board_t board)
 			//move
 		{
 			token = strtok(NULL, "&");
-			Move *legalMove;
+			cMove *legalMove;
 			if (!areAllCoordsValid(token))//if either one of the positions in the command is invalid
 			{
 				if (!properties[1])
@@ -2094,7 +2118,7 @@ int Parse(char *line, board_t board)
 					printf(NOT_YOUR_PIECE);
 				return 1;
 			}
-			legalMove = (Move *)isLegalMove(token, board, pMove);
+			legalMove = (cMove *)isLegalMove(token, board, pMove);
 			if (legalMove == NULL)//input move is illegal
 			{
 				if (!properties[1])
@@ -2106,9 +2130,44 @@ int Parse(char *line, board_t board)
 			print_board(board);
 			return 10;//successful move was made
 		}
-		else if (strcmp(token, cmmd10) == 0)
+
+
+
+		else if (strcmp(token, cmmd13) == 0)
 			//get_moves
 		{
+			Coord src;
+			token = strtok(NULL, "&");
+			char *currentPosition = token;
+			char x_coor;
+			int y_coor;
+
+			if (!areAllCoordsValid(token))//if either one of the positions in the command is invalid
+			{
+				if (!properties[1])
+					printf(WRONG_POSITION);
+				return 1;
+			}
+			if (!isLegalInitialPosition(token, board))//if position <x, y> does not contain a disc of the user's color
+			{
+				if (!properties[1])
+					printf(NOT_YOUR_PIECE);
+				return 1;
+			}
+
+
+
+
+			//parse the input coordinate
+			x_coor = currentPosition[1];
+			currentPosition += 3;
+			y_coor = (int)strtol(currentPosition, &currentPosition, 10);
+			graphicCoordToRealCoord(&src, x_coor, y_coor);
+
+			//get moves
+			pMove = movesByPieceType(board, src);
+
+			//print moves
 			printMovesList(pMove);
 			return 0;
 		}
@@ -2126,10 +2185,15 @@ char ToolNameToChar(char *toolFullName)
 	char toolFirstChar = *toolFullName;
 	switch (toolFirstChar)
 	{
+	case 'p':
+		return 'm';
 	case 'b':
 		return 'b';
 	case 'k':
-		return 'n';
+		if (toolFullName[1] == 'i')
+			return 'k';
+		else
+			return 'n';
 	case 'r':
 		return 'r';
 	case 'q':
@@ -2142,16 +2206,51 @@ char ToolNameToChar(char *toolFullName)
 }
 
 
+/*DCLR*/
+char* ToolCharToName(char toolChar)
+{
+	char c = tolower(toolChar);
+	switch (toolChar)
+	{
+	case 'b':
+		return BISHOP;
+	case 'k':
+		return KING;
+	case 'r':
+		return ROOK;
+	case 'q':
+		return QUEEN;
+	case 'm':
+		return PAWN;
+	case 'n':
+		return KNIGHT;
+	default:
+		break;
+	}
+	return NULL;
+
+}
+
+
+/*DCLR*/
+int isEqualCoordinates(Coord c1, Coord c2)
+{
+	if (c1.i_coord == c2.i_coord&& c1.j_coord == c2.j_coord)
+		return 1;
+	return 0;
+}
+
 /*return NULL if the move is illegal, and a pointer to the move otherwise*/
-Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
+cMove* isLegalMove(char *token, board_t board, cMove *allPossibleMoves)
 {
 	char *currentPosition = token;
 	char x_coor, i_coor;
 	int y_coor, j_coor;
 	int promoteNeeded = 0;
-	char promoteTo = '\0';
+	int promoteTo = 0;
 	char tool;
 	Coord source, dest;
+	int difference;
 
 
 	//fill coordinates
@@ -2174,63 +2273,15 @@ Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves)
 			promoteTo = toupper(promoteTo);
 	}
 
-	currentPosition = token;
-	int numOfCoords = 0;
-	int index = 0;
-	int difference = 0;
-	Coord route[20 + 1];
 
+	allPossibleMoves = movesByPieceType(board, source);
 
-	//counte number of coordinates
-	while (currentPosition[0] != '\n')
-	{
-		if (currentPosition[0] == '<')
-		{
-			numOfCoords++;
-		}
-		currentPosition++;
-	}
-	if (numOfCoords > 20 + 1)
-		return NULL;
-
-
-	//fill route with coordinates:
-	currentPosition = token;
-	Coord tmpCrd;
-	while (*currentPosition != '\n')
-	{
-		if (*currentPosition == '<')
-		{
-			x_coor = *(currentPosition + 1);
-			currentPosition += 3;
-			y_coor = (int)strtol(currentPosition, &currentPosition, 10);
-			graphicCoordToRealCoord(&tmpCrd, x_coor, y_coor);
-			route[index].i_coord = tmpCrd.i_coord; route[index].j_coord = tmpCrd.j_coord;
-			index++;
-
-		}
-		else
-			currentPosition++;
-	}
-	index--;
-
-
-	//check if the route equals one of the routes of possible moves:
+	//check if the move equals one of the possible moves:
 	while (allPossibleMoves != NULL)
 	{
 		difference = 0;
-		if (allPossibleMoves->len != index)
-		{
-			allPossibleMoves = allPossibleMoves->next;
-			continue;
-		}
-		for (int i = 0; i <= index; i++)
-		if (route[i].i_coord != allPossibleMoves->route[i].i_coord ||
-			route[i].j_coord != allPossibleMoves->route[i].j_coord)
-		{
+		if (!isEqualCoordinates(source, allPossibleMoves->src) || !isEqualCoordinates(dest, allPossibleMoves->dst) || promoteTo != allPossibleMoves->promote)
 			difference = 1;
-			break;
-		}
 		if (difference == 0)//if a legal move has been found
 			return allPossibleMoves;
 		allPossibleMoves = allPossibleMoves->next;
@@ -2476,7 +2527,11 @@ int LoadFromFile(char* file_path, board_t board){
 	return 0;
 }
 
-
+//TODO: implement
+int quit(void)
+{
+	return 0;
+}
 
 int main()
 {
@@ -2548,7 +2603,7 @@ int main()
 			{
 				if (!properties[1])
 					printf("Computer: move ");
-//				printMove(computerMove);
+				//				printMove(computerMove);
 				makeMove(brd, computerMove);
 				free(computerMove->route);
 				free(computerMove);
