@@ -25,6 +25,8 @@
 #define MAX 1
 
 #define MAX_SCORE 400 //TODO: what to do?
+#define MAX_VALUE 401
+#define MIN_VALUE -401
 
 
 #define WHITE_P 'm'		//pawn		hayal

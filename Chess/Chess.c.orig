@@ -1530,21 +1530,21 @@ return score(board, player);
 pay attention: this function only returns integers. the argument bestMove
 is an address to a pointer that exists outside of minimax_score, and when obtaining the information about
 which move is truely optimal (due to depth restrictions) the content of the address is set to the address of that said move. */
-int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b)
+int minimax_score(board_t board, char player, int depth, int minOrMax, Move **bestMove)
 {
 #ifndef DAMKA
-	cMove *movesList, *tmp;
+	Move *movesList, *tmp;
 	int bestValue, val;
 	if (depth == 0)//base case
 	{
-		if (minOrMax == 1)// 1 for maximizing player
+		if (minOrMax == 1)
 			return score(board, player);
 		else
 			return score(board, getEnemy(player));
 	}
-	if (minOrMax == 1)// 1 for maximizing player
+	if (minOrMax == 1)
 	{
-		bestValue = MIN_VALUE;
+		bestValue = -101;
 		movesList = getMoves(board, player);
 		tmp = movesList;
 
@@ -1553,7 +1553,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 		{
 			int bestUpdated = 0;
 			//compute score and return board to its original state
-			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b);
+			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax);
 			if (depth == properties[2] && val >= bestValue) //if depth == minimax_depth
 			{
 				if (*bestMove != NULL)
@@ -1565,7 +1565,6 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 				bestUpdated = 1;
 			}
 			bestValue = imax(bestValue, val);
-			a = imax(a, bestValue);
 			movesList = movesList->next;
 			if (bestUpdated == 0)
 			{
@@ -1573,14 +1572,12 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 				free(tmp);
 			}
 			tmp = movesList;
-			if (b <= a)
-				break // b cut-off
 		}
 		return bestValue;
 	}
 	else
 	{
-		bestValue = MAX_VALUE;
+		bestValue = 101;
 		movesList = getMoves(board, player);
 		tmp = movesList;
 
@@ -1600,7 +1597,6 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 				bestUpdated = 1;
 			}
 			bestValue = imin(bestValue, val);
-			b = imin(b, bestValue);
 			movesList = movesList->next;
 			if (bestUpdated == 0)
 			{
@@ -1609,8 +1605,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			}
 			tmp = movesList;
 
-			if (b <= a)
-				break // a cut-off
+
 
 		}
 		return bestValue;
