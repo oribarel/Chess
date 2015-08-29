@@ -6,7 +6,7 @@
 
 
 
-#include "Chess.h"
+#include "Console_Main.h"
 
 #define SCR_WIDTH 800
 #define SCR_HEIGHT 600

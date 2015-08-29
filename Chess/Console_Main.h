@@ -128,6 +128,7 @@ typedef enum Tool
 	int nonEmptyNum;
 } chessMoveArr;*/
 
+int Console_Main();
 //void print_board(char **);
 //void init_board(char **);
 int mod(int, int);

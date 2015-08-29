@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Chess.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Control_Components.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -27,11 +24,17 @@
     <ClCompile Include="Chess_Windows.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GUI_Main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="chessprog.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Console_Main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Chess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Control_Components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,6 +42,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chess_Windows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI_Main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="chessprog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Console_Main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

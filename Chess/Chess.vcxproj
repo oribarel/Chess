@@ -75,14 +75,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Chess.c" />
+    <ClCompile Include="Console_Main.c" />
+    <ClCompile Include="chessprog.c" />
     <ClCompile Include="Chess_Controls.c" />
     <ClCompile Include="Chess_Windows.c" />
     <ClCompile Include="Control_Components.c" />
     <ClCompile Include="GUI_Main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Chess.h" />
+    <ClInclude Include="Console_Main.h" />
+    <ClInclude Include="chessprog.h" />
     <ClInclude Include="Chess_Controls.h" />
     <ClInclude Include="Chess_Windows.h" />
     <ClInclude Include="Control_Components.h" />

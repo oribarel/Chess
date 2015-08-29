@@ -19,7 +19,7 @@ Functions that are labeled:
 */
 
 
-#include "Chess.h"
+#include "Console_Main.h"
 
 
 int properties[6] = { 1, 0, 1, 0, 0, 0 };
@@ -2540,7 +2540,7 @@ int quit(void)
 	return 0;
 }
 
-int ConsoleMain(int argc, char* argv[])
+int Console_Main()
 {
 
 	//srand(time(NULL));
