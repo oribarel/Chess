@@ -352,9 +352,9 @@ cMove *QueenMoves(board_t board, Coord coord)
 
 /*CONVD*/
 /*returns 0 if the two chars reperesent allies*/
-int IsEnemy(char slot, char myColor)
+int IsEnemy(char slot, int myColor)
 {
-	if (islower(myColor)) //player is white
+	if (myColor = WHITE_PLAYER) //player is white
 	{
 		switch (slot)
 		{
@@ -380,7 +380,7 @@ int IsEnemy(char slot, char myColor)
 			return 0;
 		}
 	}
-	if (isupper(myColor)) //player is white
+	else //player is black
 	{
 		switch (slot)
 		{
@@ -447,6 +447,7 @@ int promotePawn(int row, char myType)
 adds coord coordinate to the Coord array in index depth.
 Returns a pointer to the last move in the list.
 */
+#ifndef DAMKA
 Move *moveAfterRec(Coord coord, int depth, Move *recursionMoves)
 {
 	Move *move = NULL;
@@ -458,6 +459,7 @@ Move *moveAfterRec(Coord coord, int depth, Move *recursionMoves)
 	}
 	return move;
 }
+#endif
 
 /*return the char in the specific location coord in the board.*/
 char GetContentOfCoord(board_t board, Coord coord)
@@ -478,13 +480,13 @@ void setSlotInBoard(board_t board, Coord slot, char ch)
 
 
 /*CONVD*/
-/*returns 0 if tool is an oponnent tool
+/*TODO: change this: returns 0 if tool is an oponnent tool
 return 1 if tool is ally man
 retrun 3 if tool is ally king
 */
-int IsAlly(char tool, char myColor)
+int IsAlly(char tool, int myColor)
 {
-	if (isupper(myColor)) //player is white
+	if (myColor = BLACK_PLAYER) //player is black
 	{
 		switch (tool)
 		{
@@ -510,7 +512,7 @@ int IsAlly(char tool, char myColor)
 			return 0;
 		}
 	}
-	if (islower(myColor)) //player is white
+	else //player is white
 	{
 		switch (tool)
 		{
@@ -1266,12 +1268,15 @@ cMove *getMoves(board_t board, int player)
 
 
 /* UNUSED */
+#ifndef DAMKA
 int isEaterMove(Move *move)
+
 {
 	if (move->len > 1) { return 1; }
 	if (abs(move->route->i_coord - ((move->route) + 1)->i_coord) == 2){ return 1; }
 	return 0;
 }
+#endif
 
 /* Sets the slot on the board, pay attention: there is a similar function with different arguments. */
 void setSlot(board_t board, char *horiz, char *vert, char type)
@@ -1443,11 +1448,11 @@ int canMoveThisTool(board_t board, Coord coord)
 
 /* the scoring function:
 See instructions for more details.*/
-int score(board_t board, char player)
+int score(board_t board, int player)
 
 {
 	Coord coord;
-	int score = 0, ally, enemy, playerExists = 0, opponentExists = 0, playerBlocked = 1, opponentBlocked = 1;
+	int score = 0, ally, enemy, playerBlocked = 1, opponentBlocked = 1;
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
 	{
 		coord.i_coord = (int)mod(k, BOARD_SIZE);
@@ -1457,10 +1462,6 @@ int score(board_t board, char player)
 		score += (ally - enemy);
 		if (GetContentOfCoord(board, coord) != EMPTY)
 		{
-			if (ally > 0)
-				playerExists = 1;
-			if (enemy > 0)
-				opponentExists = 1;
 			if (ally > 0 && canMoveThisTool(board, coord) == 1)
 				playerBlocked = 0;
 			if (enemy > 0 && canMoveThisTool(board, coord) == 1)
@@ -1468,20 +1469,26 @@ int score(board_t board, char player)
 		}
 
 	}
-	if (!opponentExists && playerExists)
-		return 100;
-	if (!playerExists && opponentExists)
-		return -100;
+	
+	
+/*TODO: consider what to do with this part
 	if (playerBlocked == 1)
-		return -100;
-	if (opponentBlocked == 1)
-		return 100;
+		if (KingUnderThreat(board, -player))
+			return -800;//player lost
+		else
+			return -799; //tie
+	if (opponentBlocked == 1 )
+		if (KingUnderThreat(board, -player))
+			return 800;//player lost
+		else
+			return 799; //tie
+*/
 
 	return score;
+	
 }
 
-//TODO: implement if needed
-int canMoveThisTool(board, coord){ return 1; }
+int canMoveThisTool(board_t board, Coord coord){ return movesByPieceType(board, coord) != NULL; }
 
 /*returns 1 if type is white and 0 otherwise.*/
 int isWhite(char type)
@@ -1532,7 +1539,6 @@ is an address to a pointer that exists outside of minimax_score, and when obtain
 which move is truely optimal (due to depth restrictions) the content of the address is set to the address of that said move. */
 int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int boardsCounter)
 {
-#ifndef DAMKA
 	cMove *movesList, *tmp;
 	int bestValue, val;
 	if (depth == 0)//base case
@@ -1540,7 +1546,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 		if (minOrMax == 1)// 1 for maximizing player
 			return score(board, player);
 		else
-			return score(board, getEnemy(player));
+			return score(board, -player);
 	}
 	if (minOrMax == 1)// 1 for maximizing player
 	{
@@ -1558,7 +1564,6 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			{
 				if (*bestMove != NULL)
 				{
-					free((*bestMove)->route);
 					free(*bestMove);
 				}
 				*bestMove = movesList;
@@ -1569,12 +1574,11 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			movesList = movesList->next;
 			if (bestUpdated == 0)
 			{
-				free(tmp->route);
 				free(tmp);
 			}
 			tmp = movesList;
 			if (b <= a)
-				break // b cut-off
+				break; // b cut-off
 		}
 		return bestValue;
 	}
@@ -1593,7 +1597,6 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			{
 				if (*bestMove != NULL)
 				{
-					free((*bestMove)->route);
 					free(*bestMove);
 				}
 				*bestMove = movesList;
@@ -1604,85 +1607,50 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			movesList = movesList->next;
 			if (bestUpdated == 0)
 			{
-				free(tmp->route);
 				free(tmp);
 			}
 			tmp = movesList;
 
 			if (b <= a)
-				break // a cut-off
+				break; // a cut-off
 
 		}
 		return bestValue;
 	}
-#endif
+
 	return 0;
 }
 
-#ifndef DAMKA
+
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
-int makeMove_ComputeScore_Undo(board_t board, Move *move, char player, int depth, int minOrMax, int a, int b, int boardsCounter)
+int makeMove_ComputeScore_Undo(board_t board, cMove *move, char player, int depth, int minOrMax, int a, int b, int boardsCounter)
 /*Saves all the eaten tool types in the eatenTools array, all while making the move on the given board.
 Then, run minimax algorithm in recursion to produce a score. At last, undo the move, using the array, and return the score conputed.*/
 {
-	char eatentools_types[MAX_NUMBER_OF_TOOLS_PER_PLAYER];
-	Coord eatentools_coords[MAX_NUMBER_OF_TOOLS_PER_PLAYER];
-	int scr;
-	/*justification: according to the rules, at most as 20 tools may be eaten in one move,
-	as over 20 pieces for a player is unallowed.*/
-	char myColor = GetContentOfCoord(board, move->route[0]);
-
-	/*1)	setting the board as after the move, while saving the eaten tools type and location.*/
-	Coord crd = move->route[0];
-	setSlotInBoard(board, crd, EMPTY);
-
-	if (move->eater)
-	{
-		for (int i = 1; i <= move->len; i++)
-		{
-			int dx = (move->route[i].i_coord > move->route[i - 1].i_coord) ? 1 : -1;
-			int dy = (move->route[i].j_coord > move->route[i - 1].j_coord) ? 1 : -1;
-
-			do
-			{
-				crd.i_coord += dx; crd.j_coord += dy;
-			} while (!isTool(GetContentOfCoord(board, crd)));
-
-			eatentools_types[i - 1] = GetContentOfCoord(board, crd);
-			eatentools_coords[i - 1] = crd; //assignment between structs
-			setSlotInBoard(board, crd, EMPTY);
-			crd.i_coord += dx; crd.j_coord += dy;
-		}
-
-
-	}
-
-	setSlotInBoard(board, move->route[move->len], myColor);
-
+	int scr = 0;
+	//making the move
+	makeMove(board, move);
 	
+
 	//make a recursive call to minimax_score and update the nuber of boards that have already been evaluated	
 	scr = minimax_score(board, -player, depth - 1, 1 - minOrMax, NULL, a, b, ++boardsCounter);
 
-	//reconstruct the board as before
+	//undo the move - reconstruct the board as before
+	setSlotInBoard(board, move->src, move->toolType);
+	if(move->eaten == 0)
+		setSlotInBoard(board, move->dst, EMPTY);
+	else
+		setSlotInBoard(board, move->dst, move->eaten);
 
-	setSlotInBoard(board, move->route[move->len], EMPTY);
-	setSlotInBoard(board, move->route[0], myColor);
-	if (move->eater)
-	{
-		for (int i = 0; i < move->len; i++)
-		{
-			setSlotInBoard(board, eatentools_coords[i], eatentools_types[i]);
-		}
-	}
 	return scr;
 
 }
-#endif
+
 
 /*changes the board so it describes the state created after the move is made.*/
 int makeMove(board_t board, cMove *move)
 {
-	char myColor = GetContentOfCoord(board, move->dst);
+	char myColor = GetContentOfCoord(board, move->dst);//TODO: consider delete this line
 	Coord crd = move->dst;
 	setSlotInBoard(board, crd, EMPTY);
 	if (move->promote)
