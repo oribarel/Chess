@@ -8,6 +8,7 @@ SDL_Rect create1024x768Rect()
 	return Rect1024x768;
 }
 
+/* The main function of the GUI aspect of the chess game.*/
 int CreateMainWindow(Window *window)
 {
 	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);

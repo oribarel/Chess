@@ -6,6 +6,7 @@
 #define SCREEN_W 1024
 #define SCREEN_H 768
 
+int CreateMainWindow(Window *window);
 int CreateFirstSettingsWindow(Window *window);
 int LoadGame(Window *window);
 int quitGame(Window *window);
