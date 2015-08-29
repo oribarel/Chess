@@ -59,6 +59,9 @@
 
 #define BOARD_SIZE 8
 
+#define BEST_BOARDS_NUM 1000000
+#define BEST_INDICATOR 5
+
 typedef char** board_t;
 
 

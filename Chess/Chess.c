@@ -33,7 +33,7 @@ int properties[6] = { 1, 0, 1, 0, 0, 0 };
 the initial state of the global properties array:
 properties[0] = 1;	//Setting state
 properties[1] = 0;	//Don't quit
-properties[2] = 1;	//Default minimax depth
+properties[2] = 1;	//Default minimax depth. 5 stands for best
 properties[3] = 0;	//Default player color white
 properties[4] = 0 //It is now white's\black's turn: 0 for white, 1 for black
 properties[5] = 1;	//Default game mode is "two players mode"
@@ -1530,7 +1530,7 @@ return score(board, player);
 pay attention: this function only returns integers. the argument bestMove
 is an address to a pointer that exists outside of minimax_score, and when obtaining the information about
 which move is truely optimal (due to depth restrictions) the content of the address is set to the address of that said move. */
-int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b)
+int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int boardsCounter)
 {
 #ifndef DAMKA
 	cMove *movesList, *tmp;
@@ -1553,7 +1553,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 		{
 			int bestUpdated = 0;
 			//compute score and return board to its original state
-			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b);
+			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
 			if (depth == properties[2] && val >= bestValue) //if depth == minimax_depth
 			{
 				if (*bestMove != NULL)
@@ -1588,7 +1588,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 		{
 			int bestUpdated = 0;
 			//compute score and return board to its original state
-			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax);
+			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
 			if (depth == properties[2] && val <= bestValue) //if depth == minimax_depth
 			{
 				if (*bestMove != NULL)
@@ -1621,7 +1621,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 
 #ifndef DAMKA
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
-int makeMove_ComputeScore_Undo(board_t board, Move *move, char player, int depth, int minOrMax)
+int makeMove_ComputeScore_Undo(board_t board, Move *move, char player, int depth, int minOrMax, int a, int b, int boardsCounter)
 /*Saves all the eaten tool types in the eatenTools array, all while making the move on the given board.
 Then, run minimax algorithm in recursion to produce a score. At last, undo the move, using the array, and return the score conputed.*/
 {
@@ -1659,7 +1659,9 @@ Then, run minimax algorithm in recursion to produce a score. At last, undo the m
 
 	setSlotInBoard(board, move->route[move->len], myColor);
 
-	scr = minimax_score(board, getEnemy(player), depth - 1, 1 - minOrMax, NULL);
+	
+	//make a recursive call to minimax_score and update the nuber of boards that have already been evaluated	
+	scr = minimax_score(board, -player, depth - 1, 1 - minOrMax, NULL, a, b, ++boardsCounter);
 
 	//reconstruct the board as before
 
@@ -2563,8 +2565,8 @@ int main(int argc, char* argv[])
 
 	board_t brd = board;//= NULL; TODO: experiement
 	char *input = NULL;
-	Move *computerMove = NULL;
-	Move *allPossibleMoves = NULL, *tmp;
+	cMove *computerMove = NULL;
+	cMove *allPossibleMoves = NULL, *tmp;
 
 	init_board(brd);
 
@@ -2599,9 +2601,9 @@ int main(int argc, char* argv[])
 
 			//run MINIMAX
 			if (properties[3])//if computer's color is white
-				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove);
+				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 			else
-				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove);
+				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 
 			//print computer's move
 			if (computerMove != NULL)
@@ -2610,7 +2612,6 @@ int main(int argc, char* argv[])
 					printf("Computer: move ");
 				//				printMove(computerMove);
 				makeMove(brd, computerMove);
-				free(computerMove->route);
 				free(computerMove);
 				//print board
 				print_board(brd);
