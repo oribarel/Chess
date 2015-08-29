@@ -18,7 +18,13 @@
     <ClCompile Include="Chess.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GUI.c">
+    <ClCompile Include="Control_Components.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Chess_Controls.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Chess_Windows.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -26,7 +32,13 @@
     <ClInclude Include="Chess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GUI.h">
+    <ClInclude Include="Control_Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess_Controls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess_Windows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

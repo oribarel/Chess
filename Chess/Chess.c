@@ -20,7 +20,7 @@ Functions that are labeled:
 
 
 #include "Chess.h"
-#include "GUI.h"
+
 
 int properties[6] = { 1, 0, 1, 0, 0, 0 };
 /*	'settings'		0

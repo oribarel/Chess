@@ -7,6 +7,9 @@
 #include <assert.h>     /* assert */
 #include <time.h>
 #include <ctype.h>
+#include <SDL.h>
+#include <SDL_video.h>
+
 
 //damka
 #define WHITE_M 0
@@ -110,8 +113,8 @@ typedef struct chessMove {
 
 typedef enum Tool
 {
-	Pawn, Knight, Bishop, Rook, Queen, King
-}eTool;
+	Pawn, Knight, Bishop, Rook, Queen, King, Empty
+} eTool;
 
 
 /*typedef struct chessMoveArray {
@@ -122,7 +125,7 @@ typedef enum Tool
 
 //void print_board(char **);
 //void init_board(char **);
-//int mod(int, int);
+int mod(int, int);
 //char *getLine(void);
 //void print_line();
 //board_t createBoard(void);
