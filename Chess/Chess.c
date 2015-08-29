@@ -2540,7 +2540,7 @@ int quit(void)
 	return 0;
 }
 
-int main(int argc, char* argv[])
+int ConsoleMain(int argc, char* argv[])
 {
 
 	//srand(time(NULL));
