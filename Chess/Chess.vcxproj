@@ -79,12 +79,14 @@
     <ClCompile Include="Chess_Controls.c" />
     <ClCompile Include="Chess_Windows.c" />
     <ClCompile Include="Control_Components.c" />
+    <ClCompile Include="GUI_Main.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chess.h" />
     <ClInclude Include="Chess_Controls.h" />
     <ClInclude Include="Chess_Windows.h" />
     <ClInclude Include="Control_Components.h" />
+    <ClInclude Include="GUI_Main.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
