@@ -182,7 +182,7 @@ int mod(int, int);
 //int printWinner(int computerWins);
 //void quit(board_t brd, int freeBoard);
 //int getColor(board_t board, Coord coord);
-
+int quit(void);
 
 
 #endif  

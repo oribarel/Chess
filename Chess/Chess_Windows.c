@@ -1,10 +1,11 @@
 #include "Chess_Windows.h"
 
-static int quit = 0;
+static int intQuit = 0;
+static int newgamepress = 0;
 
 SDL_Rect create1024x768Rect()
 {
-	SDL_Rect Rect1024x768 = createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
+	SDL_Rect Rect1024x768 = createSDL_Rect(SCREEN_W, SCREEN_H, 0, 0);
 	return Rect1024x768;
 }
 
@@ -12,16 +13,16 @@ SDL_Rect create1024x768Rect()
 int CreateMainWindow(Window *window)
 {
 	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
-	SDL_Rect mainWindowButton = createSDL_Rect(300, 150, 150, 150);
-	RGB ageanBlue = createRGB(151, 197, 209);
+	SDL_Rect mainWindowButton = createSDL_Rect(300, 150, 150, 100);
+	RGB whiteColorRGB = createRGB(0, 51, 102);
 
-	ControlComponent *ccp_MainWindow = createPanel(Rect1024x768, ageanBlue);
+	ControlComponent *ccp_MainWindow = createPanel(Rect1024x768, whiteColorRGB);
 	ControlComponent *ccb_NewGame = createButton(mainWindowButton, uploadPicture("NewGameButton.bmp"), CreateFirstSettingsWindow);
 
-	mainWindowButton.y += 300;
+	mainWindowButton.y += 180;
 	ControlComponent *ccb_LoadGame = createButton(mainWindowButton, uploadPicture("LoadGameButton.bmp"), LoadGame);
 
-	mainWindowButton.y += 300;
+	mainWindowButton.y += 180;
 	ControlComponent *ccb_Quit = createButton(mainWindowButton, uploadPicture("QuitGameButton.bmp"), quitGame);
 
 	freeBoardAndTree(window);
@@ -29,11 +30,18 @@ int CreateMainWindow(Window *window)
 	addButtonToPanel(ccp_MainWindow, ccb_NewGame, window);
 	addButtonToPanel(ccp_MainWindow, ccb_LoadGame, window);
 	addButtonToPanel(ccp_MainWindow, ccb_Quit, window);
+	
+	if (SDL_Flip(window->self) != 0)
+	{
+		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
 
-	while (quit == 0)
+	while (intQuit == 0)
 	{
 		SDL_Event e;
-		while (SDL_PollEvent(&e) == 1 && quit == 0)
+		while (SDL_PollEvent(&e) == 1 && intQuit == 0)
 		{
 			if (e.type == SDL_QUIT)
 			{
@@ -41,7 +49,7 @@ int CreateMainWindow(Window *window)
 				window->panelChild = NULL;
 				SDL_FreeSurface(window->self);
 				free(window);
-				quit = 1;
+				intQuit = 1;
 				break;
 			}
 			else if (e.type == SDL_MOUSEBUTTONUP)
@@ -54,8 +62,11 @@ int CreateMainWindow(Window *window)
 	return 0;
 }
 
+
+
 int CreateFirstSettingsWindow(Window *window)
 {
+
 	return 0;
 }
 
@@ -242,3 +253,4 @@ int quitGame(Window *window)
 {
 	return 0;
 }
+

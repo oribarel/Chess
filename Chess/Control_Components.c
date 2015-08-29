@@ -144,7 +144,7 @@ int addPanelToWindow(Window *window, ControlComponent *ccp)
 	Uint32 color = getColorOfPanel(window, ccp);
 	
 	int DrawSuccess = SDL_FillRect(window->self, &(ccp->rect), color);
-	if (!DrawSuccess)
+	if (DrawSuccess == -1)
 	{
 		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
 		return 0;
