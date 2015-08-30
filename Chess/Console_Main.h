@@ -60,7 +60,7 @@
 #define BOARD_SIZE 8
 
 #define BEST_BOARDS_NUM 1000000
-#define BEST_INDICATOR 5
+
 
 typedef char** board_t;
 
@@ -89,6 +89,9 @@ typedef char** board_t;
 
 #define perror_message(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name))
 #define print_message(message) (printf("%s", message));
+
+
+#define XML_FIRST_LINE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 
 #define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;)
 #define BEST "best"
