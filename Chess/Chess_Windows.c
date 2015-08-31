@@ -3,6 +3,18 @@
 static int intQuit = 0;
 static int newgamepress = 0;
 
+board_t board;
+ControlComponent *guiBoard[BOARD_SIZE]; // This array is a "row" of colums
+
+ControlComponent guiBoard_col0[BOARD_SIZE];
+ControlComponent guiBoard_col1[BOARD_SIZE];
+ControlComponent guiBoard_col2[BOARD_SIZE];
+ControlComponent guiBoard_col3[BOARD_SIZE];
+ControlComponent guiBoard_col4[BOARD_SIZE];
+ControlComponent guiBoard_col5[BOARD_SIZE];
+ControlComponent guiBoard_col6[BOARD_SIZE];
+ControlComponent guiBoard_col7[BOARD_SIZE];
+
 SDL_Rect create1024x768Rect()
 {
 	SDL_Rect Rect1024x768 = createSDL_Rect(SCREEN_W, SCREEN_H, 0, 0);
@@ -10,14 +22,16 @@ SDL_Rect create1024x768Rect()
 }
 
 /* The main function of the GUI aspect of the chess game.*/
-int CreateMainWindow(Window *window)
+int CreateMainWindow(Window *window, board_t passedBoard)
 {
+	board = passedBoard;
+	
+
 	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
 	SDL_Rect mainWindowButton = createSDL_Rect(200, 75, 100, 350);
 	RGB whiteColorRGB = createRGB(0, 51, 102);
 
 	
-
 	ControlComponent *ccp_MainWindow = createPanel(Rect1024x768, whiteColorRGB);
 	ControlComponent *ccb_NewGame = createButton(mainWindowButton, uploadPicture("NewGameButton.bmp"), createPlayerSelectionWindow);
 
@@ -115,10 +129,10 @@ int createPlayerSelectionWindow(Window *window)
 	ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"),  setNextPlayerWhite);
 	ControlComponent *ccb_NextPlayerBlack = createButton(nextPlayerBlackButton, uploadPicture("NextPlayerBlack.bmp"),  setNextPlayerBlack);
 
-	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("PVP.bmp"),  StartGameOrCreateAI_Settings);
+	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("PVP.bmp"),  startGameOrCreateAI_Settings);
 
 	/* Board */
-	ccb_board = create_ccb_BoardList();
+	
 
 	freeBoardAndTree(window);
 
@@ -136,6 +150,8 @@ int createPlayerSelectionWindow(Window *window)
 	addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerBlack, window);
 
 	addButtonToPanel(ccp_ContinueOrPlay, ccb_ContinueOrPlay, window);
+
+	createGuiBoard(window, ccp_BoardSetting);
 
 	if (SDL_Flip(window->self) != 0)
 	{
@@ -169,6 +185,77 @@ int createPlayerSelectionWindow(Window *window)
 	return 0;
 }
 
+int createGuiBoard(Window *window, ControlComponent *ccp)
+{
+	guiBoard[0] = guiBoard_col0;
+	guiBoard[1] = guiBoard_col1;
+	guiBoard[2] = guiBoard_col2;
+	guiBoard[3] = guiBoard_col3;
+	guiBoard[4] = guiBoard_col4;
+	guiBoard[5] = guiBoard_col5;
+	guiBoard[6] = guiBoard_col6;
+	guiBoard[7] = guiBoard_col7;
+
+	Button *btn;
+	Coord crd;
+	eTool type;
+	int player;
+	int(*toolFunc)(Window *);
+
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			crd.i_coord = i; crd.j_coord = j;
+			type = getInitialTypeOfCoord(crd);
+			player = getInitialPlayerOfCoord(crd);
+			toolFunc = getInitialToolFuncOfCoord(crd);
+			btn = createSquareByToolType(window, ccp, crd, type, player, toolFunc); //also adds is to the ccp
+
+			guiBoard[i][j].btn = btn;
+		}
+	}
+	return 1;
+}
+
+/* Pre: coord is in board */
+eTool getInitialTypeOfCoord(Coord crd)
+{
+	if (crd.j_coord > 1 && crd.j_coord < 6)
+		return Empty;
+	else if (crd.j_coord == 1 || crd.j_coord == 6)
+		return Pawn;
+	else
+	{
+		if (crd.i_coord == 0 || crd.i_coord == 7)
+			return Rook;
+		else if (crd.i_coord == 1 || crd.i_coord == 6)
+			return Knight;
+		else if (crd.i_coord == 2 || crd.i_coord == 5)
+			return Bishop;
+		else if (crd.i_coord == 3)
+			return Queen;
+		else
+			return King;
+	}
+}
+
+/* Pre: crd is in the board */
+int getInitialPlayerOfCoord(Coord crd)
+{
+	if (crd.j_coord == 0 || crd.j_coord == 1)
+		return WHITE_PLAYER;
+	else if (crd.j_coord == 6 || crd.j_coord == 7)
+		return BLACK_PLAYER;
+	else
+		return NO_PLAYER;
+}
+
+int(*getInitialToolFuncOfCoord(Coord crd))(Window *)
+{
+	return nullFunction;
+}
+
 
 
 int setGameModePVP(Window *window)
@@ -191,7 +278,7 @@ int setNextPlayerBlack(Window *window)
 	return 0;
 }
 
-int StartGameOrCreateAI_Settings(Window *window)
+int startGameOrCreateAI_Settings(Window *window)
 {
 	return 0;
 }

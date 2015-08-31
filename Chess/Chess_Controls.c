@@ -40,7 +40,7 @@ SDL_Rect createSDL_RectForBoardSquare(Coord crd)
 }
 
 
-
+/* crd is a needed info for light or dark squares. player is a needed info for the color of the tool. type for the type. */
 const char *getPictureName_tools(Coord crd, int player, eTool type)
 {
 	if (mod(crd.i_coord + crd.j_coord, 2) == 0) //Dark
@@ -131,12 +131,14 @@ const char *getPictureName_tools(Coord crd, int player, eTool type)
 	}
 }
 
-void createSquareByToolType(Window *window, ControlComponent *ccp, Coord crd, eTool type, int player)
+/* creates the desired board square, adds it to the ccp and returns a pointer to the ccb */
+ControlComponent *createSquareByToolType(Window *window, ControlComponent *ccp, Coord crd, eTool type, int player, int (*f)(Window *))
 {
 	ControlComponent *ccb;
 	SDL_Rect rect = createSDL_RectForBoardSquare(crd);
 	const char *pictureName = getPictureName_tools(crd, player, type);
-	ccb = createButton(rect, uploadPicture(pictureName), nullFunction);
+	ccb = createButton(rect, uploadPicture(pictureName), f);
 	addButtonToPanel(ccp, ccb, window);
+	return ccb;
 }
 

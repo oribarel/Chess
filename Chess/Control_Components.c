@@ -21,7 +21,7 @@ Window *createWindow()
 {
 	Window *openWindow;
 	SDL_WM_SetCaption("Chess", "Chess");
-	SDL_Surface *surface = SDL_SetVideoMode(SCR_WIDTH, SCR_HEIGHT, 0, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	SDL_Surface *surface = SDL_SetVideoMode(SCREEN_W, SCREEN_H, 0, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	if (surface == NULL) 
 	{
 		printf("ERROR: failed to set video mode: %s\n", SDL_GetError());

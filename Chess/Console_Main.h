@@ -1,69 +1,7 @@
-#ifndef CHESS_
-#define CHESS_
+#ifndef CONSOLE_MAIN_H
+#define CONSOLE_MAIN_H
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>     /* assert */
-#include <time.h>
-#include <ctype.h>
-#include <SDL.h>
-#include <SDL_video.h>
-
-
-//damka
-#define WHITE_M 0
-//damka
-#define BLACK_M 1
-
-
-#define PLAYER_WINS "player wins!"
-#define DEBUG 1
-#define DAMKA 1
-
-#define MIN 0
-#define MAX 1
-
-#define MAX_SCORE 400 //TODO: what to do?
-#define MAX_VALUE 801
-#define MIN_VALUE -801
-
-
-#define WHITE_P 'm'		//pawn		hayal
-#define WHITE_B 'b'		//bishop	ratz
-#define WHITE_N 'n'		//knight	parash
-#define WHITE_R 'r'		//rook		tzariakh
-#define WHITE_Q 'q'		//queen		malka
-#define WHITE_K 'k'		//king		melekh
-
-#define BLACK_P 'M'
-#define BLACK_B 'B'
-#define BLACK_N 'N'
-#define BLACK_R 'R'
-#define BLACK_Q 'Q'
-#define BLACK_K 'K'
-#define EMPTY ' '
-
-#define PAWN	"pawn"		//pawn		hayal
-#define BISHOP	"bishop"	//bishop	ratz
-#define KNIGHT	"knight"	//knight	parash
-#define ROOK	"rook"		//rook		tzariakh
-#define QUEEN	"queen"		//queen		malka
-#define KING	"king"		//king		melekh
-
-#define WHITE "white"
-#define BLACK "black"
-
-#define WHITE_PLAYER 1
-#define BLACK_PLAYER -1
-
-#define BOARD_SIZE 8
-
-#define BEST_BOARDS_NUM 1000000
-
-
-typedef char** board_t;
-
+#include "Chess_Logic.h"
 
 // board initialization
 #define ENTER_SETTINGS "Enter game settings:\n" 
@@ -91,16 +29,11 @@ typedef char** board_t;
 #define print_message(message) (printf("%s", message));
 
 
-#define XML_FIRST_LINE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-
 #define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;)
 #define BEST "best"
 #define BESTval 5
 
-typedef struct Coord {
-	int i_coord;
-	int j_coord;
-} Coord;
+
 
 typedef struct Move {
 	int eater; //0 if no captures made. else, 1.
@@ -110,19 +43,7 @@ typedef struct Move {
 	Coord *route; //the coordinates of this move
 } Move;
 
-typedef struct chessMove {
-	char toolType;
-	Coord src;
-	Coord dst;
-	int eaten;  //0 if no captures made. else the char that represents the eaten piece
-	int promote; //0 if no promotion needed. else the char that represents the new promoted piece
-	struct chessMove *next;
-} cMove;
 
-typedef enum Tool
-{
-	Pawn, Knight, Bishop, Rook, Queen, King, Empty
-} eTool;
 
 
 /*typedef struct chessMoveArray {

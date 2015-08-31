@@ -33,6 +33,9 @@
     <ClCompile Include="Console_Main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Chess_Logic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Control_Components.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Console_Main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess_Logic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

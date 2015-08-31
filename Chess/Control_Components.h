@@ -4,12 +4,13 @@
 //TODO: declare all functions
 
 
+#include <SDL.h>
+#include <SDL_video.h>
 
 
-#include "Console_Main.h"
 
-#define SCR_WIDTH 1024
-#define SCR_HEIGHT 768
+#define SCREEN_W 1024
+#define SCREEN_H 768
 
 typedef struct rgb
 {
