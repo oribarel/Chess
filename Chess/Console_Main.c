@@ -34,8 +34,8 @@ the initial state of the global properties array:
 properties[0] = 1;	//Setting state
 properties[1] = 0;	//Don't quit
 properties[2] = 1;	//Default minimax depth. 5 stands for best
-properties[3] = 0;	//Default player color white
-properties[4] = 0 //It is now white's\black's turn: 0 for white, 1 for black
+properties[3] = WHITE_PLAYER;	//Default player color white
+properties[4] = WHITE_PLAYER //It is now white's\black's turn: WHITE_PLAYER for white, BLACK_PLAYER for black
 properties[5] = 1;	//Default game mode is "two players mode"
 */
 
@@ -1288,7 +1288,7 @@ void setSlot(board_t board, char *horiz, char *vert, char type)
 	if (isTool(type) || type == EMPTY)
 	{
 
-		if (isInBoard(coord) && mod(i + j, 2) == 0)
+		if (isInBoard(coord))
 		{
 			if (NotTooManyOfType(board, type))
 			{
@@ -1299,7 +1299,7 @@ void setSlot(board_t board, char *horiz, char *vert, char type)
 					board[i][j] = BLACK_K;
 			}
 			else
-			{
+			{//TODO: test the case in which the number of pieces equal to the maximum number of tools and the set command just changes such a piece to the exact same type
 				printf(NO_PIECE);
 			}
 		}
@@ -1562,11 +1562,16 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
 			if (depth == properties[2] && val >= bestValue) //if depth == minimax_depth
 			{
-				if (*bestMove != NULL)
+				if (val == bestValue)
+					AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
+				else
 				{
-					free(*bestMove);
+					if (*bestMove != NULL)
+					{
+						free(*bestMove);
+					}
+					*bestMove = movesList;
 				}
-				*bestMove = movesList;
 				bestUpdated = 1;
 			}
 			bestValue = imax(bestValue, val);
@@ -1595,11 +1600,16 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
 			if (depth == properties[2] && val <= bestValue) //if depth == minimax_depth
 			{
-				if (*bestMove != NULL)
+				if (val == bestValue)
+					AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
+				else
 				{
-					free(*bestMove);
+					if (*bestMove != NULL)
+					{
+						free(*bestMove);
+					}
+					*bestMove = movesList;
 				}
-				*bestMove = movesList;
 				bestUpdated = 1;
 			}
 			bestValue = imin(bestValue, val);
@@ -1623,9 +1633,9 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 
 
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
-int makeMove_ComputeScore_Undo(board_t board, cMove *move, char player, int depth, int minOrMax, int a, int b, int boardsCounter)
+int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int boardsCounter)
 /*Saves all the eaten tool types in the eatenTools array, all while making the move on the given board.
-Then, run minimax algorithm in recursion to produce a score. At last, undo the move, using the array, and return the score conputed.*/
+Then, run minimax algorithm in recursion to produce a score. At last, undo the move, using the array, and return the score computed.*/
 {
 	int scr = 0;
 	//making the move
@@ -1661,6 +1671,70 @@ int makeMove(board_t board, cMove *move)
 
 
 }
+
+
+int Save(board_t board, char* file_name){
+	int i, j;
+	FILE *f = fopen(file_name, "w");
+	if (f == NULL){
+		printf(WRONG_FILE_NAME);
+		return 0;
+	}
+	fprintf(f, XML_FIRST_LINE);
+	fprintf(f, "<game>\n");
+	if (properties[4] == WHITE_PLAYER)
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", WHITE);
+	else
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", BLACK);
+	fprintf(f, "\t<game_mode>%d</game_mode>\n", properties[5]);
+
+
+	if (properties[5] == 2){
+		if (properties[2] != 5)
+			fprintf(f, "\t<difficulty>%d</difficulty>\n", properties[2]);
+		else
+			fprintf(f, "\t<difficulty>best/difficulty>\n");
+		if (properties[3] == WHITE_PLAYER)
+			fprintf(f, "\t<user_color>%s</user_color>\n",WHITE);
+		else
+			fprintf(f, "\t<user_color>%s</user_color>\n", BLACK);
+	}
+	else
+	{
+		fprintf(f, "\t<difficulty></difficulty>\n");
+		fprintf(f, "\t<user_color></user_color>\n");
+	}
+
+	fprintf(f, "\t<board>\n");
+	for (j = BOARD_SIZE; j > 0; j--){
+		fprintf(f, "\t\t<row_%d>", j);
+		for (i = 0; i < BOARD_SIZE; i++){
+			if (board[i][j - 1] == EMPTY)
+				fprintf(f, "_");
+			else
+				fprintf(f, "%c", board[i][j - 1]);
+		}
+		fprintf(f, "</row_%d>\n", j);
+	}
+	fprintf(f, "\t</board>\n");
+	fprintf(f, "</game>\n");
+	fclose(f);
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* returns a if a is greater than b, and b otherwise*/
 int imax(int a, int b)
@@ -1800,8 +1874,8 @@ int Parse(char *line, board_t board)
 	properties[0] = Setting state
 	properties[1] = quit
 	properties[2] = Default minimax depth
-	properties[3] = User color: 0 for default white, 1 for black
-	properties[4] = It is now white's\black's turn: 0 for white, 1 for black
+	properties[3] = User color: WHITE_PLAYER or BLACK_PLAYER
+	properties[4] = It is now white's\black's turn: WHITE_PLAYER for white, BLACK_PLAYER for black
 	properties[5] = game mode
 
 
@@ -1904,9 +1978,9 @@ int Parse(char *line, board_t board)
 			}
 			token = strtok(NULL, " \n");
 			if (strcmp(token, white) == 0)
-				properties[3] = 0;
+				properties[3] = WHITE_PLAYER;
 			else if (strcmp(token, black) == 0)
-				properties[3] = 1;
+				properties[3] = BLACK_PLAYER;
 			return 0;
 		}
 
@@ -1931,9 +2005,9 @@ int Parse(char *line, board_t board)
 		{
 			token = strtok(NULL, " \n");
 			if (strcmp(token, black) == 0)
-				properties[4] = 1;
+				properties[4] = BLACK_PLAYER;
 			else
-				properties[4] = 0;
+				properties[4] = WHITE_PLAYER;
 
 			/*if (DEBUG)
 			printf("\nUpon updating next player, it is now %d\n", properties[4]);*/
@@ -1945,11 +2019,25 @@ int Parse(char *line, board_t board)
 			//remove
 		{
 			char *horiz, *vert;
+			Coord coord;
+			int i, j;
 			token = strtok(NULL, "<,");
 			horiz = token;
 			token = strtok(NULL, ",>");
 			vert = token;
-			setSlot(board, horiz, vert, EMPTY);
+
+			//checking if the given coordiante resides inside the board:
+
+			i = (int)*horiz - 97;
+			j = (int)strtof(vert, NULL) - 1;
+			coord.i_coord = i; coord.j_coord = j;
+			if (isInBoard(coord))
+				setSlot(board, horiz, vert, EMPTY);
+			else
+			{
+				if (!properties[1])
+					printf(WRONG_POSITION);
+			}
 			return 0;
 		}
 
@@ -2069,7 +2157,7 @@ int Parse(char *line, board_t board)
 		/*Game State*/
 	{
 		char *token = strtok(line, " \n");
-		if (strcmp(token, cmmd7) == 0)
+		if (strcmp(token, cmmd10) == 0)
 			//quit
 		{
 			properties[1] = 1;
@@ -2146,6 +2234,74 @@ int Parse(char *line, board_t board)
 			printMovesList(pMove);
 			return 0;
 		}
+
+
+
+
+		else if (strcmp(token, cmmd14) == 0)
+			//get_best_moves
+		{
+			int maxScore = MIN_VALUE;
+
+			//parsing the depth d
+			int d;
+			char *currentPosition = NULL;
+			token = strtok(NULL, "&");
+			currentPosition = token;
+			if (currentPosition[0] == 'b')
+				d = BESTval;
+			else
+				d = currentPosition[0] - '0';
+
+			//get  best moves in pMove
+			minimax_score(board, properties[4], d, 1, &pMove, MIN_VALUE, MAX_VALUE, 0);
+
+			//print moves
+			printMovesList(pMove);
+			return 0;
+		}
+
+		else if (strcmp(token, cmmd15) == 0)
+			//get_score
+		{
+			int score = 0;
+
+			//parsing the depth d
+			int d;
+			cMove *m;
+			char *currentPosition = NULL;
+			token = strtok(NULL, " ");
+			currentPosition = token;
+			if (currentPosition[0] == 'b')
+				d = BESTval;
+			else
+				d = currentPosition[0] - '0';
+
+			//parsing the move m
+			token = strtok(NULL, "&");
+			currentPosition = token;
+			m = (cMove *)isLegalMove(currentPosition, board, pMove);
+
+
+			//get  best moves in pMove
+			score = makeMove_ComputeScore_Undo(board, m, properties[4], d, 1, MIN_VALUE, MAX_VALUE, 0);
+
+			//print score
+			if (!properties[1])
+				printf("%d",score);
+			return 0;
+		}
+
+		else if (strcmp(token, cmmd16) == 0)
+			//save
+		{
+			token = strtok(NULL, "&");
+			char *currentPosition = token;
+			Save(board, currentPosition);
+
+			return 0;
+		}
+
 	}
 	if (!properties[1])
 		printf(ILLEGAL_COMMAND);
@@ -2310,7 +2466,7 @@ int isLegalInitialPosition(char *token, board_t board)
 			currentPosition += 3;
 			y_coor = (int)strtol(currentPosition, &currentPosition, 10);
 			graphicCoordToRealCoord(&coord, x_coor, y_coor);
-			if (GetContentOfCoord(board, coord) == EMPTY || IsEnemy(GetContentOfCoord(board, coord), (properties[4]) ? BLACK_P : WHITE_P)) //isWhite(GetContentOfCoord(board, coord)) == 1 - properties[3]) 
+			if (GetContentOfCoord(board, coord) == EMPTY || IsEnemy(GetContentOfCoord(board, coord), properties[4])) //isWhite(GetContentOfCoord(board, coord)) == 1 - properties[3]) 
 				return 0;
 			else
 				return 1;
@@ -2345,7 +2501,7 @@ void clearBoard(board_t board)
 /*returns a string of the player color*/
 const char* getPlayerColor()
 {
-	if (properties[3] == 0)//if player is white
+	if (properties[3] == WHITE_PLAYER)//if player is white
 		return constWhite;
 	else//if player is black
 		return constBlack;
@@ -2354,7 +2510,7 @@ const char* getPlayerColor()
 /*returns a string of the computer color*/
 const char* getComputerColor()
 {
-	if (properties[3] != 0) //if computer is white
+	if (properties[3] != WHITE_PLAYER) //if computer is white
 		return constWhite;
 	else //if computer is black
 		return constBlack;
@@ -2446,9 +2602,9 @@ int LoadFromFile(char* file_path, board_t board){
 
 	if (*(str + 1) == 'n'){ //next turn
 		if (*(str + 11) == 'W')
-			properties[4] = 0;
+			properties[4] = WHITE_PLAYER;
 		else
-			properties[4] = 1;
+			properties[4] = BLACK_PLAYER;
 		//read next line
 		fscanf(file, "%s", str);
 	}
@@ -2461,7 +2617,7 @@ int LoadFromFile(char* file_path, board_t board){
 	else
 		properties[5] = 1;
 
-
+	
 	if (*(str + 1) == 'd'){ //difficulty (optional tag)
 		if (*(str + 12) == 'b')
 			properties[2] = 5;
@@ -2476,14 +2632,14 @@ int LoadFromFile(char* file_path, board_t board){
 
 	if (*(str + 1) == 'u'){ //user color (optional tag)
 		if (*(str + 12) == 'W')
-			properties[3] = 0;
+			properties[3] = WHITE_PLAYER;
 		else
-			properties[3] = 1;
+			properties[3] = BLACK_PLAYER;
 		//read next line
 		fscanf(file, "%s", str);
 	}
 	else
-		properties[3] = 1;
+		properties[3] = BLACK_PLAYER;
 
 
 	//reading board slots:
@@ -2568,7 +2724,7 @@ int Console_Main()
 			}
 
 			//run MINIMAX
-			if (properties[3])//if computer's color is white
+			if (properties[3] = BLACK_PLAYER)//if computer's color is white
 				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 			else
 				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
@@ -2587,7 +2743,7 @@ int Console_Main()
 
 
 			//change player
-			properties[4] = 1 - properties[4];
+			properties[4] = -properties[4];
 			if ((score(brd, getGenericTool(0)) == -100))//if no legal move for the player (player lost)
 			{
 				printWinner(1);//print computer wins;
@@ -2621,7 +2777,7 @@ int Console_Main()
 			}*/
 			if (properties[1]) //if quit
 				continue;
-			if (properties[4] == 0)
+			if (properties[4] == WHITE_PLAYER)
 				printf(WHT_ENTER_YOUR_MOVE);
 			else
 				printf(BLK_ENTER_YOUR_MOVE);
@@ -2648,7 +2804,7 @@ int Console_Main()
 			tmp = allPossibleMoves;
 			}*/
 			//change color of current player
-			properties[4] = 1 - properties[4];
+			properties[4] = -properties[4];
 		}
 
 		if (input != NULL)
