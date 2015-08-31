@@ -13,16 +13,18 @@ SDL_Rect create1024x768Rect()
 int CreateMainWindow(Window *window)
 {
 	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
-	SDL_Rect mainWindowButton = createSDL_Rect(300, 150, 150, 100);
+	SDL_Rect mainWindowButton = createSDL_Rect(200, 75, 100, 350);
 	RGB whiteColorRGB = createRGB(0, 51, 102);
 
-	ControlComponent *ccp_MainWindow = createPanel(Rect1024x768, whiteColorRGB);
-	ControlComponent *ccb_NewGame = createButton(mainWindowButton, uploadPicture("NewGameButton.bmp"), CreateFirstSettingsWindow);
+	
 
-	mainWindowButton.y += 180;
+	ControlComponent *ccp_MainWindow = createPanel(Rect1024x768, whiteColorRGB);
+	ControlComponent *ccb_NewGame = createButton(mainWindowButton, uploadPicture("NewGameButton.bmp"), createPlayerSelectionWindow);
+
+	mainWindowButton.y += 95;
 	ControlComponent *ccb_LoadGame = createButton(mainWindowButton, uploadPicture("LoadGameButton.bmp"), LoadGame);
 
-	mainWindowButton.y += 180;
+	mainWindowButton.y += 95;
 	ControlComponent *ccb_Quit = createButton(mainWindowButton, uploadPicture("QuitGameButton.bmp"), quitGame);
 
 	freeBoardAndTree(window);
@@ -38,7 +40,7 @@ int CreateMainWindow(Window *window)
 		return 0;
 	}
 
-	while (intQuit == 0)
+	while (!intQuit)
 	{
 		SDL_Event e;
 		while (SDL_PollEvent(&e) == 1 && intQuit == 0)
@@ -64,18 +66,132 @@ int CreateMainWindow(Window *window)
 
 
 
-int CreateFirstSettingsWindow(Window *window)
+int createPlayerSelectionWindow(Window *window)
 {
+	int wSide = 12;
+	int hSide = 9;
+	int wBoardSetting = 800;
+	int hBoardSetting = 750;
+	int wGameModeSetting = SCREEN_W - wBoardSetting - 2 * wSide;
+	int hGameModeSetting = (SCREEN_H - 2 * hSide) / 3;
+	ControlComponent *ccb_board;
 
+	/* Screen Rect */
+	SDL_Rect Rect1024x768 = create1024x768Rect(); 
+
+	/* Panel Rects */
+	SDL_Rect gameModePanel = createSDL_Rect(wGameModeSetting, 250, wSide, 9+150 );
+	SDL_Rect nextPlayerPanel = createSDL_Rect(wGameModeSetting, 150 , wSide, 9+400);
+	SDL_Rect continueOrPlayPanel = createSDL_Rect(wGameModeSetting, 150 , wSide, 9+550);
+	SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
+	
+	/* Button Rects */
+	SDL_Rect versusButtonPvC = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect versusButtonPvP = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, 2*hSide + (hGameModeSetting - 4 * hSide)/2);
+
+	SDL_Rect nextPlayerWhiteButton = createSDL_Rect(80, 80, 10 , 45);
+	SDL_Rect nextPlayerBlackButton = createSDL_Rect(80, 80, 10 + 80 + 20, 45);
+
+	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * hSide, hGameModeSetting - 4 * hSide, wSide , 2 * hSide );
+
+	/* RGB Colors*/
+	RGB rgbMenuBlue = createRGB(0, 51, 102);
+	RGB rgbBlack = createRGB(0, 0, 0);
+	RGB rgbWhite = createRGB(255, 255, 255);
+
+	/* Controls */
+	/* 1. Panels*/
+	ControlComponent *ccp_PlayerSelectionWindow = createPanel(Rect1024x768, rgbMenuBlue);
+
+	ControlComponent *ccp_GameMode = createPanel(gameModePanel, createRGB(153, 0, 0));
+	ControlComponent *ccp_NextPlayer = createPanel(nextPlayerPanel, createRGB(255, 128, 0));
+	ControlComponent *ccp_ContinueOrPlay = createPanel(continueOrPlayPanel, createRGB(0, 153, 0));
+	ControlComponent *ccp_BoardSetting = createPanel(boardSettingPanel, createRGB(127, 0, 255));
+
+	/* 2. Buttons*/
+	ControlComponent *ccb_PvC = createButton(versusButtonPvC, uploadPicture("PVC.bmp"),  setGameModePVC);
+	ControlComponent *ccb_PVP = createButton(versusButtonPvP, uploadPicture("PVP.bmp"),  setGameModePVP);
+
+	ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"),  setNextPlayerWhite);
+	ControlComponent *ccb_NextPlayerBlack = createButton(nextPlayerBlackButton, uploadPicture("NextPlayerBlack.bmp"),  setNextPlayerBlack);
+
+	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("PVP.bmp"),  StartGameOrCreateAI_Settings);
+
+	/* Board */
+	ccb_board = create_ccb_BoardList();
+
+	freeBoardAndTree(window);
+
+	addPanelToWindow(window, ccp_PlayerSelectionWindow);
+	
+	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_GameMode, window);
+	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_NextPlayer, window);
+	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_ContinueOrPlay, window);
+	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_BoardSetting, window);
+
+	addButtonToPanel(ccp_GameMode, ccb_PvC, window);
+	addButtonToPanel(ccp_GameMode, ccb_PVP, window);
+
+	addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerWhite, window);
+	addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerBlack, window);
+
+	addButtonToPanel(ccp_ContinueOrPlay, ccb_ContinueOrPlay, window);
+
+	if (SDL_Flip(window->self) != 0)
+	{
+		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+
+	while (!intQuit)
+	{
+
+		SDL_Event e;
+		while (SDL_PollEvent(&e) == 1 && intQuit == 0)
+		{
+			if (e.type == SDL_QUIT)
+			{
+				freeCCTree(window->panelChild);
+				window->panelChild = NULL;
+				SDL_FreeSurface(window->self);
+				free(window);
+				intQuit = 1;
+				break;
+			}
+			else if (e.type == SDL_MOUSEBUTTONUP)
+			{
+				buttonPressHandler(window, ccp_PlayerSelectionWindow, e);
+				break;
+			}
+		}
+	}
 	return 0;
 }
 
-int PlayerVsPlayer(Window *window)
+
+
+int setGameModePVP(Window *window)
 {
 	return 0;
 }
 
-int CreateSecondSettingsWindow(Window *window)
+int setGameModePVC(Window *window)
+{
+	return 0;
+}
+
+int setNextPlayerWhite(Window *window)
+{
+	return 0;
+}
+
+int setNextPlayerBlack(Window *window)
+{
+	return 0;
+}
+
+int StartGameOrCreateAI_Settings(Window *window)
 {
 	return 0;
 }
@@ -89,10 +205,7 @@ int RebuildSettingsMenu(Window *window, ControlComponent **second_settings_windo
 	return 0;
 }
 
-int SetPlayerAs(Window *window, int WhiteOrBlackPlayer)
-{
-	return 0;
-}
+
 
 /* difficulty should be 1 to 4 or 0 for best */
 int setDifficulty(Window *window, int difficulty)
