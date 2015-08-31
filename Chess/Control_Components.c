@@ -56,9 +56,9 @@ RGB createRGB(int r, int g, int b)
 	return rgb;
 }
 
-ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int (*f)(Window *)) /*char ctrl )*/
+ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int (*f)(Window *, struct controlComponent *)) /*char ctrl )*/
 {
-	
+	Coord crd = { -1, -1 };
 	ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
 	if (comp == NULL)
 	{
@@ -74,7 +74,36 @@ ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int (*f)(Wind
 
 	btn->pic = pic;
 	btn->f = f;
-	
+	btn->crd = crd;
+
+	comp->next = NULL;
+	comp->lbl = NULL;
+	comp->pnl = NULL;
+	comp->rect = inpRect;
+	comp->btn = btn;
+
+	return comp;
+}
+
+ControlComponent *createButton_square(SDL_Rect inpRect, SDL_Surface *pic, int(*f)(Window *, struct controlComponent *), Coord crd) /*char ctrl )*/
+{
+	ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
+	if (comp == NULL)
+	{
+		printf("ERROR: standard function calloc has failed\n");
+		quit();
+	}
+	Button *btn = (Button *)calloc(1, sizeof(Button));
+	if (btn == NULL)
+	{
+		printf("ERROR: standard function calloc has failed\n");
+		quit();
+	}
+
+	btn->pic = pic;
+	btn->f = f;
+	btn->crd = crd;
+
 	comp->next = NULL;
 	comp->lbl = NULL;
 	comp->pnl = NULL;
@@ -232,7 +261,8 @@ Uint32 getColorOfPanel(Window *window, ControlComponent *ccp)
 	return color;
 }
 
-int nullFunction(Window *w){
+int nullFunction(Window *w, struct controlComponent *ccb)
+{
 	return 0;
 }
 

@@ -79,8 +79,7 @@ int CreateMainWindow(Window *window, board_t passedBoard)
 }
 
 
-
-int createPlayerSelectionWindow(Window *window)
+int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	int wSide = 12;
 	int hSide = 9;
@@ -151,7 +150,7 @@ int createPlayerSelectionWindow(Window *window)
 
 	addButtonToPanel(ccp_ContinueOrPlay, ccb_ContinueOrPlay, window);
 
-	createGuiBoard(window, ccp_BoardSetting);
+	createGuiBoard(window, ccp_BoardSetting, PLAYER_SELECTION_MENU);
 
 	if (SDL_Flip(window->self) != 0)
 	{
@@ -178,6 +177,12 @@ int createPlayerSelectionWindow(Window *window)
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
 				buttonPressHandler(window, ccp_PlayerSelectionWindow, e);
+				if (SDL_Flip(window->self) != 0)
+				{
+					printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+					quit();
+					return 0;
+				}
 				break;
 			}
 		}
@@ -185,7 +190,11 @@ int createPlayerSelectionWindow(Window *window)
 	return 0;
 }
 
-int createGuiBoard(Window *window, ControlComponent *ccp)
+/*	
+	for PLAYER_SELECTION_MENU: toggle pieces function.
+	for GAME_MENU: game mode function	
+*/
+int createGuiBoard(Window *window, ControlComponent *ccp, int windowType)
 {
 	guiBoard[0] = guiBoard_col0;
 	guiBoard[1] = guiBoard_col1;
@@ -196,11 +205,11 @@ int createGuiBoard(Window *window, ControlComponent *ccp)
 	guiBoard[6] = guiBoard_col6;
 	guiBoard[7] = guiBoard_col7;
 
-	Button *btn;
+	ControlComponent *ccb;
 	Coord crd;
 	eTool type;
 	int player;
-	int(*toolFunc)(Window *);
+	int(*toolFunc)(Window *, struct controlComponent *);
 
 	for (int i = 0; i < BOARD_SIZE; i++)
 	{
@@ -209,10 +218,13 @@ int createGuiBoard(Window *window, ControlComponent *ccp)
 			crd.i_coord = i; crd.j_coord = j;
 			type = getInitialTypeOfCoord(crd);
 			player = getInitialPlayerOfCoord(crd);
-			toolFunc = getInitialToolFuncOfCoord(crd);
-			btn = createSquareByToolType(window, ccp, crd, type, player, toolFunc); //also adds is to the ccp
+			if (windowType == PLAYER_SELECTION_MENU)
+				toolFunc = playerSelectionMenu_toggleTool;
+			else
+				toolFunc = (int(*)(Window *, struct controlComponent *)) getGameModeFuncion(crd); //TODO: intimdating cast
+			ccb = createSquareByToolType(window, ccp, crd, type, player, toolFunc); //also adds is to the ccp
 
-			guiBoard[i][j].btn = btn;
+			guiBoard[i][j] = *ccb;
 		}
 	}
 	return 1;
@@ -251,34 +263,65 @@ int getInitialPlayerOfCoord(Coord crd)
 		return NO_PLAYER;
 }
 
-int(*getInitialToolFuncOfCoord(Coord crd))(Window *)
+int(*getGameModeFuncion(Coord crd))(Window *, struct controlComponent *)
 {
 	return nullFunction;
 }
 
+int playerSelectionMenu_toggleTool(Window *window, struct controlComponent *ccb)
+{
+	Coord crd = ccb->btn->crd;
+	eTool type;
+	char tool = GetContentOfCoord(board, crd);
 
+	char toggleArray[13] = { EMPTY, WHITE_P, WHITE_N, WHITE_B, WHITE_R, WHITE_Q, WHITE_K,
+									BLACK_P, BLACK_N, BLACK_B, BLACK_R, BLACK_Q, BLACK_K };
 
-int setGameModePVP(Window *window)
+	char eToolToggleArray[13] = { Empty, Pawn, Knight, Bishop, Rook, Queen, King,
+										Pawn, Knight, Bishop, Rook, Queen, King };
+
+	int i = 0;
+	for (; i < 13; i++)
+	{
+		if (tool == toggleArray[i])
+		{
+			tool = toggleArray[mod(i + 1, 13)];
+			break;
+		}	
+	}
+	type = eToolToggleArray[i];
+
+	setSlotInBoard(board, crd, tool);
+	int player = NO_PLAYER;
+	if (tool != EMPTY)
+		player = (islower(tool) ? WHITE_PLAYER : BLACK_PLAYER);
+
+	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type));
+
+	return 1;
+}
+
+int setGameModePVP(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
 
-int setGameModePVC(Window *window)
+int setGameModePVC(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
 
-int setNextPlayerWhite(Window *window)
+int setNextPlayerWhite(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
 
-int setNextPlayerBlack(Window *window)
+int setNextPlayerBlack(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
 
-int startGameOrCreateAI_Settings(Window *window)
+int startGameOrCreateAI_Settings(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
@@ -300,7 +343,7 @@ int setDifficulty(Window *window, int difficulty)
 	return 0;
 }
 
-int LoadGame(Window *window)
+int LoadGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
@@ -420,6 +463,7 @@ int buttonPressHandler(Window *window, ControlComponent *ccp, SDL_Event e)
 		}
 		currChild = currChild->next;
 	}
+	
 	return 0;
 }
 
@@ -428,7 +472,7 @@ int buttonPress(Window *window, ControlComponent *ccb, SDL_Event e)
 {
 	if (isPressInsideButton(e, ccb))
 	{
-		ccb->btn->f(window);
+		ccb->btn->f(window, ccb);
 	}
 	return 0;
 }
@@ -449,7 +493,7 @@ int freeBoardAndTree(Window *window)
 	return 0;
 }
 
-int quitGame(Window *window)
+int quitGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
