@@ -56,7 +56,7 @@ RGB createRGB(int r, int g, int b)
 	return rgb;
 }
 
-ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int (*f)(Window *, struct controlComponent *)) /*char ctrl )*/
+ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int (*f)(Window *, struct controlComponent *), char purpose) /*char ctrl )*/
 {
 	Coord crd = { -1, -1 };
 	ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
@@ -75,6 +75,7 @@ ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int (*f)(Wind
 	btn->pic = pic;
 	btn->f = f;
 	btn->crd = crd;
+	btn->purpose = purpose;
 
 	comp->next = NULL;
 	comp->lbl = NULL;
@@ -103,6 +104,7 @@ ControlComponent *createButton_square(SDL_Rect inpRect, SDL_Surface *pic, int(*f
 	btn->pic = pic;
 	btn->f = f;
 	btn->crd = crd;
+	btn->purpose = 'a';
 
 	comp->next = NULL;
 	comp->lbl = NULL;

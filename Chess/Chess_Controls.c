@@ -1,5 +1,7 @@
 #include "Chess_Controls.h"
 
+const char *str_purpose_BoardSquare = "BoardSquare";
+
 const char *BDD = "bdd.bmp";
 const char *BDL = "bdl.bmp";
 const char *BLD = "bld.bmp";

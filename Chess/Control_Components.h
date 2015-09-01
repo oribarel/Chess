@@ -29,6 +29,7 @@ typedef struct button
 	struct SDL_Surface *pic;
 	char gameControl;
 	Coord crd;
+	char purpose;
 } Button;
 
 
@@ -65,7 +66,7 @@ typedef struct rectSize
 int init_GUI(void);
 int nullFunction(Window *w, struct controlComponent *ccb);
 Window *createWindow();
-ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int(*f)(Window *, struct controlComponent *));/*, char ctrl);*/
+ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int(*f)(Window *, struct controlComponent *), char purpose);/*, char ctrl);*/
 ControlComponent *createLabel(SDL_Rect rect, SDL_Surface *pic);
 ControlComponent *createPanel(SDL_Rect rect, RGB rgb_triplet);
 int addPanelToWindow(Window *window, ControlComponent *ccp);
@@ -79,6 +80,7 @@ int freeCCTree(ControlComponent *cc);
 SDL_Rect createSDL_Rect(int w, int h, int x, int y);
 RGB createRGB(int r, int g, int b);
 SDL_Surface *uploadPicture(const char *path);
+
 ControlComponent *createButton_square(SDL_Rect inpRect, SDL_Surface *pic, int(*f)(Window *, struct controlComponent *), Coord crd);
 
 #endif

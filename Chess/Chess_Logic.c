@@ -84,9 +84,10 @@ void init_rowP(board_t board, int player)
 	Coord crd;
 	int j = player == WHITE_PLAYER ? 1 : 6;
 	int i = 0;
-	crd.i_coord = i; crd.j_coord = j;
+	crd.j_coord = j;
 	for (; i < BOARD_SIZE; i++)
 	{
+		crd.i_coord = i;
 		setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_P : BLACK_P);
 	}
 }
@@ -106,9 +107,9 @@ void init_rowV(board_t board, int player)
 	crd.i_coord++;
 	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_B : BLACK_B);
 	crd.i_coord++;
-	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_K : BLACK_K);
-	crd.i_coord++;
 	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_Q : BLACK_Q);
+	crd.i_coord++;
+	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_K : BLACK_K);
 	crd.i_coord++;
 	setSlotInBoard(board, crd, player == WHITE_PLAYER ? WHITE_B : BLACK_B);
 	crd.i_coord++;

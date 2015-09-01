@@ -3,6 +3,18 @@
 static int intQuit = 0;
 static int newgamepress = 0;
 
+const char *str_purpose_NewGame = "NewGame";
+const char *str_purpose_LoadGame = "LoadGame";
+const char *str_purpose_QuitGame = "QuitGame";
+
+const char *str_purpose_settings_NextPlayerW = "NextPlayerW";
+const char *str_purpose_settings_NextPlayerB = "NextPlayerB";
+const char *str_purpose_settings_PVP = "PVP";
+const char *str_purpose_settings_PVC = "PVC";
+const char *str_purpose_settings_continueOrPlay = "continueOrPlay";
+
+
+
 board_t board;
 ControlComponent *guiBoard[BOARD_SIZE]; // This array is a "row" of colums
 
@@ -33,13 +45,13 @@ int CreateMainWindow(Window *window, board_t passedBoard)
 
 	
 	ControlComponent *ccp_MainWindow = createPanel(Rect1024x768, whiteColorRGB);
-	ControlComponent *ccb_NewGame = createButton(mainWindowButton, uploadPicture("NewGameButton.bmp"), createPlayerSelectionWindow);
+	ControlComponent *ccb_NewGame = createButton(mainWindowButton, uploadPicture("NewGameButton.bmp"), createPlayerSelectionWindow, 'n');
 
 	mainWindowButton.y += 95;
-	ControlComponent *ccb_LoadGame = createButton(mainWindowButton, uploadPicture("LoadGameButton.bmp"), LoadGame);
+	ControlComponent *ccb_LoadGame = createButton(mainWindowButton, uploadPicture("LoadGameButton.bmp"), LoadGame, 'l');
 
 	mainWindowButton.y += 95;
-	ControlComponent *ccb_Quit = createButton(mainWindowButton, uploadPicture("QuitGameButton.bmp"), quitGame);
+	ControlComponent *ccb_Quit = createButton(mainWindowButton, uploadPicture("QuitGameButton.bmp"), quitGame, 'q');
 
 	freeBoardAndTree(window);
 	addPanelToWindow(window, ccp_MainWindow);
@@ -122,13 +134,13 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 	ControlComponent *ccp_BoardSetting = createPanel(boardSettingPanel, createRGB(127, 0, 255));
 
 	/* 2. Buttons*/
-	ControlComponent *ccb_PvC = createButton(versusButtonPvC, uploadPicture("PVC.bmp"),  setGameModePVC);
-	ControlComponent *ccb_PVP = createButton(versusButtonPvP, uploadPicture("PVP.bmp"),  setGameModePVP);
+	ControlComponent *ccb_PvC = createButton(versusButtonPvC, uploadPicture("PVC.bmp"),  setGameModePVC, 'c');
+	ControlComponent *ccb_PVP = createButton(versusButtonPvP, uploadPicture("PVP.bmp"),  setGameModePVP, 'p');
 
-	ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"),  setNextPlayerWhite);
-	ControlComponent *ccb_NextPlayerBlack = createButton(nextPlayerBlackButton, uploadPicture("NextPlayerBlack.bmp"),  setNextPlayerBlack);
+	ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"),  setNextPlayerWhite,'w');
+	ControlComponent *ccb_NextPlayerBlack = createButton(nextPlayerBlackButton, uploadPicture("NextPlayerBlack.bmp"),  setNextPlayerBlack, 'b');
 
-	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("PVP.bmp"),  startGameOrCreateAI_Settings);
+	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("PVP.bmp"),  startGameOrCreateAI_Settings, 'g');
 
 	/* Board */
 	
@@ -151,6 +163,8 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 	addButtonToPanel(ccp_ContinueOrPlay, ccb_ContinueOrPlay, window);
 
 	createGuiBoard(window, ccp_BoardSetting, PLAYER_SELECTION_MENU);
+	init_board(board);
+
 
 	if (SDL_Flip(window->self) != 0)
 	{
@@ -289,14 +303,22 @@ int playerSelectionMenu_toggleTool(Window *window, struct controlComponent *ccb)
 			break;
 		}	
 	}
-	type = eToolToggleArray[i];
+	type = eToolToggleArray[mod(i + 1, 13)];
 
 	setSlotInBoard(board, crd, tool);
 	int player = NO_PLAYER;
 	if (tool != EMPTY)
 		player = (islower(tool) ? WHITE_PLAYER : BLACK_PLAYER);
 
+	SDL_FreeSurface(ccb->btn->pic);
 	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type));
+	if (SDL_BlitSurface(ccb->btn->pic, NULL, window->self , &(ccb->rect)) != 0)
+	{
+		SDL_FreeSurface(ccb->btn->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
 
 	return 1;
 }
@@ -445,7 +467,7 @@ int buttonPressHandler(Window *window, ControlComponent *ccp, SDL_Event e)
 				if (tmpChild->btn != NULL)
 				{
 					pressNeeded = buttonPress(window, tmpChild, e);
-					if (pressNeeded == 0)
+					if (pressNeeded == 1)
 					{
 						return 1;
 					}
@@ -473,6 +495,7 @@ int buttonPress(Window *window, ControlComponent *ccb, SDL_Event e)
 	if (isPressInsideButton(e, ccb))
 	{
 		ccb->btn->f(window, ccb);
+		return 1;
 	}
 	return 0;
 }

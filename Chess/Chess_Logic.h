@@ -9,7 +9,6 @@
 #include <ctype.h>
 
 
-
 //damka
 #define WHITE_M 0
 //damka
