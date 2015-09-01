@@ -1055,7 +1055,7 @@ int NotTooManyOfType(board_t board, char type)
 	{
 	case WHITE_P:
 	case BLACK_P:
-		if (numberOfTools < 8)
+		if (numberOfTools <= 8)
 			result = 1;
 		break;
 	case WHITE_B:
@@ -1064,14 +1064,14 @@ int NotTooManyOfType(board_t board, char type)
 	case BLACK_N:
 	case WHITE_R:
 	case BLACK_R:
-		if (numberOfTools < 2)
+		if (numberOfTools <= 2)
 			result = 1;
 		break;
 	case WHITE_Q:
 	case BLACK_Q:
 	case WHITE_K:
 	case BLACK_K:
-		if (numberOfTools < 1)
+		if (numberOfTools <= 1)
 			result = 1;
 		break;
 
