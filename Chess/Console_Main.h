@@ -29,9 +29,9 @@
 #define print_message(message) (printf("%s", message));
 
 
-#define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;)
+#define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;) // TODO: check this
 #define BEST "best"
-#define BESTval 5
+#define BESTval 0
 
 
 
@@ -52,7 +52,7 @@ typedef struct Move {
 	int nonEmptyNum;
 } chessMoveArr;*/
 
-int Console_Main();
+int Console_Main(board_t board);
 //void print_board(char **);
 //void init_board(char **);
 int mod(int, int);

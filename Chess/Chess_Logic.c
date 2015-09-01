@@ -1,18 +1,19 @@
 
 #include "Chess_Logic.h"
 
-int properties[6] = { 1, 0, 1, 0, 0, 0 };
+int properties[6] = { 1, 0, 1, WHITE_PLAYER, WHITE_PLAYER, 0 };
 /*	'settings'		0
 'quit'				1
 'minimax_depth'		2
 'player color'		3
 'current player'	4
-'game mode'			5
+'game mode'			
+
 
 the initial state of the global properties array:
 properties[0] = 1;	//Setting state
 properties[1] = 0;	//Don't quit
-properties[2] = 1;	//Default minimax depth. 5 stands for best
+properties[2] = 1;	//Default minimax depth. 0 stands for best
 properties[3] = WHITE_PLAYER;	//Default player color white
 properties[4] = WHITE_PLAYER //It is now white's\black's turn: WHITE_PLAYER for white, BLACK_PLAYER for black
 properties[5] = 1;	//Default game mode is "two players mode"
@@ -796,6 +797,7 @@ cMove* BishopMoves(board_t board, Coord coord){
 		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
 		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 
@@ -806,6 +808,7 @@ cMove* BishopMoves(board_t board, Coord coord){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 
@@ -818,6 +821,7 @@ cMove* BishopMoves(board_t board, Coord coord){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 
@@ -828,6 +832,7 @@ cMove* BishopMoves(board_t board, Coord coord){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 	return head;
@@ -848,6 +853,7 @@ cMove* RookMoves(board_t board, Coord coord){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 
@@ -858,6 +864,7 @@ cMove* RookMoves(board_t board, Coord coord){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 
@@ -870,6 +877,7 @@ cMove* RookMoves(board_t board, Coord coord){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 
@@ -880,6 +888,7 @@ cMove* RookMoves(board_t board, Coord coord){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			k++;
 		}
 	}
 	return head;

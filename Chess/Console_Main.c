@@ -3,7 +3,7 @@
 
 #include "Console_Main.h"
 
-extern int *properties;
+extern int properties[6];
 
 cMove *pMove;
 
@@ -81,7 +81,7 @@ int LoadFromFile(char* file_path, board_t board){
 
 	if (*(str + 1) == 'd'){ //difficulty (optional tag)
 		if (*(str + 12) == 'b')
-			properties[2] = 5;
+			properties[2] = BESTval;
 		else
 			properties[2] = *(str + 12) - '0';
 		//read next line
@@ -137,7 +137,7 @@ int Save(board_t board, char* file_name){
 
 
 	if (properties[5] == 2){
-		if (properties[2] != 5)
+		if (properties[2] != BESTval)
 			fprintf(f, "\t<difficulty>%d</difficulty>\n", properties[2]);
 		else
 			fprintf(f, "\t<difficulty>best/difficulty>\n");
@@ -685,9 +685,8 @@ int Parse(char *line, board_t board)
 
 	if (properties[0])
 		/*Setting State*/
-	{
+	{		
 		char *token = strtok(line, " \n");
-
 		if (strcmp(token, cmmd1) == 0)
 			//game mode
 		{
@@ -729,7 +728,7 @@ int Parse(char *line, board_t board)
 			token = strtok(NULL, " ");
 			if (strcmp(token, BEST))
 			{
-				properties[2] = BESTval;//5 stands for best
+				properties[2] = BESTval;//0 stands for best
 				return 0;
 			}
 			long depth = strtol(token, &token, BOARD_SIZE);
@@ -823,7 +822,7 @@ int Parse(char *line, board_t board)
 
 		else if (strcmp(token, cmmd8) == 0)
 			//set
-		{
+		{//TODO: make sure that there is at exactly one king of each type
 			char *horiz, *vert, *color, *type, tool;
 
 			token = strtok(NULL, "<,");
