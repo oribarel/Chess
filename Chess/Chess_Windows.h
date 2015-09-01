@@ -13,9 +13,15 @@ typedef ControlComponent ** board_g;
 #define AI_SETTINGS_MENU		2
 #define GAME_MENU				3
 
+#define PVC_MODE 1
+#define PVP_MODE 0
 
 int CreateMainWindow(Window *window, board_t passedBoard);
 int createPlayerSelectionWindow(Window *window, ControlComponent *);
+int createAI_SettingsWindow(Window *window, ControlComponent *);
+int CreateGameWindow(Window *window, ControlComponent *);
+
+
 int LoadGame(Window *window, ControlComponent *);
 int quitGame(Window *window, ControlComponent *);
 
@@ -24,7 +30,10 @@ int setGameModePVP(Window *window, ControlComponent *);
 
 int setNextPlayerWhite(Window *window, ControlComponent *);
 int setNextPlayerBlack(Window *window, ControlComponent *);
-int startGameOrCreateAI_Settings(Window *window, ControlComponent *);
-int playerSelectionMenu_toggleTool(Window *window, struct controlComponent *);
 
+int playerSelectionMenu_toggleTool(Window *window, struct controlComponent *);
+int playerSelectionMenu_toggleGameMode(Window *window, struct controlComponent *);
+int playerSelectionMenu_toggleNextPlayer(Window *window, struct controlComponent *ccb);
+
+int playerSelectionMenu_updateContinueOrPlayButton(Window *window);
 #endif

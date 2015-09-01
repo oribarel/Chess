@@ -3,7 +3,7 @@
 static int intQuit = 0;
 static int newgamepress = 0;
 
-const char *str_purpose_NewGame = "NewGame";
+/*const char *str_purpose_NewGame = "NewGame";
 const char *str_purpose_LoadGame = "LoadGame";
 const char *str_purpose_QuitGame = "QuitGame";
 
@@ -11,9 +11,14 @@ const char *str_purpose_settings_NextPlayerW = "NextPlayerW";
 const char *str_purpose_settings_NextPlayerB = "NextPlayerB";
 const char *str_purpose_settings_PVP = "PVP";
 const char *str_purpose_settings_PVC = "PVC";
-const char *str_purpose_settings_continueOrPlay = "continueOrPlay";
+const char *str_purpose_settings_continueOrPlay = "continueOrPlay";*/
+
+int gameMode = PVC_MODE;
+int nextPlayer = WHITE_PLAYER;
 
 
+ControlComponent *ccp_PlayerSelectionWindow = NULL;
+ControlComponent *ccp_MainWindow = NULL;
 
 board_t board;
 ControlComponent *guiBoard[BOARD_SIZE]; // This array is a "row" of colums
@@ -44,7 +49,7 @@ int CreateMainWindow(Window *window, board_t passedBoard)
 	RGB whiteColorRGB = createRGB(0, 51, 102);
 
 	
-	ControlComponent *ccp_MainWindow = createPanel(Rect1024x768, whiteColorRGB);
+	ccp_MainWindow = createPanel(Rect1024x768, whiteColorRGB);
 	ControlComponent *ccb_NewGame = createButton(mainWindowButton, uploadPicture("NewGameButton.bmp"), createPlayerSelectionWindow, 'n');
 
 	mainWindowButton.y += 95;
@@ -99,7 +104,7 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 	int hBoardSetting = 750;
 	int wGameModeSetting = SCREEN_W - wBoardSetting - 2 * wSide;
 	int hGameModeSetting = (SCREEN_H - 2 * hSide) / 3;
-	ControlComponent *ccb_board;
+	
 
 	/* Screen Rect */
 	SDL_Rect Rect1024x768 = create1024x768Rect(); 
@@ -112,10 +117,10 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 	
 	/* Button Rects */
 	SDL_Rect versusButtonPvC = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
-	SDL_Rect versusButtonPvP = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, 2*hSide + (hGameModeSetting - 4 * hSide)/2);
+	//SDL_Rect versusButtonPvP = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, 2*hSide + (hGameModeSetting - 4 * hSide)/2);
 
 	SDL_Rect nextPlayerWhiteButton = createSDL_Rect(80, 80, 10 , 45);
-	SDL_Rect nextPlayerBlackButton = createSDL_Rect(80, 80, 10 + 80 + 20, 45);
+	//SDL_Rect nextPlayerBlackButton = createSDL_Rect(80, 80, 10 + 80 + 20, 45);
 
 	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * hSide, hGameModeSetting - 4 * hSide, wSide , 2 * hSide );
 
@@ -126,7 +131,7 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 
 	/* Controls */
 	/* 1. Panels*/
-	ControlComponent *ccp_PlayerSelectionWindow = createPanel(Rect1024x768, rgbMenuBlue);
+	ccp_PlayerSelectionWindow = createPanel(Rect1024x768, rgbMenuBlue);
 
 	ControlComponent *ccp_GameMode = createPanel(gameModePanel, createRGB(153, 0, 0));
 	ControlComponent *ccp_NextPlayer = createPanel(nextPlayerPanel, createRGB(255, 128, 0));
@@ -134,13 +139,13 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 	ControlComponent *ccp_BoardSetting = createPanel(boardSettingPanel, createRGB(127, 0, 255));
 
 	/* 2. Buttons*/
-	ControlComponent *ccb_PvC = createButton(versusButtonPvC, uploadPicture("PVC.bmp"),  setGameModePVC, 'c');
-	ControlComponent *ccb_PVP = createButton(versusButtonPvP, uploadPicture("PVP.bmp"),  setGameModePVP, 'p');
+	ControlComponent *ccb_PvC = createButton(versusButtonPvC, uploadPicture("PVC.bmp"),  playerSelectionMenu_toggleGameMode, 'c');
+	//ControlComponent *ccb_PVP = createButton(versusButtonPvP, uploadPicture("PVP.bmp"),  setGameModePVP, 'p');
 
-	ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"),  setNextPlayerWhite,'w');
-	ControlComponent *ccb_NextPlayerBlack = createButton(nextPlayerBlackButton, uploadPicture("NextPlayerBlack.bmp"),  setNextPlayerBlack, 'b');
+	ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"), playerSelectionMenu_toggleNextPlayer, 'w');
+	//ControlComponent *ccb_NextPlayerBlack = createButton(nextPlayerBlackButton, uploadPicture("NextPlayerBlack.bmp"),  setNextPlayerBlack, 'b');
 
-	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("PVP.bmp"),  startGameOrCreateAI_Settings, 'g');
+	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("AI_Settings.bmp"),  createAI_SettingsWindow, 'g');
 
 	/* Board */
 	
@@ -155,10 +160,10 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_BoardSetting, window);
 
 	addButtonToPanel(ccp_GameMode, ccb_PvC, window);
-	addButtonToPanel(ccp_GameMode, ccb_PVP, window);
+	//addButtonToPanel(ccp_GameMode, ccb_PVP, window);
 
 	addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerWhite, window);
-	addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerBlack, window);
+	//addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerBlack, window);
 
 	addButtonToPanel(ccp_ContinueOrPlay, ccb_ContinueOrPlay, window);
 
@@ -244,6 +249,7 @@ int createGuiBoard(Window *window, ControlComponent *ccp, int windowType)
 	return 1;
 }
 
+
 /* Pre: coord is in board */
 eTool getInitialTypeOfCoord(Coord crd)
 {
@@ -323,6 +329,94 @@ int playerSelectionMenu_toggleTool(Window *window, struct controlComponent *ccb)
 	return 1;
 }
 
+int playerSelectionMenu_toggleGameMode(Window *window, struct controlComponent *ccb)
+{
+	if (gameMode == PVP_MODE)
+	{
+		/* Change to PVC mode: */
+		gameMode = PVC_MODE;
+		SDL_FreeSurface(ccb->btn->pic);
+		ccb->btn->pic = uploadPicture("PVC.bmp");
+	}
+	else
+	{
+		/* Change to PVP mode: */
+		gameMode = PVP_MODE;
+		SDL_FreeSurface(ccb->btn->pic);
+		ccb->btn->pic = uploadPicture("PVP.bmp");
+	}
+	if (SDL_BlitSurface(ccb->btn->pic, NULL, window->self, &(ccb->rect)) != 0)
+	{
+		SDL_FreeSurface(ccb->btn->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+	if (playerSelectionMenu_updateContinueOrPlayButton(window) == 0)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+/* updates this button's function and picture (not global gameMode) */
+int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
+{
+	if (ccp_PlayerSelectionWindow == NULL)
+	{
+		return 0;
+	}
+	
+	ControlComponent *ccb_continueOrPlay;
+	ccb_continueOrPlay = ccp_PlayerSelectionWindow->pnl->children->next->next->pnl->children; /* Should point to continueOrPlay Button*/
+	if (gameMode == PVP_MODE)
+	{
+		ccb_continueOrPlay->btn->f = CreateGameWindow;
+		SDL_FreeSurface(ccb_continueOrPlay->btn->pic);
+		ccb_continueOrPlay->btn->pic = uploadPicture("StartGame.bmp");
+	}
+	else
+	{
+		ccb_continueOrPlay->btn->f = createAI_SettingsWindow;
+		SDL_FreeSurface(ccb_continueOrPlay->btn->pic);
+		ccb_continueOrPlay->btn->pic = uploadPicture("AI_Settings.bmp");
+	}
+	if (SDL_BlitSurface(ccb_continueOrPlay->btn->pic, NULL, window->self, &(ccb_continueOrPlay->rect)) != 0)
+	{
+		SDL_FreeSurface(ccb_continueOrPlay->btn->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+
+}
+
+int playerSelectionMenu_toggleNextPlayer(Window *window, struct controlComponent *ccb)
+{
+	if (nextPlayer == WHITE_PLAYER)
+	{
+		/* Change to Black Player: */
+		nextPlayer = BLACK_PLAYER;
+		SDL_FreeSurface(ccb->btn->pic);
+		ccb->btn->pic = uploadPicture("NextPlayerBlack.bmp");
+	}
+	else
+	{
+		/* Change to White Player: */
+		nextPlayer = WHITE_PLAYER;
+		SDL_FreeSurface(ccb->btn->pic);
+		ccb->btn->pic = uploadPicture("NextPlayerWhite.bmp");
+	}
+	if (SDL_BlitSurface(ccb->btn->pic, NULL, window->self, &(ccb->rect)) != 0)
+	{
+		SDL_FreeSurface(ccb->btn->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+	return 1;
+}
+
 int setGameModePVP(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
@@ -343,7 +437,7 @@ int setNextPlayerBlack(Window *window, ControlComponent *buttonWhichPressCalledT
 	return 0;
 }
 
-int startGameOrCreateAI_Settings(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
+int createAI_SettingsWindow(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
@@ -415,7 +509,7 @@ int colorByPixel(char** board, Pixel px)
 	return 0;
 }
 
-int CreateGameWindow(Window *window)
+int CreateGameWindow(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
