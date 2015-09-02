@@ -141,7 +141,6 @@ int CreateMainWindow(Window *window, board_t passedBoard)
 
 int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
-
 	//TODO: return to main menu button.
 
 	int wSide = 12;
@@ -168,41 +167,56 @@ int createPlayerSelectionWindow(Window *window, ControlComponent *buttonWhichPre
 
 	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * hSide, hGameModeSetting - 4 * hSide, wSide, 2 * hSide);
 
+	if (!windowsCreated[1])
+	{
+		/* Controls */
+		/* 1. Panels*/
+		ccp_PlayerSelectionWindow = createPanel(Rect1024x768, rgbMenuBlue);
 
-	/* Controls */
-	/* 1. Panels*/
-	ccp_PlayerSelectionWindow = createPanel(Rect1024x768, rgbMenuBlue);
+		ControlComponent *ccp_GameMode = createPanel(gameModePanel, rgbRed);
+		ControlComponent *ccp_NextPlayer = createPanel(nextPlayerPanel, rgbOrange);
+		ControlComponent *ccp_ContinueOrPlay = createPanel(continueOrPlayPanel, rgbGreen);
+		ControlComponent *ccp_BoardSetting = createPanel(boardSettingPanel, rgbPurple);
 
-	ControlComponent *ccp_GameMode = createPanel(gameModePanel, rgbRed);
-	ControlComponent *ccp_NextPlayer = createPanel(nextPlayerPanel, rgbOrange);
-	ControlComponent *ccp_ContinueOrPlay = createPanel(continueOrPlayPanel, rgbGreen);
-	ControlComponent *ccp_BoardSetting = createPanel(boardSettingPanel, rgbPurple);
+		/* 2. Buttons*/
+		ControlComponent *ccb_PvC = createButton(versusButtonPvC, uploadPicture("PVC.bmp"), playerSelectionMenu_toggleGameMode, 'c');
+		ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"), playerSelectionMenu_toggleNextPlayer, 'w');
+		ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("AI_Settings.bmp"), createAI_SettingsWindow, 'g');
 
-	/* 2. Buttons*/
-	ControlComponent *ccb_PvC = createButton(versusButtonPvC, uploadPicture("PVC.bmp"), playerSelectionMenu_toggleGameMode, 'c');
-	ControlComponent *ccb_NextPlayerWhite = createButton(nextPlayerWhiteButton, uploadPicture("NextPlayerWhite.bmp"), playerSelectionMenu_toggleNextPlayer, 'w');
-	ControlComponent *ccb_ContinueOrPlay = createButton(ContinueOrPlayButton, uploadPicture("AI_Settings.bmp"), createAI_SettingsWindow, 'g');
+		/* Board */
+		freeBoardAndTree(window); //TODO: NOTICE! this is not implemented <-----
 
-	/* Board */
-	freeBoardAndTree(window); //TODO: NOTICE! this is not implemented <-----
+		addPanelToWindow(window, ccp_PlayerSelectionWindow);
+		
 
-	addPanelToWindow(window, ccp_PlayerSelectionWindow);
-	windowsCreated[1] = 1;
+		addPanelToPanel(ccp_PlayerSelectionWindow, ccp_GameMode, window);
+		addPanelToPanel(ccp_PlayerSelectionWindow, ccp_NextPlayer, window);
+		addPanelToPanel(ccp_PlayerSelectionWindow, ccp_ContinueOrPlay, window);
+		addPanelToPanel(ccp_PlayerSelectionWindow, ccp_BoardSetting, window);
 
-	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_GameMode, window);
-	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_NextPlayer, window);
-	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_ContinueOrPlay, window);
-	addPanelToPanel(ccp_PlayerSelectionWindow, ccp_BoardSetting, window);
+		addButtonToPanel(ccp_GameMode, ccb_PvC, window);
 
-	addButtonToPanel(ccp_GameMode, ccb_PvC, window);
+		addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerWhite, window);
 
-	addButtonToPanel(ccp_NextPlayer, ccb_NextPlayerWhite, window);
+		addButtonToPanel(ccp_ContinueOrPlay, ccb_ContinueOrPlay, window);
 
-	addButtonToPanel(ccp_ContinueOrPlay, ccb_ContinueOrPlay, window);
+		createGuiBoard(window, ccp_BoardSetting, PLAYER_SELECTION_MENU);
 
-	createGuiBoard(window, ccp_BoardSetting, PLAYER_SELECTION_MENU);
-	init_board(board);
+		init_board(board);
+		windowsCreated[1] = 1;
+	}
+	else
+	{
+		addPanelToWindow(window, ccp_PlayerSelectionWindow);
+		
+		for (int i = 0; i < 4; i++)
+		{
+			blitMenu(ccp_PlayerSelectionWindow, i, window);
+		}
 
+		createGuiBoard(window, ccp_PlayerSelectionWindow->pnl->children->next->next->next, PLAYER_SELECTION_MENU);
+		
+	}
 
 	if (SDL_Flip(window->self) != 0)
 	{
@@ -260,7 +274,7 @@ int createAI_SettingsWindow(Window *window, ControlComponent *buttonWhichPressCa
 	SDL_Rect returnsPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9);
 	SDL_Rect togglesPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 250);
 	SDL_Rect playPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 500);
-	SDL_Rect boardPanel = createSDL_Rect(wBoardPanel, hBoardPanel, wSide + wTogglePanels, hSide);
+	SDL_Rect boardPanel = createSDL_Rect(wBoardPanel, hBoardPanel, wSide + wTogglePanels, hSide); //wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide
 
 	/* Button Rects*/
 	SDL_Rect backToMainMenuButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
@@ -282,7 +296,7 @@ int createAI_SettingsWindow(Window *window, ControlComponent *buttonWhichPressCa
 
 	/* 2. Buttons*/
 	ControlComponent *ccb_returnToMainMenu = createButton(backToMainMenuButton, uploadPicture("ReturnToMainMenu.bmp"), nullFunction, 'M');
-	ControlComponent *ccb_returnToPlayerSelectionMenu = createButton(backToPlayerSelectionButton, uploadPicture("Back.bmp"), nullFunction, 'P');
+	ControlComponent *ccb_returnToPlayerSelectionMenu = createButton(backToPlayerSelectionButton, uploadPicture("Back.bmp"), createPlayerSelectionWindow, 'P');
 
 	ControlComponent *ccb_toggleDifficulty = createButton(difficultyButton, uploadPicture(getDifficultyPicName()), AI_settingsMenu_toggleDifficulty, AI_DIFF_TOGGLE_BUTTON);
 	ControlComponent *ccb_togglePlayerColor = createButton(playerColorButton, uploadPicture(getPlayerColorPicName()), AI_settingsMenu_togglePlayerColor, AI_PLAYER_COLOR_TOGGLE_BUTTON);
@@ -307,6 +321,7 @@ int createAI_SettingsWindow(Window *window, ControlComponent *buttonWhichPressCa
 	addButtonToPanel(ccp_Toggles, ccb_togglePlayerColor, window);
 
 	addButtonToPanel(ccp_Play, ccb_play, window);
+	
 	createGuiBoard(window, ccp_Board, AI_SETTINGS_MENU);
 
 	if (SDL_Flip(window->self) != 0)
@@ -348,6 +363,7 @@ int createAI_SettingsWindow(Window *window, ControlComponent *buttonWhichPressCa
 }
 
 
+
 /*
 	for PLAYER_SELECTION_MENU: toggle pieces function.
 	for AI_SETTINGS_MENU: builds a guiBoard from board
@@ -366,12 +382,22 @@ int createGuiBoard(Window *window, ControlComponent *ccp, int windowType)
 		for (int j = 0; j < BOARD_SIZE; j++)
 		{
 			crd.i_coord = i; crd.j_coord = j;
-			if (windowType == PLAYER_SELECTION_MENU)
+			if (windowType == PLAYER_SELECTION_MENU && !windowsCreated[1])
 			{
 				type = getInitialTypeOfCoord(crd);
 				player = getInitialPlayerOfCoord(crd);
 				toolFunc = playerSelectionMenu_toggleTool;
 				ccb = createSquareByToolType(window, ccp, crd, type, player, toolFunc); // Allocates the square, and also adds is to the ccp
+			}
+			else if (windowType == PLAYER_SELECTION_MENU && windowsCreated[1])
+			{
+				type = GetContentOfCoord(board, crd);
+				player = getColor(board, crd);
+				toolFunc = playerSelectionMenu_toggleTool;
+				// Doesn't allocate the square, only adds it to the ccp, it has a picture, crd and everything so no need to set that.
+				ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
+				ccb->btn->f = toolFunc;
+				ccb->rect = createSDL_RectForBoardSquare(crd);
 			}
 			else if (windowType == AI_SETTINGS_MENU)
 			{
@@ -381,6 +407,7 @@ int createGuiBoard(Window *window, ControlComponent *ccp, int windowType)
 				// Doesn't allocate the square, only adds it to the ccp, it has a picture, crd and everything so no need to set that.
 				ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
 				ccb->btn->f = toolFunc;
+				ccb->rect = createSDL_RectForBoardSquare(crd);
 				addButtonToPanel(ccp, ccb, window);
 
 			}
@@ -394,45 +421,6 @@ int createGuiBoard(Window *window, ControlComponent *ccp, int windowType)
 		}
 	}
 	return 1;
-}
-
-
-/* Pre: coord is in board */
-eTool getInitialTypeOfCoord(Coord crd)
-{
-	if (crd.j_coord > 1 && crd.j_coord < 6)
-		return Empty;
-	else if (crd.j_coord == 1 || crd.j_coord == 6)
-		return Pawn;
-	else
-	{
-		if (crd.i_coord == 0 || crd.i_coord == 7)
-			return Rook;
-		else if (crd.i_coord == 1 || crd.i_coord == 6)
-			return Knight;
-		else if (crd.i_coord == 2 || crd.i_coord == 5)
-			return Bishop;
-		else if (crd.i_coord == 3)
-			return Queen;
-		else
-			return King;
-	}
-}
-
-/* Pre: crd is in the board */
-int getInitialPlayerOfCoord(Coord crd)
-{
-	if (crd.j_coord == 0 || crd.j_coord == 1)
-		return WHITE_PLAYER;
-	else if (crd.j_coord == 6 || crd.j_coord == 7)
-		return BLACK_PLAYER;
-	else
-		return NO_PLAYER;
-}
-
-int(*getGameModeFuncion(Coord crd))(Window *, struct controlComponent *)
-{
-	return nullFunction;
 }
 
 
@@ -488,8 +476,6 @@ int playerSelectionMenu_toggleTool(Window *window, struct controlComponent *ccb)
 
 	return 1;
 }
-
-
 
 int playerSelectionMenu_toggleGameMode(Window *window, struct controlComponent *ccb)
 {
@@ -563,39 +549,6 @@ int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
 	return 1;
 }
 
-int AI_Settings_updatePlayButton(Window *window)
-{
-	if (ccp_AI_SettingsWindow == NULL)
-	{
-		return 0;
-	}
-
-	ControlComponent *ccb_Play;
-	ccb_Play = ccp_AI_SettingsWindow->pnl->children->next->next->pnl->children; /* Should point to Play Button*/
-
-	if (!isValidBoardInitialization(board))
-	{
-		ccb_Play->btn->f = nullFunction;
-		SDL_FreeSurface(ccb_Play->btn->pic);
-		ccb_Play->btn->pic = uploadPicture("StartGameInactive.bmp");
-	}
-	else
-	{
-		ccb_Play->btn->f = CreateGameWindow;
-		SDL_FreeSurface(ccb_Play->btn->pic);
-		ccb_Play->btn->pic = uploadPicture("StartGame.bmp"); //TODO: maybe unnecessary allocation too many times. also in twin function.
-	}
-
-	if (SDL_BlitSurface(ccb_Play->btn->pic, NULL, window->self, &(ccb_Play->rect)) != 0)
-	{
-		SDL_FreeSurface(ccb_Play->btn->pic);
-		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
-		return 0;
-	}
-	return 1;
-}
-
 int playerSelectionMenu_toggleNextPlayer(Window *window, struct controlComponent *ccb)
 {
 	if (nextPlayer == WHITE_PLAYER)
@@ -621,6 +574,9 @@ int playerSelectionMenu_toggleNextPlayer(Window *window, struct controlComponent
 	}
 	return 1;
 }
+
+
+
 
 
 int AI_settingsMenu_toggleDifficulty(Window *window, struct controlComponent *ccb)
@@ -712,6 +668,76 @@ int AI_SettingsMenu_toggleTool(Window *window, struct controlComponent *ccb)
 	return 1;
 }
 
+int AI_Settings_updatePlayButton(Window *window)
+{
+	if (ccp_AI_SettingsWindow == NULL)
+	{
+		return 0;
+	}
+
+	ControlComponent *ccb_Play;
+	ccb_Play = ccp_AI_SettingsWindow->pnl->children->next->next->pnl->children; /* Should point to Play Button*/
+
+	if (!isValidBoardInitialization(board))
+	{
+		ccb_Play->btn->f = nullFunction;
+		SDL_FreeSurface(ccb_Play->btn->pic);
+		ccb_Play->btn->pic = uploadPicture("StartGameInactive.bmp");
+	}
+	else
+	{
+		ccb_Play->btn->f = CreateGameWindow;
+		SDL_FreeSurface(ccb_Play->btn->pic);
+		ccb_Play->btn->pic = uploadPicture("StartGame.bmp"); //TODO: maybe unnecessary allocation too many times. also in twin function.
+	}
+
+	if (SDL_BlitSurface(ccb_Play->btn->pic, NULL, window->self, &(ccb_Play->rect)) != 0)
+	{
+		SDL_FreeSurface(ccb_Play->btn->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+	return 1;
+}
+
+
+
+/* If Menu has n sub-panels then this function should be ran on it with i_next from 0 to n-1. */
+void blitMenu(ControlComponent *ccpParent, int i_next, Window *window)
+{
+	ControlComponent *curr = ccpParent->pnl->children;
+
+	while (i_next-- > 0)
+		curr = curr->next;
+	
+	Uint32 color = getColorOfPanel(window, curr);
+	if (SDL_FillRect(window->self, &(curr->rect), color) != 0)
+	{
+		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
+		quit();
+		
+	}
+
+	ControlComponent *ccbCurr = curr->pnl->children;
+	while (ccbCurr != NULL)
+	{
+		if (ccbCurr->btn != NULL)
+		{
+			if (SDL_BlitSurface(ccbCurr->btn->pic, NULL, window->self, &(ccbCurr->rect)) != 0)
+			{
+				SDL_FreeSurface(ccbCurr->btn->pic);
+				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+				quit();
+				
+			}
+		}
+		ccbCurr = ccbCurr->next;
+	}
+}
+
+
+
 
 int buttonPressHandler(Window *window, ControlComponent *ccp, SDL_Event e)
 {
@@ -774,6 +800,52 @@ int isPressInsideButton(SDL_Event e, ControlComponent *ccb)
 		return 0;
 }
 
+
+
+
+
+
+
+/* Pre: coord is in board */
+eTool getInitialTypeOfCoord(Coord crd)
+{
+	if (crd.j_coord > 1 && crd.j_coord < 6)
+		return Empty;
+	else if (crd.j_coord == 1 || crd.j_coord == 6)
+		return Pawn;
+	else
+	{
+		if (crd.i_coord == 0 || crd.i_coord == 7)
+			return Rook;
+		else if (crd.i_coord == 1 || crd.i_coord == 6)
+			return Knight;
+		else if (crd.i_coord == 2 || crd.i_coord == 5)
+			return Bishop;
+		else if (crd.i_coord == 3)
+			return Queen;
+		else
+			return King;
+	}
+}
+
+/* Pre: crd is in the board */
+int getInitialPlayerOfCoord(Coord crd)
+{
+	if (crd.j_coord == 0 || crd.j_coord == 1)
+		return WHITE_PLAYER;
+	else if (crd.j_coord == 6 || crd.j_coord == 7)
+		return BLACK_PLAYER;
+	else
+		return NO_PLAYER;
+}
+
+int(*getGameModeFuncion(Coord crd))(Window *, struct controlComponent *)
+{
+	return nullFunction;
+}
+
+
+
 /* AI_Difficulty is between 0 and 4 inclusive */
 const char *getDifficultyPicName(void)
 {
@@ -796,6 +868,12 @@ const char *getPlayerColorPicName()
 	else
 		return "PlayerIsBlack.bmp";
 }
+
+
+
+
+
+
 
 /* Returns 1 iff it is legal to start a game with the board setting */
 /* TODO: move this function to Chess_Logic.c */

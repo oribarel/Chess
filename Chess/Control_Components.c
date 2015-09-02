@@ -184,13 +184,13 @@ int addPanelToWindow(Window *window, ControlComponent *ccp)
 }
 
 /*TODO: EDIT*/
-int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb, Window *s)
+int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb, Window *window)
 {
 	addControlToPanelList(ccp, ccb);
 
 	ccb->rect.x += ccp->rect.x;
 	ccb->rect.y += ccp->rect.y;
-	if (SDL_BlitSurface(ccb->btn->pic, NULL, s->self, &(ccb->rect)) != 0)
+	if (SDL_BlitSurface(ccb->btn->pic, NULL, window->self, &(ccb->rect)) != 0)
 	{
 		SDL_FreeSurface(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());

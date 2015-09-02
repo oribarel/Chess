@@ -54,5 +54,6 @@ int AI_settingsMenu_togglePlayerColor(Window *window, struct controlComponent *)
 int AI_SettingsMenu_toggleTool(Window *window, struct controlComponent *ccb);
 int AI_Settings_updatePlayButton(Window *window);
 
+
 const char *getDifficultyPicName(void);
 #endif
