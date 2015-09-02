@@ -95,22 +95,8 @@ int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, Control
 	return 1;
 }
 
-int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color)
-{
-	ccp->pnl = pnl;
-	ccp->btn = NULL;
-	ccp->lbl = NULL;
-	ccp->next = NULL;
-	ccp->rect = rect;
-	ccp->pnl->children = NULL;
-	ccp->pnl->rgb_triplet = color;
-
-	return 1;
-}
-
 int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns)
 {
-	//TODO: return to main menu button.
 	//TODO: board isn't attached.
 
 	int wSide = 12;
@@ -210,7 +196,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	addButtonToPanel(ccps, ccbs + 1);
 	addButtonToPanel(ccps + 1, ccbs + 2);
 	addButtonToPanel(ccps + 1, ccbs + 3);
-	addButtonToPanel(ccps + 1, ccbs + 4);
+	addButtonToPanel(ccps + 2, ccbs + 4);
 
 	/* Add the Panels To the Menu*/
 	addPanelToMenu(AI_SettingsMenu, ccps, 1);
@@ -237,7 +223,8 @@ int showMenu(Window *window, Menu *menu)
 	
 	window->shownMenu = menu;
 	addMenuToWindow(chessWindow, menu);
-	//Uint32 color = getColorOfMenu(chessWindow, menu);
+	
+	
 
 
 	if (menu->panel_1 != NULL)
@@ -263,13 +250,42 @@ int showMenu(Window *window, Menu *menu)
 	return 1;
 }
 
+/* This also adds each of the squares to the panel! */
+int createGuiBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board)
+{
+	
+	Coord crd;
+	eTool type;
+	int player;
+	btnFunc toolFunc;
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			crd.i_coord = i; crd.j_coord = j;
+			ControlComponent *ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
+			
+			ccb->lbl = NULL;
+			ccb->next = NULL;
+			ccb->pnl = NULL;
+			ccb->rect = createSDL_RectForBoardSquare(crd);
+
+			
+			type = getInitialTypeOfCoord(crd);
+			player = getInitialPlayerOfCoord(crd);
+			toolFunc = playerSelectionMenu_toggleTool;
+			//guiBoard[crd.i_coord][crd.j_coord] = createSquareByToolType(ccp_BoardSetting, crd, type, player, toolFunc); // Allocates the square, and also adds is to the ccp
+			createSquareByToolType(ccp_BoardSetting, &(guiBoard[crd.i_coord][crd.j_coord]), crd, type, player, toolFunc);
+		}
+	}
+}
 
 /*
 	for PLAYER_SELECTION_MENU: toggle pieces function.
 	for AI_SETTINGS_MENU: builds a guiBoard from board
 	for GAME_MENU: game mode function
 	*/
-int createGuiBoard(Window *window, ControlComponent *ccp, int windowType)
+int createGuiBoard1(Window *window, ControlComponent *ccp, int windowType)
 {
 	ControlComponent *ccb;
 	Coord crd;
@@ -323,7 +339,6 @@ int createGuiBoard(Window *window, ControlComponent *ccp, int windowType)
 	}
 	return 1;
 }
-
 
 
 
@@ -774,7 +789,18 @@ int isPressInsideButton(SDL_Event e, ControlComponent *ccb)
 }
 
 
+int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color)
+{
+	ccp->pnl = pnl;
+	ccp->btn = NULL;
+	ccp->lbl = NULL;
+	ccp->next = NULL;
+	ccp->rect = rect;
+	ccp->pnl->children = NULL;
+	ccp->pnl->rgb_triplet = color;
 
+	return 1;
+}
 
 
 

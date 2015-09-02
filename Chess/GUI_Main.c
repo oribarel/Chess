@@ -53,19 +53,24 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccp_Board, *pCCP_Board = &ccp_Board;
 	Panel pnl_Board, *pPnl_Board = &pnl_Board;
 
+	int wSide = 12;
+	int hSide = 9;
+	int wBoardSetting = 800;
+	int hBoardSetting = 750;
+	int wGameModeSetting = SCREEN_W - wBoardSetting - 2 * wSide;
+	
+	SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
+	panelMaker(pCCP_Board, pPnl_Board, boardSettingPanel,rgbPurple);
+	
 	ControlComponent ccb_BoardPanelCCBs[4];
 	Button btnb_BoardPanelButtons[4];
-
-	/* Initialize Gui Board */
-
-	guiBoard[0] = guiBoard_col0;
-	guiBoard[1] = guiBoard_col1;
-	guiBoard[2] = guiBoard_col2;
-	guiBoard[3] = guiBoard_col3;
-	guiBoard[4] = guiBoard_col4;
-	guiBoard[5] = guiBoard_col5;
-	guiBoard[6] = guiBoard_col6;
-	guiBoard[7] = guiBoard_col7;
+	
+	/* Pass the board */
+	pBoard = passedBoard;
+	init_board(pBoard);
+	passTheBoard(passedBoard);
+	
+	
 
 	/* Initialize Colors */
 
@@ -78,16 +83,25 @@ int GUI_Main(board_t passedBoard)
 	rgbPurple = createRGB(127, 0, 255);
 
 	/* Initialize SDL Video */
+	init_GUI();
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		printf("ERROR: unable to init SDL: %s\n", SDL_GetError());
 		return 0;
 	}
 
-	/* Pass the board */
-	pBoard = passedBoard;
-	init_board(pBoard);
-	passTheBoard(passedBoard);
+	/* Initialize Gui Board */
+
+	guiBoard[0] = guiBoard_col0;
+	guiBoard[1] = guiBoard_col1;
+	guiBoard[2] = guiBoard_col2;
+	guiBoard[3] = guiBoard_col3;
+	guiBoard[4] = guiBoard_col4;
+	guiBoard[5] = guiBoard_col5;
+	guiBoard[6] = guiBoard_col6;
+	guiBoard[7] = guiBoard_col7;
+
+	
 
 	/* Create the window */
 	createWindow(chessWindow);
@@ -98,6 +112,10 @@ int GUI_Main(board_t passedBoard)
 	createAI_SettingsMenu(pMenu_AI_settings,ccp_AI_SettingsMenuCCPs,pnl_AI_SettingsMenuPanels,ccb_AI_SettingsCCBs,btn_AI_SettingsButtons);
 	createGameMenu(pMenu_Game,ccp_GamePlayMenuCCPs,pnl_GamePlayMenuPanels,ccb_GamePlayMenuCCBs,btnb_GamePlayMenuButtons);
 	
+	createGuiBoard(guiBoard, pCCP_Board, pBoard);
+	addPanelToMenu(pMenu_PlayerSelection, pCCP_Board,4);
+	addPanelToMenu(pMenu_AI_settings, pCCP_Board,4);
+
 	/* Start */
 	showMenu(chessWindow, pMenu_Main);
 	if (SDL_Flip(chessWindow->self) != 0)

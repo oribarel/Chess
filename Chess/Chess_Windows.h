@@ -74,6 +74,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 int createAI_SettingsMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 
+
 int LoadGame(Window *window, ControlComponent *);
 int quitGame(Window *window, ControlComponent *);
 
@@ -100,6 +101,9 @@ int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCAlled
 int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
 int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
+
+int createGuiBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board);
+int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color);
 
 int QuitGame(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 
