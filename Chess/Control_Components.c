@@ -17,25 +17,20 @@ int init_GUI(void)
 	return 0;
 }
 
-Window *createWindow()
+int createWindow(Window *pWindow)
 {
-	Window *openWindow;
 	SDL_WM_SetCaption("Chess", "Chess");
 	SDL_Surface *surface = SDL_SetVideoMode(SCREEN_W, SCREEN_H, 0, SDL_HWSURFACE | SDL_DOUBLEBUF);
-	if (surface == NULL) 
+	if (surface == NULL)
 	{
 		printf("ERROR: failed to set video mode: %s\n", SDL_GetError());
 		quit();
+		return 0;
 	}
-	openWindow = (Window *)calloc(1, sizeof(Window));
-	if ( openWindow == NULL)
-	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
-	openWindow->self = surface;
-	openWindow->panelChild = NULL;
-	return openWindow;
+
+	pWindow->self = surface;
+	pWindow->shownMenu = NULL;
+	return 1;
 }
 
 SDL_Rect createSDL_Rect(int w, int h, int x, int y)
@@ -56,63 +51,67 @@ RGB createRGB(int r, int g, int b)
 	return rgb;
 }
 
-ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int (*f)(Window *, struct controlComponent *), char purpose) /*char ctrl )*/
+int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Surface *pic, btnFunc f , char purpose)
 {
 	Coord crd = { -1, -1 };
-	ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
-	if (comp == NULL)
-	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
-	Button *btn = (Button *)calloc(1, sizeof(Button));
-	if (btn == NULL)
-	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
 
 	btn->pic = pic;
 	btn->f = f;
 	btn->crd = crd;
 	btn->purpose = purpose;
 
-	comp->next = NULL;
-	comp->lbl = NULL;
-	comp->pnl = NULL;
-	comp->rect = inpRect;
-	comp->btn = btn;
+	ccbParent->next = NULL;
+	ccbParent->lbl = NULL;
+	ccbParent->pnl = NULL;
+	ccbParent->rect = rect;
+	ccbParent->btn = btn;
 
-	return comp;
-}
+	return 1;
 
-ControlComponent *createButton_square(SDL_Rect inpRect, SDL_Surface *pic, int(*f)(Window *, struct controlComponent *), Coord crd) /*char ctrl )*/
-{
-	ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
+	/*ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
 	if (comp == NULL)
 	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
+	printf("ERROR: standard function calloc has failed\n");
+	quit();
 	}
 	Button *btn = (Button *)calloc(1, sizeof(Button));
+
 	if (btn == NULL)
 	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
+	printf("ERROR: standard function calloc has failed\n");
+	quit();
+	}*/
+}
+
+int createButton_square(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Surface *pic, btnFunc f )//int(*f)(Menu *, struct controlComponent *))
+{
+	Coord crd = { -1, -1 };
 
 	btn->pic = pic;
 	btn->f = f;
 	btn->crd = crd;
 	btn->purpose = 'a';
 
-	comp->next = NULL;
-	comp->lbl = NULL;
-	comp->pnl = NULL;
-	comp->rect = inpRect;
-	comp->btn = btn;
+	ccbParent->next = NULL;
+	ccbParent->lbl = NULL;
+	ccbParent->pnl = NULL;
+	ccbParent->rect = rect;
+	ccbParent->btn = btn;
 
-	return comp;
+	return 1;
+
+	/*ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
+	if (comp == NULL)
+	{
+	printf("ERROR: standard function calloc has failed\n");
+	quit();
+	}
+	Button *btn = (Button *)calloc(1, sizeof(Button));
+	if (btn == NULL)
+	{
+	printf("ERROR: standard function calloc has failed\n");
+	quit();
+	}*/
 }
 
 ControlComponent *createLabel(SDL_Rect rect, SDL_Surface *pic)
@@ -131,7 +130,7 @@ ControlComponent *createLabel(SDL_Rect rect, SDL_Surface *pic)
 	}
 
 	lbl->pic = pic;
-	
+
 	comp->next = NULL;
 	comp->lbl = lbl;
 	comp->pnl = NULL;
@@ -155,7 +154,7 @@ ControlComponent *createPanel(SDL_Rect rect, RGB rgb_triplet)
 		printf("ERROR: standard function calloc has failed\n");
 		quit();
 	}
-	
+
 	pnl->rgb_triplet = rgb_triplet;
 	pnl->children = NULL;
 
@@ -168,13 +167,26 @@ ControlComponent *createPanel(SDL_Rect rect, RGB rgb_triplet)
 	return comp;
 }
 
-//returns 0 on failure and 1 on success.
-int addPanelToWindow(Window *window, ControlComponent *ccp)
+int createMenu(Menu *pMenu, SDL_Rect rect, RGB color)
 {
-	window->panelChild = ccp;
-	Uint32 color = getColorOfPanel(window, ccp);
-	
-	int DrawSuccess = SDL_FillRect(window->self, &(ccp->rect), color);
+	pMenu->rect = rect;
+	pMenu->rgb_triplet = color;
+
+	pMenu->panel_1 = NULL;
+	pMenu->panel_2 = NULL;
+	pMenu->panel_3 = NULL;
+	pMenu->panel_4 = NULL;
+
+	return 1;
+}
+
+//returns 0 on failure and 1 on success.
+int addMenuToWindow(Window *window, Menu *pMenu)
+{
+	window->shownMenu = pMenu;
+	Uint32 color = getColorOfMenu(window, pMenu);
+
+	int DrawSuccess = SDL_FillRect(window->self, &(pMenu->rect), color);
 	if (DrawSuccess == -1)
 	{
 		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
@@ -183,14 +195,22 @@ int addPanelToWindow(Window *window, ControlComponent *ccp)
 	return 1;
 }
 
-/*TODO: EDIT*/
-int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb, Window *window)
+/*Doesn't Draw, only adds */
+int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb)
 {
 	addControlToPanelList(ccp, ccb);
 
 	ccb->rect.x += ccp->rect.x;
 	ccb->rect.y += ccp->rect.y;
-	if (SDL_BlitSurface(ccb->btn->pic, NULL, window->self, &(ccb->rect)) != 0)
+	
+	return 1;
+}
+
+/* Pre: has a pic */
+int drawButtonToPanel(ControlComponent *ccb)
+{
+	
+	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
 		SDL_FreeSurface(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
@@ -199,7 +219,6 @@ int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb, Window *windo
 	}
 	return 1;
 }
-
 int addControlToPanelList(ControlComponent *panelComponent, ControlComponent *toAdd)
 {
 	ControlComponent *last = getLastInPanelList(panelComponent);
@@ -211,14 +230,14 @@ int addControlToPanelList(ControlComponent *panelComponent, ControlComponent *to
 }
 
 //returns 0 on failure and 1 on success.
-int addPanelToPanel(ControlComponent *ccpParent, ControlComponent *ccpChild, Window *window){
-
+int addPanelToPanel(ControlComponent *ccpParent, ControlComponent *ccpChild, Window *window)
+{
 	addControlToPanelList(ccpParent, ccpChild);
 	Uint32 color = getColorOfPanel(window, ccpChild);
 
 	ccpChild->rect.x += ccpParent->rect.x;
 	ccpChild->rect.y += ccpParent->rect.y;
-	
+
 	if (SDL_FillRect(window->self, &(ccpChild->rect), color) != 0)
 	{
 		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
@@ -228,14 +247,69 @@ int addPanelToPanel(ControlComponent *ccpParent, ControlComponent *ccpChild, Win
 	return 1;
 }
 
+//Doesn't Draw!. returns 0 on failure and 1 on success.
+int addPanelToMenu(Menu *menuParent, ControlComponent *ccp, int panelNum)
+{
+	switch (panelNum)
+	{
+	case 1:
+		menuParent->panel_1 = ccp;
+		break;
+	case 2:
+		menuParent->panel_2 = ccp;
+		break;
+	case 3:
+		menuParent->panel_3 = ccp;
+		break;
+	case 4:
+		menuParent->panel_4 = ccp;
+		break;
+	default:
+		break;
+	}
+
+	ccp->rect.x += menuParent->rect.x;
+	ccp->rect.y += menuParent->rect.y;
+	
+	return 1;
+}
+
+/* Only fills the rect of ccp with its color*/
+int drawPanelToMenu(ControlComponent *ccp)
+{
+	Uint32 color = getColorOfPanel(chessWindow, ccp);
+	if (SDL_FillRect(chessWindow->self, &(ccp->rect), color) != 0)
+	{
+		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+	return 1;
+}
+
+int drawButtonsOfPanel(ControlComponent *ccp)
+{
+	ControlComponent *ccb = ccp->pnl->children;
+	while (ccb != NULL)
+	{
+		if (ccb->btn != NULL)
+		{
+			if (drawButtonToPanel(ccb) == 0)
+				return 0;
+		}
+		ccb = ccb->next;
+	}
+	return 1;
+}
+
 //returns 0 on failure and 1 on success.
 int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild, Window *window){
-	
+
 	addControlToPanelList(ccpParent, cclChild);
 
 	cclChild->rect.x += ccpParent->rect.x;
 	cclChild->rect.y += ccpParent->rect.y;
-	if (SDL_BlitSurface(cclChild->lbl->pic, NULL, window->self, &(cclChild->rect)) != 0) 
+	if (SDL_BlitSurface(cclChild->lbl->pic, NULL, window->self, &(cclChild->rect)) != 0)
 	{
 		SDL_FreeSurface(cclChild->lbl->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
@@ -263,7 +337,13 @@ Uint32 getColorOfPanel(Window *window, ControlComponent *ccp)
 	return color;
 }
 
-int nullFunction(Window *w, struct controlComponent *ccb)
+Uint32 getColorOfMenu(Window *window, Menu *pMenu)
+{
+	Uint32 color = SDL_MapRGB(window->self->format, pMenu->rgb_triplet.r, pMenu->rgb_triplet.g, pMenu->rgb_triplet.b);
+	return color;
+}
+
+int nullFunction(struct menu *pMenu, struct controlComponent *ccb)
 {
 	return 0;
 }

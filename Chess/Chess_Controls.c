@@ -134,13 +134,13 @@ const char *getPictureName_tools(Coord crd, int player, eTool type)
 
 /*	Only for initial board setting.
 	creates the desired board square, adds it to the ccp and returns a pointer to the ccb */
-ControlComponent *createSquareByToolType(Window *window, ControlComponent *ccp, Coord crd, eTool type, int player, int (*f)(Window *, ControlComponent *))
+ControlComponent *createSquareByToolType(Window *window, ControlComponent *ccp, Coord crd, eTool type, int player, btnFunc f)//int (*f)(Window *, ControlComponent *))
 {
-	ControlComponent *ccb;
-	SDL_Rect rect = createSDL_RectForBoardSquare(crd);
+	ControlComponent *ccb=NULL;
+	/*SDL_Rect rect = createSDL_RectForBoardSquare(crd);
 	const char *pictureName = getPictureName_tools(crd, player, type);
 	ccb = createButton_square(rect, uploadPicture(pictureName), f, crd);
-	addButtonToPanel(ccp, ccb, window);
+	addButtonToPanel(ccp, ccb, window);*/
 	return ccb;
 }
 

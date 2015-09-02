@@ -7,7 +7,7 @@ int properties[6] = { 1, 0, 1, WHITE_PLAYER, WHITE_PLAYER, 0 };
 'minimax_depth'		2
 'player color'		3
 'current player'	4
-'game mode'			
+'game mode'
 
 
 the initial state of the global properties array:
