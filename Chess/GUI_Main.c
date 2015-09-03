@@ -12,6 +12,16 @@ Menu menu_Game, *pMenu_Game = &menu_Game;
 /* Returns 0 on failure to init sdl video and 1 otherwise.*/
 int GUI_Main(board_t passedBoard)
 {
+	
+	/* Initialize Colors */
+
+	rgbMenuBlue = createRGB(0, 51, 102);
+	rgbBlack = createRGB(0, 0, 0);
+	rgbWhite = createRGB(255, 255, 255);
+	rgbRed = createRGB(153, 0, 0);
+	rgbOrange = createRGB(255, 128, 0);
+	rgbGreen = createRGB(0, 153, 0);
+	rgbPurple = createRGB(127, 0, 255);
 
 	
 
@@ -19,34 +29,34 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccp_MainMenu, *pCCP_MainMenu = &ccp_MainMenu;
 	Panel pnl_MainMenu, *pPnl_MainMenu = &pnl_MainMenu;
 
-	ControlComponent ccb_mainMenuCCBs[3];
+	ControlComponent ccb_mainMenuCCBs[NUM_OF_MAIN_MENU_BUTTONS];
 	
-	Button btn_mainMenuButtons[3];
+	Button btn_mainMenuButtons[NUM_OF_MAIN_MENU_BUTTONS];
 	
 
 	/* Player Selection Menu CCPs, PNLs,CCBs, BTNs*/
-	ControlComponent ccp_PlayerSelectionMenuCCPs[3];
-	Panel pnl_PlayerSelectionMenuPanels[3];
+	ControlComponent ccp_PlayerSelectionMenuCCPs[NUM_OF_PLAYER_SELECTION_MENU_PANELS];
+	Panel pnl_PlayerSelectionMenuPanels[NUM_OF_PLAYER_SELECTION_MENU_PANELS];
 	
-	ControlComponent ccb_PlayerSelectionMenuCCBs[4];
-	Button btn_PlayerSelectionMenuButtons[4];
+	ControlComponent ccb_PlayerSelectionMenuCCBs[NUM_OF_PLAYER_SELECTION_MENU_BUTTONS];
+	Button btn_PlayerSelectionMenuButtons[NUM_OF_PLAYER_SELECTION_MENU_BUTTONS];
 	
 	
 	/* AI_Settings Menu CCPs, PNLs, BTNs */
-	ControlComponent ccp_AI_SettingsMenuCCPs[3];
-	Panel pnl_AI_SettingsMenuPanels[3];
+	ControlComponent ccp_AI_SettingsMenuCCPs[NUM_OF_AI_MENU_PANELS];
+	Panel pnl_AI_SettingsMenuPanels[NUM_OF_AI_MENU_PANELS];
 
-	ControlComponent ccb_AI_SettingsCCBs[5];
-	Button btn_AI_SettingsButtons[5];
+	ControlComponent ccb_AI_SettingsCCBs[NUM_OF_AI_MENU_BUTTONS];
+	Button btn_AI_SettingsButtons[NUM_OF_AI_MENU_BUTTONS];
 
 	
 
 	/* Game Play Menu CCPs, PNLs, BTNs */
-	ControlComponent ccp_GamePlayMenuCCPs[1];
-	Panel pnl_GamePlayMenuPanels[1];
+	ControlComponent ccp_GamePlayMenuCCPs[NUM_OF_GAME_PLAY_MENU_PANELS];
+	Panel pnl_GamePlayMenuPanels[NUM_OF_GAME_PLAY_MENU_PANELS];
 
-	ControlComponent ccb_GamePlayMenuCCBs[2];
-	Button btnb_GamePlayMenuButtons[2];
+	ControlComponent ccb_GamePlayMenuCCBs[NUM_OF_GAME_PLAY_MENU_BUTTONS];
+	Button btnb_GamePlayMenuButtons[NUM_OF_GAME_PLAY_MENU_BUTTONS];
 	
 
 	/* Board Panel CCPs, PNLs, BTNs*/
@@ -72,16 +82,7 @@ int GUI_Main(board_t passedBoard)
 	
 	
 
-	/* Initialize Colors */
-
-	rgbMenuBlue = createRGB(0, 51, 102);
-	rgbBlack = createRGB(0, 0, 0);
-	rgbWhite = createRGB(255, 255, 255);
-	rgbRed = createRGB(153, 0, 0);
-	rgbOrange = createRGB(255, 128, 0);
-	rgbGreen = createRGB(0, 153, 0);
-	rgbPurple = createRGB(127, 0, 255);
-
+	
 	/* Initialize SDL Video */
 	init_GUI();
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -112,9 +113,10 @@ int GUI_Main(board_t passedBoard)
 	createAI_SettingsMenu(pMenu_AI_settings,ccp_AI_SettingsMenuCCPs,pnl_AI_SettingsMenuPanels,ccb_AI_SettingsCCBs,btn_AI_SettingsButtons);
 	createGameMenu(pMenu_Game,ccp_GamePlayMenuCCPs,pnl_GamePlayMenuPanels,ccb_GamePlayMenuCCBs,btnb_GamePlayMenuButtons);
 	
-	createGuiBoard(guiBoard, pCCP_Board, pBoard);
+	createGUIBoard(guiBoard, pCCP_Board, pBoard);
 	addPanelToMenu(pMenu_PlayerSelection, pCCP_Board,4);
 	addPanelToMenu(pMenu_AI_settings, pCCP_Board,4);
+	addPanelToMenu(pMenu_Game, pCCP_Board, 4);
 
 	/* Start */
 	showMenu(chessWindow, pMenu_Main);
@@ -142,7 +144,7 @@ int GUI_Main(board_t passedBoard)
 			// add right click https://www.libsdl.org/release/SDL-1.2.15/docs/html/sdlmousebuttonevent.html?
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
-				printf("%s", "SDL_MOUSEBUTTONUP does works. \n");
+				//printf("%s", "SDL_MOUSEBUTTONUP does works. \n");
 				buttonPressHandler(chessWindow, e);
 				//break;
 			}

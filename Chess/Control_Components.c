@@ -174,7 +174,7 @@ ControlComponent *createPanel(SDL_Rect rect, RGB rgb_triplet)
 	return comp;
 }
 
-int createMenu(Menu *pMenu, SDL_Rect rect, RGB color)
+int createMenu(Menu *pMenu, SDL_Rect rect, RGB color, int identifier)
 {
 	pMenu->rect = rect;
 	pMenu->rgb_triplet = color;
@@ -184,6 +184,7 @@ int createMenu(Menu *pMenu, SDL_Rect rect, RGB color)
 	pMenu->panel_3 = NULL;
 	pMenu->panel_4 = NULL;
 
+	pMenu->identifier = identifier;
 	return 1;
 }
 

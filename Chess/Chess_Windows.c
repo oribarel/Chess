@@ -68,7 +68,7 @@ int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, Control
 	SDL_Rect quitGameRect = createSDL_Rect(200, 75, 100, 550);
 
 
-	createMenu(mainMenu, Rect1024x768, rgbMenuBlue);
+	createMenu(mainMenu, Rect1024x768, rgbMenuBlue, MAIN_MENU);
 
 	/* Make the buttons */
 	createButton(ccbs, btns, newGameRect, uploadPicture("NewGameButton.bmp"), showPlayerSelectionMenu, NEW_GAME_BUTTON);
@@ -122,7 +122,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	SDL_Rect nextPlayerButton = createSDL_Rect(80, 80, wGameModeSetting / 2 - 40, hGameModeSetting / 2 );
 	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * hSide, hGameModeSetting - 4 * hSide, wSide, 2 * hSide);
 
-	createMenu(playerSelectionMenu, Rect1024x768, rgbMenuBlue);
+	createMenu(playerSelectionMenu, Rect1024x768, rgbMenuBlue, PLAYER_SELECTION_MENU);
 
 	/* Make the buttons */
 	createButton(ccbs, btns, returnToMainMenuButton, uploadPicture("ReturnToMainMenu.bmp"), showMainMenu, BACK_TO_MAIN_MENU_BUTTON);
@@ -151,8 +151,6 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 
 int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns)
 {
-	//TODO: implement 2 relevant toggles.
-
 	int wSide = 12;
 	int hSide = 9;
 	int wBoardPanel = 800;
@@ -167,7 +165,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	SDL_Rect returnsPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9);
 	SDL_Rect togglesPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 250);
 	SDL_Rect playPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 500);
-	SDL_Rect boardPanel = createSDL_Rect(wBoardPanel, hBoardPanel, wSide + wTogglePanels, hSide); //wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide
+	//SDL_Rect boardPanel = createSDL_Rect(wBoardPanel, hBoardPanel, wSide + wTogglePanels, hSide); //wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide
 
 	/* Button Rects*/
 	SDL_Rect backToMainMenuButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
@@ -178,7 +176,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 
 	SDL_Rect startGameButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
 
-	createMenu(AI_SettingsMenu, Rect1024x768, rgbMenuBlue);
+	createMenu(AI_SettingsMenu, Rect1024x768, rgbMenuBlue,AI_SETTINGS_MENU);
 
 	/* Make the buttons */
 	createButton(ccbs, btns, backToMainMenuButton, uploadPicture("ReturnToMainMenu.bmp"), showMainMenu, BACK_TO_MAIN_MENU_BUTTON);
@@ -207,10 +205,53 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 
 }
 
-int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns)
+int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns)
 {
-	return 0;
+	int wSide = 12;
+	int hSide = 9;
+	int wBoardPanel = 800;
+	int hBoardPanel = 750;
+	int wTogglePanels = SCREEN_W - wBoardPanel - 2 * wSide;
+	int hTogglePanels = (SCREEN_H - 2 * hSide) / 3;
+
+	/* Screen Rect */
+	SDL_Rect Rect1024x768 = create1024x768Rect();
+
+	/* Panel Rects */
+	SDL_Rect returnsPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9);
+	SDL_Rect emptyPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 250);
+	SDL_Rect saveAndQuitPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 500);
+	
+
+	/* Button Rects*/
+	SDL_Rect backToMainMenuButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect saveGameButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect quitButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide + (wTogglePanels*0.6));
+
+	createMenu(GamePlayMenu, Rect1024x768, rgbMenuBlue, GAME_PLAY_MENU);
+
+	/* Make the buttons */
+	createButton(ccbs, btns, backToMainMenuButton, uploadPicture("ReturnToMainMenu.bmp"), GamePlayMenu_endGameAndShowMainMenu, END_GAME_AND_RETURN_TO_MAIN_MENU_BUTTON);
+	createButton(ccbs + 1, btns + 1, quitButton, uploadPicture("QuitGameButton_inGame.bmp"), QuitGame, QUIT_GAME_BUTTON);
+	createButton(ccbs + 2, btns + 2, saveGameButton, uploadPicture("saveGame.bmp"), GamePlayMenu_SaveGame, SAVE_GAME_BUTTON);
+
+	/* Make the Panels*/
+	panelMaker(ccps, panel, returnsPanel, rgbRed);
+	panelMaker(ccps + 1, panel + 1, emptyPanel, rgbOrange);
+	panelMaker(ccps + 2, panel + 2, saveAndQuitPanel, rgbGreen);
+
+	addButtonToPanel(ccps, ccbs);
+	addButtonToPanel(ccps + 2, ccbs + 1);
+	addButtonToPanel(ccps + 2, ccbs + 2);
+
+	/* Add the Panels To the Menu*/
+	addPanelToMenu(GamePlayMenu, ccps, 1);
+	addPanelToMenu(GamePlayMenu, ccps + 1, 2);
+	addPanelToMenu(GamePlayMenu, ccps + 2, 3);
+
+	return 1;
 }
+
 
 int showMenu(Window *window, Menu *menu)
 {
@@ -221,10 +262,14 @@ int showMenu(Window *window, Menu *menu)
 	4. Inside each panel, paint the buttons.
 	*/
 	
-	window->shownMenu = menu;
+	//window->shownMenu = menu;
 	addMenuToWindow(chessWindow, menu);
 	
-	
+	if (menu->identifier == PLAYER_SELECTION_MENU || menu->identifier == AI_SETTINGS_MENU || menu->identifier == GAME_PLAY_MENU)
+	{
+		updateGUIBoard(menu);
+	}
+
 
 
 	if (menu->panel_1 != NULL)
@@ -251,13 +296,14 @@ int showMenu(Window *window, Menu *menu)
 }
 
 /* This also adds each of the squares to the panel! */
-int createGuiBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board)
+int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board)
 {
 	
 	Coord crd;
 	eTool type;
 	int player;
 	btnFunc toolFunc;
+
 	for (int i = 0; i < BOARD_SIZE; i++)
 	{
 		for (int j = 0; j < BOARD_SIZE; j++)
@@ -278,19 +324,22 @@ int createGuiBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t b
 			createSquareByToolType(ccp_BoardSetting, &(guiBoard[crd.i_coord][crd.j_coord]), crd, type, player, toolFunc);
 		}
 	}
+	return 1;
 }
 
+
 /*
+	This function only updates the function of the GUIBoard
 	for PLAYER_SELECTION_MENU: toggle pieces function.
 	for AI_SETTINGS_MENU: builds a guiBoard from board
 	for GAME_MENU: game mode function
 	*/
-int createGuiBoard1(Window *window, ControlComponent *ccp, int windowType)
+int updateGUIBoard( Menu *menu)
 {
 	ControlComponent *ccb;
 	Coord crd;
 	eTool type;
-	int player;
+	int player, identfier = menu->identifier;
 	btnFunc toolFunc; //int(*toolFunc)(Window *, struct controlComponent *);
 
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -298,51 +347,98 @@ int createGuiBoard1(Window *window, ControlComponent *ccp, int windowType)
 		for (int j = 0; j < BOARD_SIZE; j++)
 		{
 			crd.i_coord = i; crd.j_coord = j;
-			if (windowType == PLAYER_SELECTION_MENU)// && !windowsCreated[1])
+			if (identfier == PLAYER_SELECTION_MENU)// && !windowsCreated[1])
 			{
-				type = getInitialTypeOfCoord(crd);
-				player = getInitialPlayerOfCoord(crd);
 				toolFunc = playerSelectionMenu_toggleTool;
-				ccb = createSquareByToolType(window, ccp, crd, type, player, toolFunc); // Allocates the square, and also adds is to the ccp
+				//type = getInitialTypeOfCoord(crd);
+				//player = getInitialPlayerOfCoord(crd);
+				//ccb = createSquareByToolType(window, ccp, crd, type, player, toolFunc); // Allocates the square, and also adds is to the ccp 
+				//ControlComponent *ccp, ControlComponent *ccb, Coord crd, eTool type, int player, btnFunc f
 			}
-			else if (windowType == PLAYER_SELECTION_MENU)// && windowsCreated[1])
+			//else if (identfier == PLAYER_SELECTION_MENU)// && windowsCreated[1])
+			//{
+			//	type = GetContentOfCoord(pBoard, crd);
+			//	player = getColor(pBoard, crd);
+			//	toolFunc = playerSelectionMenu_toggleTool;
+			//	// Doesn't allocate the square, only adds it to the ccp, it has a picture, crd and everything so no need to set that.
+			//	ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
+			//	ccb->btn->f = toolFunc;
+			//	ccb->rect = createSDL_RectForBoardSquare(crd);
+			//}
+			else if (identfier == AI_SETTINGS_MENU)
 			{
-				type = GetContentOfCoord(pBoard, crd);
-				player = getColor(pBoard, crd);
-				toolFunc = playerSelectionMenu_toggleTool;
-				// Doesn't allocate the square, only adds it to the ccp, it has a picture, crd and everything so no need to set that.
-				ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
-				ccb->btn->f = toolFunc;
-				ccb->rect = createSDL_RectForBoardSquare(crd);
-			}
-			else if (windowType == AI_SETTINGS_MENU)
-			{
-				type = GetContentOfCoord(pBoard, crd);
-				player = getColor(pBoard, crd);
+				//type = GetContentOfCoord(pBoard, crd);
+				//player = getColor(pBoard, crd);
+				//toolFunc = AI_SettingsMenu_toggleTool;
+				//// Doesn't allocate the square, only adds it to the ccp, it has a picture, crd and everything so no need to set that.
+				//ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
+				//ccb->btn->f = toolFunc;
+				//ccb->rect = createSDL_RectForBoardSquare(crd);
+				////addButtonToPanel(ccp, ccb, window);
 				toolFunc = AI_SettingsMenu_toggleTool;
-				// Doesn't allocate the square, only adds it to the ccp, it has a picture, crd and everything so no need to set that.
-				ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
-				ccb->btn->f = toolFunc;
-				ccb->rect = createSDL_RectForBoardSquare(crd);
-				//addButtonToPanel(ccp, ccb, window);
-
+				
 			}
 			else
 			{
-				toolFunc = nullFunction; //TODO: intimdating cast was (int(*)(Window *, struct controlComponent *))
-
+				toolFunc = (btnFunc)getGameFunctionOfTool(GetContentOfCoord(pBoard,crd)); //TODO: intimdating cast was (int(*)(Window *, struct controlComponent *))
+				
 			}
+			guiBoard[crd.i_coord][crd.j_coord].btn->f = toolFunc;
 
-
-			guiBoard[i][j] = *ccb;
+			//guiBoard[i][j] = *ccb;
 		}
 	}
 	return 1;
 }
 
+btnFunc getGameFunctionOfTool(char tool)
+{
+	if (tool == WHITE_P || tool == BLACK_P)
+		return pawnClick;
+	if (tool == WHITE_N || tool == BLACK_N)
+		return knightClick;
+	if (tool == WHITE_B || tool == BLACK_B)
+		return bishopClick;
+	if (tool == WHITE_R || tool == BLACK_R)
+		return rookClick;
+	if (tool == WHITE_Q || tool == BLACK_Q)
+		return queenClick;
+	if (tool == WHITE_K || tool == BLACK_K)
+		return kingClick;
+	return nullFunction;
+}
 
+int pawnClick(struct menu *menu, struct controlComponent *ccb)
+{
+	Coord crd = ccb->btn->crd;
+	printf("You have clicked a %s pawn.\n", islower(GetContentOfCoord(pBoard, crd)) ? "white" : "black");
+	return 1;
+}
 
+int knightClick(struct menu *menu, struct controlComponent *ccb)
+{
+	return 1;
+}
 
+int bishopClick(struct menu *menu, struct controlComponent *ccb)
+{
+	return 1;
+}
+
+int rookClick(struct menu *menu, struct controlComponent *ccb)
+{
+	return 1;
+}
+
+int queenClick(struct menu *menu, struct controlComponent *ccb)
+{
+	return 1;
+}
+
+int kingClick(struct menu *menu, struct controlComponent *ccb)
+{
+	return 1;
+}
 
 
 int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
@@ -616,6 +712,27 @@ int AI_Settings_updatePlayButton(Window *window)
 	}
 	return 1;
 }
+
+
+int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb)
+{
+	return 0;
+}
+
+int GamePlayMenu_SaveGame(struct menu *menu, struct controlComponent *ccb)
+{
+	return 0;
+}
+
+
+/* shared with main menu and game play menu */
+int QuitGame(struct menu *menu, struct controlComponent *ccb)
+{
+	return 0;
+}
+
+
+
 
 
 
@@ -906,22 +1023,20 @@ int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis
 	return 0;
 }
 
+int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	showMenu(chessWindow, pMenu_Game);
+	return 0;
+}
+
 int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
 	return 0;
 }
 
-int QuitGame(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	return 0;
-}
 
 
 
-int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	return 0;
-}
 
 
 
@@ -972,11 +1087,6 @@ int loadGameNum(Window *window, int n)
 	return 0;
 }
 
-int SaveGame(Window *window)
-{
-	return 0;
-}
-
 int SaveGUI(char* file_name)
 {
 	return 0;
@@ -998,11 +1108,6 @@ int inBoardBoundaries(Pixel px)
 }
 
 int colorByPixel(char** board, Pixel px)
-{
-	return 0;
-}
-
-int CreateGameWindow(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
@@ -1033,13 +1138,6 @@ int SetPromotionAs(Window *window, eTool type)
 }
 
 int restartGame(Window *window)
-{
-	return 0;
-}
-
-
-
-int quitGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	return 0;
 }
