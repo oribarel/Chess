@@ -3,7 +3,7 @@
 
 #include "Console_Main.h"
 
-extern int properties[6];
+//extern int properties[6];
 
 cMove *pMove;
 

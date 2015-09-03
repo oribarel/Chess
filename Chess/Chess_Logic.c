@@ -361,8 +361,8 @@ int IsAlly(char tool, int myColor)
 Coord offsetCoord(Coord coord, int i_offset, int j_offset)
 {
 	Coord res = coord;
-	coord.i_coord += i_offset;
-	coord.j_coord += j_offset;
+	res.i_coord += i_offset;
+	res.j_coord += j_offset;
 	return res;
 }
 
@@ -798,17 +798,23 @@ cMove* BishopMoves(board_t board, Coord coord){
 		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
+			tmpCoord = offsetCoord(tmpCoord, k, k);
 		}
 	}
 
 	//north-west
 	tmpCoord = offsetCoord(coord, -k, k);
-	while (isInBoard(tmpCoord)) {
-		if (getColor(board, tmpCoord) == color * -1){
+	while (isInBoard(tmpCoord)) 
+	{
+		if (getColor(board, tmpCoord) == color * -1)
+		{
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
+		} 
+		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
+		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
+			tmpCoord = offsetCoord(tmpCoord, -k, k);
 		}
 	}
 
@@ -816,23 +822,33 @@ cMove* BishopMoves(board_t board, Coord coord){
 
 	//south-east
 	tmpCoord = offsetCoord(coord, k, -k);
-	while (isInBoard(tmpCoord)) {
-		if (getColor(board, tmpCoord) == color * -1){
+	while (isInBoard(tmpCoord)) 
+	{
+		if (getColor(board, tmpCoord) == color * -1)
+		{
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
+		} 
+		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
+		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
+			tmpCoord = offsetCoord(tmpCoord, k, -k);
 		}
 	}
 
 	//south-west
 	tmpCoord = offsetCoord(coord, -k, -k);
-	while (isInBoard(tmpCoord)) {
-		if (getColor(board, tmpCoord) == color * -1){
+	while (isInBoard(tmpCoord)) 
+	{
+		if (getColor(board, tmpCoord) == color * -1)
+		{
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
+		} 
+		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
+		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
+			tmpCoord = offsetCoord(tmpCoord, -k, -k);
 		}
 	}
 	return head;

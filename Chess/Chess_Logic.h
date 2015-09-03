@@ -62,6 +62,11 @@
 
 #define XML_FIRST_LINE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 
+/* Externs */
+extern int properties[6];
+
+
+
 typedef char** board_t;
 
 typedef struct Coord {
@@ -113,6 +118,7 @@ cMove* PawnMoves(board_t board, Coord coord);
 cMove* BishopMoves(board_t board, Coord coord);
 cMove* RookMoves(board_t board, Coord coord);
 cMove* KnightMoves(board_t board, Coord coord);
+cMove *QueenMoves(board_t board, Coord coord);
 cMove* KingMoves(board_t board, Coord coord);
 cMove *movesByPieceType(board_t board, Coord coord);
 cMove *getMoves(board_t board, int player);

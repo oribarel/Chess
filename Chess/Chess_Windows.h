@@ -13,8 +13,11 @@ typedef ControlComponent ** board_g;
 #define AI_SETTINGS_MENU		2
 #define GAME_PLAY_MENU			3
 
-#define PVC_MODE 1
-#define PVP_MODE 0
+
+#define SETTINGS_MODE 1
+#define GAME_MODE 0
+#define PVC_MODE 2
+#define PVP_MODE 1
 
 
 #define NEW_GAME_BUTTON								'n'
@@ -37,8 +40,13 @@ typedef ControlComponent ** board_g;
 
 #define SQUARE_BUTTON								'a'
 
+#define WAITING			0
+#define NONE_SELECTED	1
+#define HIGHLIGHTED		2
+#define MOVE_MADE		3
+#define PROMOTE			4
 
-extern int intQuit;
+
 
 extern ControlComponent *guiBoard[BOARD_SIZE];
 extern ControlComponent guiBoard_col0[BOARD_SIZE];
@@ -64,47 +72,55 @@ extern Menu *pMenu_AI_settings;
 extern Menu *pMenu_Game;
 //extern Menu *currMenu;
 
-
-/*int CreateMainWindow(Window *window, board_t passedBoard);
-int createPlayerSelectionWindow(Window *window, ControlComponent *);
-int createAI_SettingsWindow(Window *window, ControlComponent *);
-int CreateGameWindow(Window *window, ControlComponent *);*/
-
 int passTheBoard(board_t board);
 
+/* Create Menus Functions */
 int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 int createAI_SettingsMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 
-
+/* mainMenu */
 int LoadGame(Window *window, ControlComponent *);
 int quitGame(Window *window, ControlComponent *);
+int QuitGame(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 
-
+/* playerSelectionMenu */
 int playerSelectionMenu_toggleTool(Menu *menu, struct controlComponent *);
 int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *);
 int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *);
 int playerSelectionMenu_updateContinueOrPlayButton(Window *window);
 
+/* AI_settingsMenu  */
+const char *getDifficultyPicName(void);
 int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *);
 int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *);
 int AI_SettingsMenu_toggleTool(Menu *menu, struct controlComponent *ccb);
 int AI_Settings_updatePlayButton(Window *window);
 
+
+/* GamePlayMenu */
 int GamePlayMenu_SaveGame(struct menu *menu, struct controlComponent *ccb);
 int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb);
-int pawnClick(struct menu *menu, struct controlComponent *ccb);
-int knightClick(struct menu *menu, struct controlComponent *ccb);
-int bishopClick(struct menu *menu, struct controlComponent *ccb);
-int rookClick(struct menu *menu, struct controlComponent *ccb);
-int queenClick(struct menu *menu, struct controlComponent *ccb);
-int kingClick(struct menu *menu, struct controlComponent *ccb);
 
+/* Game Play Functions */
+int pawnHighlight(struct menu *menu, struct controlComponent *ccb);
+int knightHighlight(struct menu *menu, struct controlComponent *ccb);
+int bishopHighlight(struct menu *menu, struct controlComponent *ccb);
+int rookHighlight(struct menu *menu, struct controlComponent *ccb);
+int queenHighlight(struct menu *menu, struct controlComponent *ccb);
+int kingHighlight(struct menu *menu, struct controlComponent *ccb);
+int changeHighlightedTool(struct menu *menu, struct controlComponent *ccb);
+int gui_makeMove(struct menu *menu, struct controlComponent *ccb);
+int highlightMovesList(Menu *menu, Coord crd, cMove *moves);
+int advanceTurnStage(int promotiveSituation);
+
+/* Button handling */
 int buttonPressHandler(Window *window, SDL_Event e);
 int pressIfNeeded(Menu *menu, struct controlComponent *ccb, SDL_Event e);
 int isPressInsideButton(SDL_Event e, ControlComponent *ccb);
 
+/* Show menus */
 int showMenu(Window *window, Menu *menu);
 
 int showMainMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
@@ -113,13 +129,16 @@ int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis
 int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
 int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 
+/* GUI Board */
+int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color);
 int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board);
 int updateGUIBoard(Menu *menu);
-int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color);
-
-int QuitGame(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
+btnFunc getGameFunctionOfCoord(Coord crd);
 
 
+/* Misc */
+int isOfPlayer(int player, char tool);
+int freeMovesList(cMove *move);
+eTool get_eToolFromType(char type);
 
-const char *getDifficultyPicName(void);
 #endif

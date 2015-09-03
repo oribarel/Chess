@@ -23,7 +23,14 @@ int GUI_Main(board_t passedBoard)
 	rgbGreen = createRGB(0, 153, 0);
 	rgbPurple = createRGB(127, 0, 255);
 
-	
+	/* Initialize default properties: */
+	properties[0] = 1; //settings
+	properties[1] = 0; //not-quit
+	properties[2] = 1; //AI default depth
+	properties[3] = WHITE_PLAYER; //default player color
+	properties[4] = WHITE_PLAYER; //default starting player
+	properties[5] = PVP_MODE; //default game mode
+
 
 	/* Main Menu  CCPs, PNLs, BTNs*/
 	ControlComponent ccp_MainMenu, *pCCP_MainMenu = &ccp_MainMenu;
@@ -118,6 +125,8 @@ int GUI_Main(board_t passedBoard)
 	addPanelToMenu(pMenu_AI_settings, pCCP_Board,4);
 	addPanelToMenu(pMenu_Game, pCCP_Board, 4);
 
+	
+
 	/* Start */
 	showMenu(chessWindow, pMenu_Main);
 	if (SDL_Flip(chessWindow->self) != 0)
@@ -127,10 +136,10 @@ int GUI_Main(board_t passedBoard)
 		return 0;
 	}
 
-	while (!intQuit)
+	while (!properties[1])
 	{
 		SDL_Event e;
-		while (SDL_PollEvent(&e) == 1 && intQuit == 0)
+		while (SDL_PollEvent(&e) == 1 && properties[1] == 0)
 		{
 			if (e.type == SDL_QUIT)
 			{
