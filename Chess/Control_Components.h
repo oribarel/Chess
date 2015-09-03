@@ -8,30 +8,39 @@
 #include <SDL_video.h>
 #include "Chess_Logic.h"
 
-
+/* Definitions */
 #define SCREEN_W 1024
 #define SCREEN_H 768
+
+/* externs*/
+
+
+
+
+/* Structs */
+
+struct menu;
+struct controlComponent;
+typedef int(*btnFunc)(struct menu *, struct controlComponent *);
 
 typedef struct rgb
 {
 	Uint8 r, g, b;
 } RGB;
 
-typedef struct window
+typedef struct label
 {
-	struct controlComponent *panelChild;
-	struct SDL_Surface *self;
-} Window;
+	struct SDL_Surface *pic;
+} Label;
+
 
 typedef struct button
 {
-	int(*f) (Window *, struct controlComponent *);
+	btnFunc f;
 	struct SDL_Surface *pic;
-	char gameControl;
 	Coord crd;
 	char purpose;
 } Button;
-
 
 typedef struct panel
 {
@@ -39,10 +48,6 @@ typedef struct panel
 	struct controlComponent *children;
 } Panel;
 
-typedef struct label
-{
-	struct SDL_Surface *pic;
-} Label;
 
 typedef struct controlComponent
 {
@@ -52,6 +57,25 @@ typedef struct controlComponent
 	struct controlComponent *next;
 	SDL_Rect rect;
 } ControlComponent;
+
+
+typedef struct menu
+{
+	struct controlComponent *panel_1;
+	struct controlComponent *panel_2;
+	struct controlComponent *panel_3;
+	struct controlComponent *panel_4;
+
+	struct rgb rgb_triplet;
+	SDL_Rect rect;
+} Menu;
+
+typedef struct window
+{
+	struct menu *shownMenu;
+	struct SDL_Surface *self;
+} Window;
+
 
 typedef struct pixel
 {
@@ -63,25 +87,46 @@ typedef struct rectSize
 	int h, w;
 } RectSize;
 
+
+
+/* Extern Variables */
+extern Window *chessWindow;
+
+
+/* Functions Declarations*/
+
 int init_GUI(void);
-int nullFunction(Window *w, struct controlComponent *ccb);
-Window *createWindow();
-ControlComponent *createButton(SDL_Rect inpRect, SDL_Surface *pic, int(*f)(Window *, struct controlComponent *), char purpose);/*, char ctrl);*/
+int nullFunction(struct menu *pMenu, struct controlComponent *ccb);
+
+int createWindow(Window *window);
+int createMenu(Menu *pMenu, SDL_Rect rect, RGB color);
+int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Surface *pic, btnFunc f , char purpose);
+int createButton_square(ControlComponent *ccbParent,  SDL_Rect rect, SDL_Surface *pic, btnFunc f);
 ControlComponent *createLabel(SDL_Rect rect, SDL_Surface *pic);
 ControlComponent *createPanel(SDL_Rect rect, RGB rgb_triplet);
+RGB createRGB(int r, int g, int b);
+SDL_Rect createSDL_Rect(int w, int h, int x, int y);
+
 int addPanelToWindow(Window *window, ControlComponent *ccp);
-int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb, Window *s);
+int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb);
 int addControlToPanelList(ControlComponent *panelComponent, ControlComponent *toAdd);
 int addPanelToPanel(ControlComponent *ccpParent, ControlComponent *ccpChild, Window *window);
 int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild, Window *window);
+int addPanelToMenu(Menu *menuParent, ControlComponent *ccp, int panelNum);
+int addMenuToWindow(Window *window, Menu *pMenu);
+
+int drawPanelToMenu(ControlComponent *ccp);
+int drawButtonsOfPanel(ControlComponent *ccp);
+
 ControlComponent *getLastInPanelList(ControlComponent* ccpParent);
 Uint32 getColorOfPanel(Window *window, ControlComponent *ccp);
+Uint32 getColorOfMenu(Window *window, Menu *pMenu);
+
 int freeCCTree(ControlComponent *cc);
-SDL_Rect createSDL_Rect(int w, int h, int x, int y);
-RGB createRGB(int r, int g, int b);
+
 SDL_Surface *uploadPicture(const char *path);
 
-ControlComponent *createButton_square(SDL_Rect inpRect, SDL_Surface *pic, int(*f)(Window *, struct controlComponent *), Coord crd);
+
 
 #endif
 

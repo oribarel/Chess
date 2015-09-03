@@ -1,0 +1,16 @@
+Eyal: ( Last thing I worked on was making sure the 'back' button from AI_settings. Next thing to work on is showing AI_settings when it was already created )
+1. Double frees in gui.
+2. All TODOs in gui.
+
+Incomplete:
+	Main menu:
+		a. Load
+		b. Quit
+
+	player selection menu:
+		a. add a return to main menu button and implement
+		b. implement start game button
+
+	AI settings window:
+		a. implement 'back' and 'return to main menu' buttons.
+		b. implement start game button

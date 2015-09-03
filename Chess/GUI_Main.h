@@ -3,6 +3,10 @@
 
 #include "Chess_Windows.h"
 
-int GUI_Main();
+
+
+
+
+int GUI_Main(board_t board);
 
 #endif
