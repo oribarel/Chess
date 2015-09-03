@@ -802,7 +802,6 @@ cMove* BishopMoves(board_t board, Coord coord){
 		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
-			tmpCoord = offsetCoord(tmpCoord, k, k);
 		}
 		else
 			break;
@@ -811,17 +810,13 @@ cMove* BishopMoves(board_t board, Coord coord){
 	k = 1;
 	//north-west
 	tmpCoord = offsetCoord(coord, -k, k);
-	while (isInBoard(tmpCoord)) 
-	{
-		if (getColor(board, tmpCoord) == color * -1)
-		{
+	while (isInBoard(tmpCoord)) {
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
-		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
-		{
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
-			tmpCoord = offsetCoord(tmpCoord, -k, k);
 		}
 		else
 			break;
@@ -832,17 +827,13 @@ cMove* BishopMoves(board_t board, Coord coord){
 	k = 1;
 	//south-east
 	tmpCoord = offsetCoord(coord, k, -k);
-	while (isInBoard(tmpCoord)) 
-	{
-		if (getColor(board, tmpCoord) == color * -1)
-		{
+	while (isInBoard(tmpCoord)) {
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
-		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
-		{
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
-			tmpCoord = offsetCoord(tmpCoord, k, -k);
 		}
 		else
 			break;
@@ -851,17 +842,13 @@ cMove* BishopMoves(board_t board, Coord coord){
 	k = 1;
 	//south-west
 	tmpCoord = offsetCoord(coord, -k, -k);
-	while (isInBoard(tmpCoord)) 
-	{
-		if (getColor(board, tmpCoord) == color * -1)
-		{
+	while (isInBoard(tmpCoord)) {
+		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
-		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
-		{
+		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
-			tmpCoord = offsetCoord(tmpCoord, -k, -k);
 		}
 		else
 			break;
@@ -1100,9 +1087,9 @@ int CountToolsOfType(board_t board, char type)
 {
 	int counter = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
-	for (int j = 0; j < BOARD_SIZE; j++)
-	if (board[i][j] == type)
-		counter++;
+		for (int j = 0; j < BOARD_SIZE; j++)
+			if (board[i][j] == type)
+				counter++;
 	return counter;
 }
 
