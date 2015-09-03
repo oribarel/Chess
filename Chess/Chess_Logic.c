@@ -7,7 +7,7 @@ int properties[6] = { 1, 0, 1, WHITE_PLAYER, WHITE_PLAYER, 0 };
 'minimax_depth'		2
 'player color'		3
 'current player'	4
-'game mode'
+'game mode'			5
 
 
 the initial state of the global properties array:
@@ -189,7 +189,7 @@ cMove *QueenMoves(board_t board, Coord coord)
 /*returns 0 if the two chars reperesent allies*/
 int IsEnemy(char slot, int myColor)
 {
-	if (myColor = WHITE_PLAYER) //player is white
+	if (myColor == WHITE_PLAYER) //player is white
 	{
 		switch (slot)
 		{
@@ -302,7 +302,7 @@ retrun 3 if tool is ally king
 */
 int IsAlly(char tool, int myColor)
 {
-	if (myColor = BLACK_PLAYER) //player is black
+	if (myColor == BLACK_PLAYER) //player is black
 	{
 		switch (tool)
 		{
@@ -519,8 +519,11 @@ int DoesCrdContainsEnemy(board_t board, Coord coord, char tool)
 
 }
 
+/*return 0 if empty, otherwish WHITE_PLAYER or BLACK_PLAYER according to coord*/
 int getColor(board_t board, Coord coord)
 {
+	if (GetContentOfCoord(board, coord) == EMPTY)
+		return 0;
 	int color = islower(GetContentOfCoord(board, coord)) ? WHITE_PLAYER : BLACK_PLAYER;
 	return color;
 }
@@ -744,7 +747,7 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord = coord;
 	tmpCoord.i_coord -= color * 1;
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
+	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, tmpCoord, tool))
 	{
 		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
@@ -762,7 +765,7 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord = coord;
 	tmpCoord.i_coord += color * 1;
 	tmpCoord.j_coord += color * 1;
-	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, coord, tool))
+	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, tmpCoord, tool))
 	{
 		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
@@ -793,6 +796,7 @@ cMove* BishopMoves(board_t board, Coord coord){
 		if (getColor(board, tmpCoord) == color * -1)
 		{
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			break;
 		}
 		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
 		{
@@ -800,8 +804,11 @@ cMove* BishopMoves(board_t board, Coord coord){
 			k++;
 			tmpCoord = offsetCoord(tmpCoord, k, k);
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, k, k);
 	}
-
+	k = 1;
 	//north-west
 	tmpCoord = offsetCoord(coord, -k, k);
 	while (isInBoard(tmpCoord)) 
@@ -809,17 +816,20 @@ cMove* BishopMoves(board_t board, Coord coord){
 		if (getColor(board, tmpCoord) == color * -1)
 		{
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} 
+			break;
 		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
 		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 			tmpCoord = offsetCoord(tmpCoord, -k, k);
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, -k, k);
 	}
 
 
-
+	k = 1;
 	//south-east
 	tmpCoord = offsetCoord(coord, k, -k);
 	while (isInBoard(tmpCoord)) 
@@ -827,15 +837,18 @@ cMove* BishopMoves(board_t board, Coord coord){
 		if (getColor(board, tmpCoord) == color * -1)
 		{
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} 
+			break;
 		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
 		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 			tmpCoord = offsetCoord(tmpCoord, k, -k);
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, k, -k);
 	}
-
+	k = 1;
 	//south-west
 	tmpCoord = offsetCoord(coord, -k, -k);
 	while (isInBoard(tmpCoord)) 
@@ -843,13 +856,16 @@ cMove* BishopMoves(board_t board, Coord coord){
 		if (getColor(board, tmpCoord) == color * -1)
 		{
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} 
+			break;
 		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
 		{
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 			tmpCoord = offsetCoord(tmpCoord, -k, -k);
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, -k, -k);
 	}
 	return head;
 }
@@ -863,49 +879,69 @@ cMove* RookMoves(board_t board, Coord coord){
 
 	//north
 	int k = 1;
-	Coord tmpCoord = offsetCoord(coord, k, k);
+	Coord tmpCoord = offsetCoord(coord, 0, k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, 0, k);
 	}
 
 	//south
-	tmpCoord = offsetCoord(coord, -k, k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, 0, -k);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, 0, -k);
 	}
 
 
 
 	//east
-	tmpCoord = offsetCoord(coord, k, -k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, k, 0);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, k, 0);
 	}
 
 	//west
-	tmpCoord = offsetCoord(coord, -k, -k);
+	k = 1;
+	tmpCoord = offsetCoord(coord, -k, 0);
 	while (isInBoard(tmpCoord)) {
 		if (getColor(board, tmpCoord) == color * -1){
 			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
-		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
+			break;
+		}
+		if (GetContentOfCoord(board, tmpCoord) == EMPTY){
 			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
+		else
+			break;
+		tmpCoord = offsetCoord(coord, -k, 0);
 	}
 	return head;
 }
@@ -947,7 +983,7 @@ cMove* KingMoves(board_t board, Coord coord)
 	cMove *head = NULL;
 
 	int color = getColor(board, coord);
-	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
+	char tool = color == WHITE_PLAYER ? WHITE_K : BLACK_K;
 
 	Coord tmpCrd = coord, possibilities[8];
 	possibilities[0] = offsetCoord(coord, 0, 1);
@@ -980,11 +1016,11 @@ cMove *movesByPieceType(board_t board, Coord coord)
 	{
 	case WHITE_P:
 	case BLACK_P:
-		PawnMoves(board, coord);
+		return PawnMoves(board, coord);
 		break;
 	case WHITE_B:
 	case BLACK_B:
-		BishopMoves(board, coord);
+		return BishopMoves(board, coord);
 		break;
 	case WHITE_N:
 	case BLACK_N:
@@ -1285,8 +1321,8 @@ Then, run minimax algorithm in recursion to produce a score. At last, undo the m
 /*changes the board so it describes the state created after the move is made.*/
 int makeMove(board_t board, cMove *move)
 {
-	char myColor = GetContentOfCoord(board, move->dst);//TODO: consider delete this line
-	Coord crd = move->dst;
+	char myColor = GetContentOfCoord(board, move->src);//TODO: consider delete this line
+	Coord crd = move->src;
 	setSlotInBoard(board, crd, EMPTY);
 	if (move->promote)
 		setSlotInBoard(board, move->dst, move->promote);

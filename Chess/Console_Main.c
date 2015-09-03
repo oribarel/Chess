@@ -4,6 +4,8 @@
 #include "Console_Main.h"
 
 //extern int properties[6];
+extern Coord WhiteKing;
+extern Coord BlackKing;
 
 cMove *pMove;
 
@@ -108,7 +110,22 @@ int LoadFromFile(char* file_path, board_t board){
 		fscanf(file, "%s", str);
 		for (i = 0; i < BOARD_SIZE; i++){
 			if (*(str + 7 + i) != '_')
+			{
 				board[i][j] = *(str + 7 + i);
+				//update kings' coordinates
+				if (*(str + 7 + i) == WHITE_K)
+				{
+					WhiteKing.i_coord = i;
+					WhiteKing.j_coord = j;
+				}
+				if (*(str + 7 + i) == BLACK_K)
+				{
+					BlackKing.i_coord = i;
+					BlackKing.j_coord = j;
+				}
+					
+			
+			}
 			else
 				board[i][j] = EMPTY;
 		}
@@ -122,6 +139,8 @@ int LoadFromFile(char* file_path, board_t board){
 
 int Save(board_t board, char* file_name){
 	int i, j;
+	//replacing '\n' with '\0'
+	file_name[strlen(file_name) - 1] = '\0';
 	FILE *f = fopen(file_name, "w");
 	if (f == NULL){
 		printf(WRONG_FILE_NAME);
@@ -294,7 +313,7 @@ void printMove(cMove *move)
 
 	//if promotion needed
 	if (move->promote)
-		printf("%s", ToolCharToName(move->promote));
+		printf(" %s", ToolCharToName(move->promote));
 
 	//print end of line
 	printf("\n");
@@ -726,7 +745,7 @@ int Parse(char *line, board_t board)
 
 
 			token = strtok(NULL, " ");
-			if (strcmp(token, BEST))
+			if (strcmp(token, BEST)==0)
 			{
 				properties[2] = BESTval;//0 stands for best
 				return 0;
@@ -911,6 +930,7 @@ int Parse(char *line, board_t board)
 		else if (strcmp(token, cmmd11) == 0)
 			//start
 		{
+			Coord tmpCrd;
 			if (CountToolsOfType(board, WHITE_K) < 1 || CountToolsOfType(board, BLACK_K) < 1)
 			{
 				if (!properties[1])
@@ -921,6 +941,23 @@ int Parse(char *line, board_t board)
 			{
 				properties[0] = 0;//change from setting state to game state
 				return 0;
+			}
+			for (int j = BOARD_SIZE - 1; j >= 0; j--){
+				for (int i = 0; i < BOARD_SIZE; i++){
+					tmpCrd.i_coord = i;
+					tmpCrd.j_coord = j;
+					//update kings' coordinates
+					if (GetContentOfCoord(board, tmpCrd) == WHITE_K)
+					{
+						WhiteKing.i_coord = i;
+						WhiteKing.j_coord = j;
+					}
+					if (GetContentOfCoord(board, tmpCrd) == BLACK_K)
+					{
+						BlackKing.i_coord = i;
+						BlackKing.j_coord = j;
+					}
+				}
 			}
 		}
 		if (!properties[1])
@@ -1108,7 +1145,7 @@ cMove* isLegalMove(char *token, board_t board, cMove *allPossibleMoves)
 	graphicCoordToRealCoord(&source, x_coor, y_coor);
 	currentPosition += 6;
 	i_coor = *currentPosition;
-	currentPosition += 3;
+	currentPosition += 2;
 	j_coor = (int)strtol(currentPosition, &currentPosition, 10);
 	graphicCoordToRealCoord(&dest, i_coor, j_coor);
 
@@ -1288,7 +1325,7 @@ int Console_Main(board_t board)
 	}
 	}*/
 
-	//print_board(brd);
+	print_board(brd);
 	if (!properties[1])
 		printf(ENTER_SETTINGS);
 
@@ -1306,7 +1343,7 @@ int Console_Main(board_t board)
 			}
 
 			//run MINIMAX
-			if (properties[3] = BLACK_PLAYER)//if computer's color is white
+			if (properties[3] == BLACK_PLAYER)//if computer's color is white
 				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 			else
 				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
@@ -1316,7 +1353,7 @@ int Console_Main(board_t board)
 			{
 				if (!properties[1])
 					printf("Computer: move ");
-				//				printMove(computerMove);
+								printMove(computerMove);
 				makeMove(brd, computerMove);
 				free(computerMove);
 				//print board

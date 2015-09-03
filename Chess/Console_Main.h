@@ -13,8 +13,8 @@
 #define WRONG_POSITION "Invalid position on the board\n"
 #define NO_PIECE "Setting this piece creates an invalid board\n"  
 #define WROND_BOARD_INITIALIZATION "Wrong board initialization\n"
-#define WHT_ENTER_YOUR_MOVE "white player - enter your move:\n"
-#define BLK_ENTER_YOUR_MOVE "black player - enter your move:\n"
+#define WHT_ENTER_YOUR_MOVE "White player - enter your move:\n"
+#define BLK_ENTER_YOUR_MOVE "Black player - enter your move:\n"
 
 #define ILLEGAL_COMMAND "Illegal command, please try again\n"
 #define ILLEGAL_MOVE "Illegal move\n"
