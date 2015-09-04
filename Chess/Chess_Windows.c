@@ -122,6 +122,49 @@ int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, Control
 	return 1;
 }
 
+/* TODO: need to convert this */
+int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons)
+{
+	/* Rects */
+	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
+	SDL_Rect newGameRect = createSDL_Rect(200, 75, 100, 350);
+	SDL_Rect loadGameRect = createSDL_Rect(200, 75, 100, 450);
+	SDL_Rect quitGameRect = createSDL_Rect(200, 75, 100, 550);
+
+
+	createMenu(pMenu_Save, Rect1024x768, rgbMenuBlue, MAIN_MENU);
+
+	/* Make the buttons */
+	createButton(ccb_SaveMenuCCBs, btn_SaveMenuButtons, newGameRect, uploadPicture("NewGameButton.bmp"), showPlayerSelectionMenu, NEW_GAME_BUTTON);
+	createButton(ccb_SaveMenuCCBs + 1, btn_SaveMenuButtons + 1, loadGameRect, uploadPicture("LoadGameButton.bmp"), showLoadGameMenu, LOAD_GAME_BUTTON);
+	createButton(ccb_SaveMenuCCBs + 2, btn_SaveMenuButtons + 2, quitGameRect, uploadPicture("QuitGameButton.bmp"), QuitGame, QUIT_GAME_BUTTON);
+
+	/* Make the Panel*/
+	panelMaker(ccp_SaveMenuCCPs, pnl_SaveMenuPanels, Rect1024x768, rgbMenuBlue);
+	/*ccps->pnl = panel;
+	ccps->btn = NULL;
+	ccps->lbl = NULL;
+	ccps->next = NULL;
+	ccps->rect = Rect1024x768;
+	ccps->pnl->children = NULL;
+	ccps->pnl->rgb_triplet = rgbRed;*/
+
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 1);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 2);
+
+	/* Add the Panels To the Menu*/
+	addPanelToMenu(pMenu_Save, ccp_SaveMenuCCPs, 1);
+
+
+	return 1;
+}
+
+int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons)
+{
+	return 1;
+}
+
 int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns)
 {
 
@@ -327,8 +370,9 @@ int showMenu(Window *window, Menu *menu)
 	return 1;
 }
 
+
 /* This also adds each of the squares to the panel! */
-int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board)
+int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *btn_BoardPanelButtons, board_t board)
 {
 
 	Coord crd;
@@ -348,12 +392,10 @@ int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t b
 			ccb->pnl = NULL;
 			ccb->rect = createSDL_RectForBoardSquare(crd);
 
-
 			type = getInitialTypeOfCoord(crd);
 			player = getInitialPlayerOfCoord(crd);
 			toolFunc = playerSelectionMenu_toggleTool;
-			//guiBoard[crd.i_coord][crd.j_coord] = createSquareByToolType(ccp_BoardSetting, crd, type, player, toolFunc); // Allocates the square, and also adds is to the ccp
-			createSquareByToolType(ccp_BoardSetting, &(guiBoard[crd.i_coord][crd.j_coord]), crd, type, player, toolFunc);
+			createSquareByToolType(ccp_BoardSetting, &(guiBoard[crd.i_coord][crd.j_coord]), (btn_BoardPanelButtons + i*BOARD_SIZE + j) , crd, type, player, toolFunc);
 		}
 	}
 	return 1;
@@ -516,9 +558,29 @@ int updateGUIBoard_Vis(Menu *menu)
 	{
 		for (int j = 0; j < BOARD_SIZE; j++)
 		{
+			int selectionStatus;
+			/* If it is the selected Coord then SelectionStatus == SEL */
+			if (properties[0] == 1)
+				selectionStatus = NON_SEL;
+			else if (selectedTool.i_coord == i && selectedTool.j_coord == j)
+				selectionStatus = SEL;
+			/* Else we go over the highlighted squares array and check for a match: */
+			else
+			{
+				int inHighlightedSquares = 0;
+				for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
+					inHighlightedSquares |= (highlightedSquares[k].i_coord == i && highlightedSquares[k].j_coord == j);
+				if (inHighlightedSquares)
+					selectionStatus = ATT; /* If it is in the highlighted squares, then it is being attacked */
+				else
+					selectionStatus = NON_SEL;
+			}
+
+
+
 			crd.i_coord = i; crd.j_coord = j;
 			guiBoard[i][j].btn->pic = uploadPicture(getPictureName_tools(crd, getColor(pBoard, crd),
-				get_eToolFromType(GetContentOfCoord(pBoard, crd))));
+				get_eToolFromType(GetContentOfCoord(pBoard, crd)), selectionStatus));
 			
 			if (SDL_BlitSurface(guiBoard[i][j].btn->pic, NULL, chessWindow->self, &(guiBoard[i][j].rect)) != 0)
 			{
@@ -673,8 +735,19 @@ int advanceTurnStage(int promotiveSituation)
 
 int changeHighlightedTool(struct menu *menu, struct controlComponent *ccb)
 {
-	/*if (ccb->btn->crd.i_coord == selectedTool.i_coord && ccb->btn->crd.j_coord == selectedTool.j_coord)
-		cancelSelection(menu);*/
+	/* Change selectedTool */
+	selectedTool = ccb->btn->crd;
+
+	/* Reset and fill again highlighted Coords Array */
+	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
+	{
+		highlightedSquares[k].i_coord = -1; highlightedSquares[k].j_coord = -1;
+	}
+	cMove *newMoves = movesByPieceType(pBoard, ccb->btn->crd);
+	highlightMovesList(menu, ccb->btn->crd, newMoves);
+
+	/* update gui board (and vis) */
+	updateGUIBoard(menu);
 	return 1;
 }
 
@@ -685,6 +758,15 @@ int gui_makeMove(struct menu *menu, struct controlComponent *ccb)
 	setSlotInBoard(pBoard, ccb->btn->crd, movedToolType); //moves the tool to the new square
 	setSlotInBoard(pBoard, selectedTool, EMPTY); //empties the square it was at before
 	advanceTurnStage(0);
+	
+	/* Reset Highlight array*/
+	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
+	{
+		highlightedSquares[k].i_coord = -1;
+		highlightedSquares[k].j_coord = -1;
+	}
+	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
+	
 	/* Update GUIBoard */
 	updateGUIBoard(menu);
 	updateGUIBoard_Vis(menu);
@@ -693,7 +775,7 @@ int gui_makeMove(struct menu *menu, struct controlComponent *ccb)
 
 int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
 {
-	/* Highlighted Squares*/
+	/* Reset Highlighted Squares Array */
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
 	{
 		highlightedSquares[k].i_coord = -1;
@@ -702,36 +784,36 @@ int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
 
 	ControlComponent *ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
 
-	SDL_FreeSurface(ccb->btn->pic);
-	ccb->btn->pic = uploadPicture("selected.bmp");
+	//SDL_FreeSurface(ccb->btn->pic);
+	//ccb->btn->pic = uploadPicture("selected.bmp");
 	selectedTool = ccb->btn->crd;
-	
-	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
+	/*if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
 		SDL_FreeSurface(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
-	}
+	}*/
 
 	cMove *curr = moves;
 	int count = 0;
 	while (curr != NULL)
 	{
 		ccb = &(guiBoard[curr->dst.i_coord][curr->dst.j_coord]);
-		SDL_FreeSurface(ccb->btn->pic);
-		ccb->btn->pic = uploadPicture("threatened.bmp");
+		//SDL_FreeSurface(ccb->btn->pic);
+		//ccb->btn->pic = uploadPicture("threatened.bmp");
 		highlightedSquares[count++] = ccb->btn->crd;
 
-		if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
+		/*if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 		{
 			SDL_FreeSurface(ccb->btn->pic);
 			printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 			quit();
 			return 0;
-		}
+		}*/
 		curr = curr->next;
 	}
+	updateGUIBoard_Vis(menu);
 	return 1;
 
 }
@@ -768,7 +850,7 @@ int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *c
 		player = (islower(tool) ? WHITE_PLAYER : BLACK_PLAYER);
 
 	SDL_FreeSurface(ccb->btn->pic);
-	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type));
+	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type,NON_SEL));
 
 	if (playerSelectionMenu_updateContinueOrPlayButton(chessWindow) == 0)
 	{
@@ -964,7 +1046,7 @@ int AI_SettingsMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
 		player = (islower(tool) ? WHITE_PLAYER : BLACK_PLAYER);
 
 	SDL_FreeSurface(ccb->btn->pic);
-	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type));
+	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type,NON_SEL));
 
 	if (AI_Settings_updatePlayButton(chessWindow) == 0)
 	{

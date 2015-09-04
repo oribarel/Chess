@@ -83,42 +83,24 @@ int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Su
 	}*/
 }
 
+
 /* As of now, this function allocates the btn itself. */
-int createButton_square(ControlComponent *ccbParent, SDL_Rect rect, SDL_Surface *pic, btnFunc f )//int(*f)(Menu *, struct controlComponent *))
+int createButton_square(ControlComponent *ccbParent, Button *button, SDL_Rect rect, SDL_Surface *pic, btnFunc f )//int(*f)(Menu *, struct controlComponent *))
 {
 	Coord crd = { -1, -1 };
-	Button *btn = (Button *)calloc(1, sizeof(Button));
-	if (btn == NULL)
-	{
-		//TODO: what to print here
-		quit();
-		return 0;
-	}
-	btn->pic = pic;
-	btn->f = f;
-	btn->crd = crd;
-	btn->purpose = 'a';
+
+	button->pic = pic;
+	button->f = f;
+	button->crd = crd;
+	button->purpose = 'a';
 
 	ccbParent->next = NULL;
 	ccbParent->lbl = NULL;
 	ccbParent->pnl = NULL;
 	ccbParent->rect = rect;
-	ccbParent->btn = btn;
+	ccbParent->btn = button;
 
 	return 1;
-
-	/*ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
-	if (comp == NULL)
-	{
-	printf("ERROR: standard function calloc has failed\n");
-	quit();
-	}
-	Button *btn = (Button *)calloc(1, sizeof(Button));
-	if (btn == NULL)
-	{
-	printf("ERROR: standard function calloc has failed\n");
-	quit();
-	}*/
 }
 
 ControlComponent *createLabel(SDL_Rect rect, SDL_Surface *pic)

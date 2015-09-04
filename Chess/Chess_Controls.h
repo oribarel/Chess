@@ -7,8 +7,12 @@
 
 #define SQUARE_SIDE	80
 
-ControlComponent *createSquareByToolType(ControlComponent *ccp, ControlComponent *ccb, Coord crd, eTool type, int player, btnFunc f); // int(*f)(Window *, ControlComponent *));
-const char *getPictureName_tools(Coord crd, int player, eTool type);
+#define NON_SEL 0
+#define SEL	1
+#define ATT 2
+
+ControlComponent *createSquareByToolType(ControlComponent *ccp, ControlComponent *ccb, Button *button, Coord crd, eTool type, int player, btnFunc f);
+const char *getPictureName_tools(Coord crd, int player, eTool type, int selectionStatus);
 SDL_Rect createSDL_RectForBoardSquare(Coord crd);
 
 

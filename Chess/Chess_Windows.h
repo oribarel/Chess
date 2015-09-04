@@ -134,7 +134,7 @@ int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 
 /* GUI Board */
 int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color);
-int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board);
+int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *btn_BoardPanelButtons, board_t board);
 int updateGUIBoard(Menu *menu);
 int updateGUIBoard_Vis(Menu *menu);
 btnFunc getGameFunctionOfCoord(Coord crd);

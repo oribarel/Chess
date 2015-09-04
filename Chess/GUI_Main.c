@@ -7,6 +7,8 @@ Menu menu_Main, *pMenu_Main = &menu_Main;
 Menu menu_PlayerSelection, *pMenu_PlayerSelection = &menu_PlayerSelection;
 Menu menu_AI_settings, *pMenu_AI_settings = &menu_AI_settings;
 Menu menu_Game, *pMenu_Game = &menu_Game;
+Menu menu_Save, *pMenu_Save = &menu_Save;
+Menu menu_Load, *pMenu_Load = &menu_Load;
 //Menu *currMenu = NULL;
 
 /* Returns 0 on failure to init sdl video and 1 otherwise.*/
@@ -79,9 +81,23 @@ int GUI_Main(board_t passedBoard)
 	SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
 	panelMaker(pCCP_Board, pPnl_Board, boardSettingPanel,rgbPurple);
 	
-	ControlComponent ccb_BoardPanelCCBs[4];
-	Button btnb_BoardPanelButtons[4];
+	ControlComponent ccb_BoardPanelCCBs[4]; //These are for promoting purposes
+	Button btn_BoardPanelButtons[BOARD_SIZE*BOARD_SIZE + 4]; // these are 64 buttons for the squares and 4 for the promoting purpose.
 	
+	/* Save Menu  CCPs, PNLs, BTNs */
+	ControlComponent ccp_SaveMenuCCPs[NUM_OF_SAVE_MENU_PANELS];
+	Panel pnl_SaveMenuPanels[NUM_OF_SAVE_MENU_PANELS];
+
+	ControlComponent ccb_SaveMenuCCBs[NUM_OF_SAVE_MENU_BUTTONS];
+	Button btn_SaveMenuButtons[NUM_OF_SAVE_MENU_BUTTONS];
+
+	/* Load Menu  CCPs, PNLs, BTNs */
+	ControlComponent ccp_LoadMenuCCPs[NUM_OF_LOAD_MENU_PANELS];
+	Panel pnl_LoadMenuPanels[NUM_OF_LOAD_MENU_PANELS];
+
+	ControlComponent ccb_LoadMenuCCBs[NUM_OF_LOAD_MENU_BUTTONS];
+	Button btn_LoadMenuButtons[NUM_OF_LOAD_MENU_BUTTONS];
+
 	/* Pass the board */
 	pBoard = passedBoard;
 	init_board(pBoard);
@@ -121,12 +137,14 @@ int GUI_Main(board_t passedBoard)
 	createPlayerSelectionMenu(pMenu_PlayerSelection,ccp_PlayerSelectionMenuCCPs,pnl_PlayerSelectionMenuPanels,ccb_PlayerSelectionMenuCCBs,btn_PlayerSelectionMenuButtons);
 	createAI_SettingsMenu(pMenu_AI_settings,ccp_AI_SettingsMenuCCPs,pnl_AI_SettingsMenuPanels,ccb_AI_SettingsCCBs,btn_AI_SettingsButtons);
 	createGameMenu(pMenu_Game,ccp_GamePlayMenuCCPs,pnl_GamePlayMenuPanels,ccb_GamePlayMenuCCBs,btnb_GamePlayMenuButtons);
-	
-	createGUIBoard(guiBoard, pCCP_Board, pBoard);
+	createSaveMenu(pMenu_Save, ccp_SaveMenuCCPs, pnl_SaveMenuPanels, ccb_SaveMenuCCBs, btn_SaveMenuButtons);
+	createLoadMenu(pMenu_Load, ccp_LoadMenuCCPs, pnl_LoadMenuPanels, ccb_LoadMenuCCBs, btn_LoadMenuButtons);
+
+
+	createGUIBoard(guiBoard, pCCP_Board, btn_BoardPanelButtons, pBoard);
 	addPanelToMenu(pMenu_PlayerSelection, pCCP_Board,4);
 	addPanelToMenu(pMenu_AI_settings, pCCP_Board,4);
 	addPanelToMenu(pMenu_Game, pCCP_Board, 4);
-
 	
 
 	/* Start */
@@ -185,7 +203,6 @@ int GUI_Main(board_t passedBoard)
 					}
 				}
 			}
-
 			/* Handle Computer's Turn */
 			/* if in AI mode, in game state and it is the computer's turn */
 			if (properties[0] == GAME_MODE && properties[5] == PVC_MODE && properties[3] != properties[4])
@@ -204,6 +221,7 @@ int GUI_Main(board_t passedBoard)
 					minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 
 				advanceTurnStage(0);
+				printf("computer: %d,%d to %d,%d \n", computerMove->src.i_coord, computerMove->src.j_coord, computerMove->dst.i_coord, computerMove->dst.j_coord);
 				if (computerMove != NULL)
 				{
 					selectedTool = computerMove->src;
