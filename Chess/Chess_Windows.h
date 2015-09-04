@@ -72,6 +72,8 @@ extern Menu *pMenu_AI_settings;
 extern Menu *pMenu_Game;
 //extern Menu *currMenu;
 
+extern Coord selectedTool;
+
 int passTheBoard(board_t board);
 
 /* Create Menus Functions */
@@ -117,6 +119,7 @@ int advanceTurnStage(int promotiveSituation);
 
 /* Button handling */
 int buttonPressHandler(Window *window, SDL_Event e);
+int rightClicksHandler(Window *chessWindow, SDL_Event e);
 int pressIfNeeded(Menu *menu, struct controlComponent *ccb, SDL_Event e);
 int isPressInsideButton(SDL_Event e, ControlComponent *ccb);
 
@@ -133,6 +136,7 @@ int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color);
 int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, board_t board);
 int updateGUIBoard(Menu *menu);
+int updateGUIBoard_Vis(Menu *menu);
 btnFunc getGameFunctionOfCoord(Coord crd);
 
 

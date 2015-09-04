@@ -71,9 +71,7 @@ Coord selectedTool, highlightedSquares[BOARD_SIZE*BOARD_SIZE];
 
 Coord src, dest;
 
-/* cMoves */
-cMove *computerMove = NULL;
-cMove *allPossibleMoves = NULL, *tmp;
+
 
 SDL_Rect create1024x768Rect()
 {
@@ -382,8 +380,12 @@ int updateGUIBoard(Menu *menu)
 		{
 			crd.i_coord = i; crd.j_coord = j;
 
-			if (identfier == GAME_PLAY_MENU)
+			if (identfier == GAME_PLAY_MENU )
+			{
 				toolFunc = (btnFunc)getGameFunctionOfCoord(crd);
+				if (properties[5] == PVC_MODE && properties[3] != properties[4])
+					toolFunc = nullFunction;
+			}
 			else if (identfier == PLAYER_SELECTION_MENU)
 				toolFunc = playerSelectionMenu_toggleTool;
 			else if (identfier == AI_SETTINGS_MENU)
@@ -558,7 +560,7 @@ int pawnHighlight(struct menu *menu, struct controlComponent *ccb)
 	cMove *moves = PawnMoves(pBoard, crd);
 	highlightMovesList(menu, crd, moves);
 	freeMovesList(moves);
-	
+	updateGUIBoard(menu);
 	return 1;
 }
 
@@ -609,6 +611,7 @@ int queenHighlight(struct menu *menu, struct controlComponent *ccb)
 	updateGUIBoard(menu);
 	return 1;
 }
+
 int kingHighlight(struct menu *menu, struct controlComponent *ccb)
 {
 	advanceTurnStage(0);
@@ -683,6 +686,7 @@ int gui_makeMove(struct menu *menu, struct controlComponent *ccb)
 	setSlotInBoard(pBoard, selectedTool, EMPTY); //empties the square it was at before
 	advanceTurnStage(0);
 	/* Update GUIBoard */
+	updateGUIBoard(menu);
 	updateGUIBoard_Vis(menu);
 	return 1;
 }
@@ -1182,6 +1186,41 @@ int buttonPressHandler(Window *window, SDL_Event e)
 
 }
 
+
+int rightClicksHandler(Window *chessWindow, SDL_Event e)
+{
+	Menu *menu = chessWindow->shownMenu;
+	ControlComponent *currChild;
+
+	if (menu->identifier == PLAYER_SELECTION_MENU)
+	{
+		if (menu->panel_4 != NULL)
+		{
+			currChild = menu->panel_4->pnl->children;
+			while (currChild != NULL)
+			{
+				if (currChild->btn != NULL)
+				{
+
+					if (isPressInsideButton(e, currChild))
+					{
+						Coord crd = currChild->btn->crd;
+						setSlotInBoard(pBoard, crd, EMPTY);
+						playerSelectionMenu_updateContinueOrPlayButton(chessWindow);
+						updateGUIBoard_Vis(menu);
+						return 1;
+					}
+
+				}
+				currChild = currChild->next;
+			}
+		}
+		return 0;
+	}
+}
+
+
+
 /* Executes pressing of the button if and only if e indicates that button was pressed */
 int pressIfNeeded(Menu *menu, struct controlComponent *ccb, SDL_Event e)
 {
@@ -1324,6 +1363,19 @@ int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis
 int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
 	properties[0] = GAME_MODE;
+	Coord crd;
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			crd.i_coord = i; crd.j_coord = j;
+			char tool = GetContentOfCoord(pBoard, crd);
+			if (tool == WHITE_K)
+				WhiteKing = crd;
+			if (tool == BLACK_K)
+				BlackKing= crd;
+		}
+	}
 	showMenu(chessWindow, pMenu_Game);
 	return 0;
 }

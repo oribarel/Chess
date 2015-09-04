@@ -87,7 +87,9 @@ int GUI_Main(board_t passedBoard)
 	init_board(pBoard);
 	passTheBoard(passedBoard);
 	
-	
+	/* cMoves */
+	cMove *computerMove = NULL;
+	cMove *allPossibleMoves = NULL, *tmp;
 
 	
 	/* Initialize SDL Video */
@@ -153,9 +155,10 @@ int GUI_Main(board_t passedBoard)
 			// add right click https://www.libsdl.org/release/SDL-1.2.15/docs/html/sdlmousebuttonevent.html?
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
-				//printf("%s", "SDL_MOUSEBUTTONUP does works. \n");
-				buttonPressHandler(chessWindow, e);
-				//break;
+				if (e.button.button == SDL_BUTTON_LEFT)
+					buttonPressHandler(chessWindow, e);
+				else if (e.button.button == SDL_BUTTON_RIGHT)
+					rightClicksHandler(chessWindow, e);
 			}
 			
 			if (SDL_Flip(chessWindow->self) != 0)
@@ -163,6 +166,59 @@ int GUI_Main(board_t passedBoard)
 				printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
 				quit();
 				return 0;
+			}
+
+			/* Update the Kings Coordinates*/
+			if (properties[0] == GAME_MODE)
+			{
+				Coord crd;
+				for (int i = 0; i < BOARD_SIZE; i++)
+				{
+					for (int j = 0; j < BOARD_SIZE; j++)
+					{
+						crd.i_coord = i; crd.j_coord = j;
+						char tool = GetContentOfCoord(pBoard, crd);
+						if (tool == WHITE_K)
+							WhiteKing = crd;
+						if (tool == BLACK_K)
+							BlackKing = crd;
+					}
+				}
+			}
+
+			/* Handle Computer's Turn */
+			/* if in AI mode, in game state and it is the computer's turn */
+			if (properties[0] == GAME_MODE && properties[5] == PVC_MODE && properties[3] != properties[4])
+			{
+				computerMove = NULL;
+				if (score(pBoard, getGenericTool(1)) == -100)//no legal move for the computer (computer lost)
+				{
+					//TODO: show that player won, disable all buttons except for returns.
+					properties[1] = 1; // <---- consider this //TODO:
+				}
+
+				//run MINIMAX
+				if (properties[3] == BLACK_PLAYER)//if computer's color is white
+					minimax_score(pBoard, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+				else
+					minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+
+				advanceTurnStage(0);
+				if (computerMove != NULL)
+				{
+					selectedTool = computerMove->src;
+					gui_makeMove(chessWindow->shownMenu, &(guiBoard[computerMove->dst.i_coord][computerMove->dst.j_coord]));
+					//advanceTurnStage(0); //computerMove->promote);
+					free(computerMove);
+					updateGUIBoard(chessWindow->shownMenu);
+					updateGUIBoard_Vis(chessWindow->shownMenu);
+					if (SDL_Flip(chessWindow->self) != 0)
+					{
+						printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+						quit();
+						return 0;
+					}
+				}
 			}
 		}
 	}
