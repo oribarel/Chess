@@ -68,8 +68,12 @@ int playerTurnStages[5] = { WAITING, NONE_SELECTED, HIGHLIGHTED, MOVE_MADE, PROM
 int  whitePlayerTurnStage = NONE_SELECTED, blackPlayerTurnStage = WAITING;
 Coord selectedTool, highlightedSquares[BOARD_SIZE*BOARD_SIZE];
 
-
 Coord src, dest;
+
+/* Save/Load Game */
+char selectedSlot = '0';
+
+
 
 
 
@@ -124,44 +128,130 @@ int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, Control
 
 /* TODO: need to convert this */
 int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons)
-{
+{ /* This menu has a 'return to game', a 'quit', 'save' and 7 slots buttons. */
+	
+	int wSide = 12;
+	int hSide = 9;
+	int wBoardSetting = 800;
+	int hBoardSetting = 750;
+	int wGameModeSetting = SCREEN_W - wBoardSetting - 2 * wSide;
+	int hGameModeSetting = (SCREEN_H - 2 * hSide) / 3;
+	
 	/* Rects */
 	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
-	SDL_Rect newGameRect = createSDL_Rect(200, 75, 100, 350);
-	SDL_Rect loadGameRect = createSDL_Rect(200, 75, 100, 450);
-	SDL_Rect quitGameRect = createSDL_Rect(200, 75, 100, 550);
+	SDL_Rect returnsPanel = createSDL_Rect(wGameModeSetting, hGameModeSetting, wSide, 9);
+	SDL_Rect slotsPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
+
+	SDL_Rect returnToMainMenu = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect returnToGameButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting/2 + hSide);
+	SDL_Rect slot_1 = createSDL_Rect(200, 75, 412, 100);
+	SDL_Rect slot_2 = createSDL_Rect(200, 75, 412, 185);
+	SDL_Rect slot_3 = createSDL_Rect(200, 75, 412, 270);
+	SDL_Rect slot_4 = createSDL_Rect(200, 75, 412, 355);
+	SDL_Rect slot_5 = createSDL_Rect(200, 75, 412, 440);
+	SDL_Rect slot_6 = createSDL_Rect(200, 75, 412, 525);
+	SDL_Rect slot_7 = createSDL_Rect(200, 75, 412, 610);
+	SDL_Rect saveButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
 
 
-	createMenu(pMenu_Save, Rect1024x768, rgbMenuBlue, MAIN_MENU);
+	createMenu(pMenu_Save, Rect1024x768, rgbMenuBlue, SAVE_MENU);
 
 	/* Make the buttons */
-	createButton(ccb_SaveMenuCCBs, btn_SaveMenuButtons, newGameRect, uploadPicture("NewGameButton.bmp"), showPlayerSelectionMenu, NEW_GAME_BUTTON);
-	createButton(ccb_SaveMenuCCBs + 1, btn_SaveMenuButtons + 1, loadGameRect, uploadPicture("LoadGameButton.bmp"), showLoadGameMenu, LOAD_GAME_BUTTON);
-	createButton(ccb_SaveMenuCCBs + 2, btn_SaveMenuButtons + 2, quitGameRect, uploadPicture("QuitGameButton.bmp"), QuitGame, QUIT_GAME_BUTTON);
-
-	/* Make the Panel*/
-	panelMaker(ccp_SaveMenuCCPs, pnl_SaveMenuPanels, Rect1024x768, rgbMenuBlue);
-	/*ccps->pnl = panel;
-	ccps->btn = NULL;
-	ccps->lbl = NULL;
-	ccps->next = NULL;
-	ccps->rect = Rect1024x768;
-	ccps->pnl->children = NULL;
-	ccps->pnl->rgb_triplet = rgbRed;*/
+	createButton(ccb_SaveMenuCCBs, btn_SaveMenuButtons, returnToMainMenu, uploadPicture("ReturnToMainMenu.bmp"), SaveMenu_ResetGameAndShowMainMenu, BACK_TO_MAIN_MENU_BUTTON);
+	createButton(ccb_SaveMenuCCBs + 1, btn_SaveMenuButtons + 1, slot_1, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '1');
+	createButton(ccb_SaveMenuCCBs + 2, btn_SaveMenuButtons + 2, slot_2, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '2');
+	createButton(ccb_SaveMenuCCBs + 3, btn_SaveMenuButtons + 3, slot_3, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '3');
+	createButton(ccb_SaveMenuCCBs + 4, btn_SaveMenuButtons + 4, slot_4, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '4');
+	createButton(ccb_SaveMenuCCBs + 5, btn_SaveMenuButtons + 5, slot_5, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '5');
+	createButton(ccb_SaveMenuCCBs + 6, btn_SaveMenuButtons + 6, slot_6, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '6');
+	createButton(ccb_SaveMenuCCBs + 7, btn_SaveMenuButtons + 7, slot_7, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '7');
+	createButton(ccb_SaveMenuCCBs + 8, btn_SaveMenuButtons + 8, saveButton, uploadPicture("saveGame.bmp"), SaveMenu_saveGameSlot, SAVE_GAME_BUTTON);
+	createButton(ccb_SaveMenuCCBs + 9, btn_SaveMenuButtons + 9, returnToGameButton, uploadPicture("ReturnToGame.bmp"), SaveMenu_ResetSaveMenuAndShowGamePlayMenu, BACK_TO_GAME);
+	
+	/* Make the Panels*/
+	panelMaker(ccp_SaveMenuCCPs, pnl_SaveMenuPanels, returnsPanel, rgbRed);
+	panelMaker(ccp_SaveMenuCCPs + 1, pnl_SaveMenuPanels + 1, slotsPanel, rgbPurple);
 
 	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs);
-	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 1);
-	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 2);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 1);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 2);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 3);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 4);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 5);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 6);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 7);
+	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 8);
+	addButtonToPanel(ccp_SaveMenuCCPs , ccb_SaveMenuCCBs + 9);
 
 	/* Add the Panels To the Menu*/
 	addPanelToMenu(pMenu_Save, ccp_SaveMenuCCPs, 1);
-
+	addPanelToMenu(pMenu_Save, ccp_SaveMenuCCPs + 1, 2);
+	addPanelToMenu(pMenu_Save, NULL, 3);
+	addPanelToMenu(pMenu_Save, NULL, 4);
 
 	return 1;
 }
 
 int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons)
 {
+	/* This menu has a 'return to game', a 'quit', 'save' and 7 slots buttons. */
+
+	int wSide = 12;
+	int hSide = 9;
+	int wBoardSetting = 800;
+	int hBoardSetting = 750;
+	int wGameModeSetting = SCREEN_W - wBoardSetting - 2 * wSide;
+	int hGameModeSetting = (SCREEN_H - 2 * hSide) / 3;
+
+	/* Rects */
+	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
+	SDL_Rect returnsPanel = createSDL_Rect(wGameModeSetting, hGameModeSetting, wSide, 9);
+	SDL_Rect slotsPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
+
+	SDL_Rect returnToMainMenu = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+	//SDL_Rect returnToGameButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting / 2 + hSide);
+	SDL_Rect slot_1 = createSDL_Rect(200, 75, 412, 100);
+	SDL_Rect slot_2 = createSDL_Rect(200, 75, 412, 185);
+	SDL_Rect slot_3 = createSDL_Rect(200, 75, 412, 270);
+	SDL_Rect slot_4 = createSDL_Rect(200, 75, 412, 355);
+	SDL_Rect slot_5 = createSDL_Rect(200, 75, 412, 440);
+	SDL_Rect slot_6 = createSDL_Rect(200, 75, 412, 525);
+	SDL_Rect slot_7 = createSDL_Rect(200, 75, 412, 610);
+	SDL_Rect loadButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+
+
+	createMenu(pMenu_Save, Rect1024x768, rgbMenuBlue, SAVE_MENU);
+
+	/* Make the buttons */
+	createButton(ccb_LoadMenuCCBs, btn_LoadMenuButtons, returnToMainMenu, uploadPicture("ReturnToMainMenu.bmp"), LoadMenu_Reset_LoadMenu_And_ShowMainMenu, BACK_TO_MAIN_MENU_BUTTON);
+	createButton(ccb_LoadMenuCCBs + 1, btn_LoadMenuButtons + 1, slot_1, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '1');
+	createButton(ccb_LoadMenuCCBs + 2, btn_LoadMenuButtons + 2, slot_2, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '2');
+	createButton(ccb_LoadMenuCCBs + 3, btn_LoadMenuButtons + 3, slot_3, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '3');
+	createButton(ccb_LoadMenuCCBs + 4, btn_LoadMenuButtons + 4, slot_4, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '4');
+	createButton(ccb_LoadMenuCCBs + 5, btn_LoadMenuButtons + 5, slot_5, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '5');
+	createButton(ccb_LoadMenuCCBs + 6, btn_LoadMenuButtons + 6, slot_6, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '6');
+	createButton(ccb_LoadMenuCCBs + 7, btn_LoadMenuButtons + 7, slot_7, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '7');
+	createButton(ccb_LoadMenuCCBs + 8, btn_LoadMenuButtons + 8, loadButton, uploadPicture("loadGame.bmp"), nullFunction, LOAD_GAME_BUTTON);
+	/* Make the Panels*/
+	panelMaker(ccp_LoadMenuCCPs, pnl_LoadMenuPanels, returnsPanel, rgbRed);
+	panelMaker(ccp_LoadMenuCCPs + 1, pnl_LoadMenuPanels + 1, slotsPanel, rgbPurple);
+
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 1);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 2);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 3);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 4);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 5);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 6);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 7);
+	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 8);
+
+	/* Add the Panels To the Menu*/
+	addPanelToMenu(pMenu_Load, ccp_LoadMenuCCPs, 1);
+	addPanelToMenu(pMenu_Load, ccp_LoadMenuCCPs + 1, 2);
+	addPanelToMenu(pMenu_Load, NULL, 3);
+	addPanelToMenu(pMenu_Load, NULL, 4);
+
 	return 1;
 }
 
@@ -215,7 +305,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	addPanelToMenu(playerSelectionMenu, ccps + 1, 2);
 	addPanelToMenu(playerSelectionMenu, ccps + 2, 3);
 
-	/* Highlighted Squares*/
+	/* Highlighted Squares  <--- this happens *here* only for sake of multi-functionality */
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
 	{
 		highlightedSquares[k].i_coord = -1;
@@ -340,12 +430,18 @@ int showMenu(Window *window, Menu *menu)
 	//window->shownMenu = menu;
 	addMenuToWindow(chessWindow, menu);
 
+	if (SDL_Flip(chessWindow->self) != 0)
+	{
+		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+
+
 	if (menu->identifier == PLAYER_SELECTION_MENU || menu->identifier == AI_SETTINGS_MENU || menu->identifier == GAME_PLAY_MENU)
 	{
 		updateGUIBoard(menu);
 	}
-
-
 
 	if (menu->panel_1 != NULL)
 	{
@@ -992,6 +1088,7 @@ int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
 	return 1;
 }
 
+
 int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *ccb)
 {
 	if (properties[3] == WHITE_PLAYER)
@@ -1106,9 +1203,227 @@ int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlCompone
 
 int GamePlayMenu_SaveGame(struct menu *menu, struct controlComponent *ccb)
 {
+	showSaveGameMenu(menu, ccb);
 	return 0;
 }
 
+int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb)
+{
+	if (selectedSlot == '0')
+		return 0;
+
+	char filename[12] = "chessX.xml \0";
+	*(filename + 5) = selectedSlot;
+	Save1(pBoard, filename);  //TODO: change to regular save.
+
+	selectedSlot = '0';
+	SaveOrLoad_Menu_UpdateVis(menu);
+	
+	return 1;
+}
+
+/* Serializes the game into an XML file */
+int Save1(board_t board, char* file_name){
+	int i, j;
+	//replacing '\n' with '\0'
+	file_name[strlen(file_name) - 1] = '\0';
+	FILE *f = fopen(file_name, "w");
+	if (f == NULL){
+		printf("Wrong file name\n");
+		return 0;
+	}
+	fprintf(f, XML_FIRST_LINE);
+	fprintf(f, "<game>\n");
+	if (properties[4] == WHITE_PLAYER)
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", WHITE);
+	else
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", BLACK);
+	fprintf(f, "\t<game_mode>%d</game_mode>\n", properties[5]);
+
+
+	if (properties[5] == 2){
+		if (properties[2] != 0)
+			fprintf(f, "\t<difficulty>%d</difficulty>\n", properties[2]);
+		else
+			fprintf(f, "\t<difficulty>best/difficulty>\n");
+		if (properties[3] == WHITE_PLAYER)
+			fprintf(f, "\t<user_color>%s</user_color>\n", WHITE);
+		else
+			fprintf(f, "\t<user_color>%s</user_color>\n", BLACK);
+	}
+	else
+	{
+		fprintf(f, "\t<difficulty></difficulty>\n");
+		fprintf(f, "\t<user_color></user_color>\n");
+	}
+
+	fprintf(f, "\t<board>\n");
+	for (j = BOARD_SIZE; j > 0; j--){
+		fprintf(f, "\t\t<row_%d>", j);
+		for (i = 0; i < BOARD_SIZE; i++){
+			if (board[i][j - 1] == EMPTY)
+				fprintf(f, "_");
+			else
+				fprintf(f, "%c", board[i][j - 1]);
+		}
+		fprintf(f, "</row_%d>\n", j);
+	}
+	fprintf(f, "\t</board>\n");
+	fprintf(f, "</game>\n");
+	fclose(f);
+	return 0;
+}
+
+/* Sets the game from XML file */
+int LoadFromFile1(char* file_path, board_t board){
+	int i, j;
+	char str[51], curTag;
+	FILE *file = fopen(file_path, "r");
+	if (file == NULL)
+	{
+		printf("%s", "Wrong file name\n");
+		return 1;
+	}
+
+
+
+
+	//placing the file pointer on the first tag after <game> tag
+	for (i = 0; i < 5; i++)
+		fscanf(file, "%s", str);
+
+	if (*(str + 1) == 'n'){ //next turn
+		if (*(str + 11) == 'W')
+			properties[4] = WHITE_PLAYER;
+		else
+			properties[4] = BLACK_PLAYER;
+		//read next line
+		fscanf(file, "%s", str);
+	}
+
+	if (*(str + 1) == 'g'){ //game mode
+		properties[5] = *(str + 11) - '0';
+		//read next line
+		fscanf(file, "%s", str);
+	}
+	else
+		properties[5] = 1;
+
+
+	if (*(str + 1) == 'd'){ //difficulty (optional tag)
+		if (*(str + 12) == 'b')
+			properties[2] = 0;
+		else
+			properties[2] = *(str + 12) - '0';
+		//read next line
+		fscanf(file, "%s", str);
+	}
+	else
+		properties[2] = 1;
+
+
+	if (*(str + 1) == 'u'){ //user color (optional tag)
+		if (*(str + 12) == 'W')
+			properties[3] = WHITE_PLAYER;
+		else
+			properties[3] = BLACK_PLAYER;
+		//read next line
+		fscanf(file, "%s", str);
+	}
+	else
+		properties[3] = BLACK_PLAYER;
+
+
+	//reading board slots:
+	for (j = BOARD_SIZE - 1; j >= 0; j--){
+		fscanf(file, "%s", str);
+		for (i = 0; i < BOARD_SIZE; i++){
+			if (*(str + 7 + i) != '_')
+			{
+				board[i][j] = *(str + 7 + i);
+				//update kings' coordinates
+				if (*(str + 7 + i) == WHITE_K)
+				{
+					WhiteKing.i_coord = i;
+					WhiteKing.j_coord = j;
+				}
+				if (*(str + 7 + i) == BLACK_K)
+				{
+					BlackKing.i_coord = i;
+					BlackKing.j_coord = j;
+				}
+
+
+			}
+			else
+				board[i][j] = EMPTY;
+		}
+	}
+
+	fclose(file);
+	print_board(board);
+	return 0;
+}
+
+
+int SaveMenu_selectSlot(struct menu *menu, struct controlComponent *ccb)
+{
+	if (selectedSlot != ccb->btn->purpose)
+		selectedSlot = ccb->btn->purpose;
+	else
+		selectedSlot = '0';
+
+	SaveOrLoad_Menu_UpdateVis(menu);
+	return 1;
+}
+
+int SaveOrLoad_Menu_UpdateVis(struct menu *menu)
+{
+	/* Update Save Or Load Menu Vis */
+	ControlComponent *ccbCurr = menu->panel_2->pnl->children;
+	for (int i = 0; i < 7; i++)
+	{
+		ccbCurr->btn->pic = uploadPicture(i + '1' == selectedSlot ? "PressedGenericButton.bmp" : "UnpressedGenericButton.bmp");
+		if (SDL_BlitSurface(ccbCurr->btn->pic, NULL, chessWindow->self, &(ccbCurr->rect)) != 0)
+		{
+			SDL_FreeSurface(ccbCurr->btn->pic);
+			printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+			quit();
+			return 0;
+		}
+
+		ccbCurr = ccbCurr->next;
+	}
+	if (SDL_Flip(chessWindow->self) != 0)
+	{
+		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+	return 1;
+}
+
+int SaveMenu_ResetGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb)
+{
+	//TODO: Reset all data (board, default settings, kingcrd, highlights, turnstages...) and also this menu's data, and then:
+	showMainMenu(menu, ccb);
+	return 1;
+}
+
+int SaveMenu_ResetSaveMenuAndShowGamePlayMenu(struct menu *menu, struct controlComponent *ccb)
+{
+	selectedSlot = '0';
+	SaveOrLoad_Menu_UpdateVis(menu);
+	showGamePlayMenu(menu, ccb);
+	return 1;
+}
+
+int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlComponent *ccb)
+{
+	//TODO: Reset all of this menu's data ( selected slot... ) and then:
+	showMainMenu(menu, ccb);
+	return 1;
+}
 
 /* shared with main menu and game play menu */
 int QuitGame(struct menu *menu, struct controlComponent *ccb)
@@ -1120,7 +1435,7 @@ int QuitGame(struct menu *menu, struct controlComponent *ccb)
 
 
 
-
+/* Not in USE!!!*/
 /* If Menu has n sub-panels then this function should be ran on it with i_next from 0 to n-1. */
 void blitMenu(ControlComponent *ccpParent, int i_next, Window *window)
 {
@@ -1137,6 +1452,7 @@ void blitMenu(ControlComponent *ccpParent, int i_next, Window *window)
 
 	}
 
+	
 	ControlComponent *ccbCurr = curr->pnl->children;
 	while (ccbCurr != NULL)
 	{
@@ -1299,6 +1615,7 @@ int rightClicksHandler(Window *chessWindow, SDL_Event e)
 		}
 		return 0;
 	}
+	return 0;
 }
 
 
@@ -1462,8 +1779,17 @@ int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 	return 0;
 }
 
+int showSaveGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
+	showMenu(chessWindow, pMenu_Save);
+	return 0;
+}
+
 int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
+	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
+	showMenu(chessWindow, pMenu_Load);
 	return 0;
 }
 

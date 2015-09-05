@@ -51,7 +51,7 @@ RGB createRGB(int r, int g, int b)
 	return rgb;
 }
 
-int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Surface *pic, btnFunc f , char purpose)
+int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Surface *pic, btnFunc f, char purpose)
 {
 	Coord crd = { -1, -1 };
 
@@ -85,7 +85,7 @@ int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Su
 
 
 /* As of now, this function allocates the btn itself. */
-int createButton_square(ControlComponent *ccbParent, Button *button, SDL_Rect rect, SDL_Surface *pic, btnFunc f )//int(*f)(Menu *, struct controlComponent *))
+int createButton_square(ControlComponent *ccbParent, Button *button, SDL_Rect rect, SDL_Surface *pic, btnFunc f)//int(*f)(Menu *, struct controlComponent *))
 {
 	Coord crd = { -1, -1 };
 
@@ -192,14 +192,14 @@ int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb)
 
 	ccb->rect.x += ccp->rect.x;
 	ccb->rect.y += ccp->rect.y;
-	
+
 	return 1;
 }
 
 /* Pre: has a pic */
 int drawButtonToPanel(ControlComponent *ccb)
 {
-	
+
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
 		SDL_FreeSurface(ccb->btn->pic);
@@ -257,10 +257,12 @@ int addPanelToMenu(Menu *menuParent, ControlComponent *ccp, int panelNum)
 	default:
 		break;
 	}
+	if (ccp != NULL)
+	{
+		ccp->rect.x += menuParent->rect.x;
+		ccp->rect.y += menuParent->rect.y;
+	}
 
-	ccp->rect.x += menuParent->rect.x;
-	ccp->rect.y += menuParent->rect.y;
-	
 	return 1;
 }
 

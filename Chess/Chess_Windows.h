@@ -12,7 +12,8 @@ typedef ControlComponent ** board_g;
 #define PLAYER_SELECTION_MENU	1
 #define AI_SETTINGS_MENU		2
 #define GAME_PLAY_MENU			3
-
+#define SAVE_MENU				4
+#define LOAD MENU				5
 
 #define SETTINGS_MODE 1
 #define GAME_MODE 0
@@ -31,6 +32,7 @@ typedef ControlComponent ** board_g;
 
 #define BACK_TO_MAIN_MENU_BUTTON					'M'
 #define BACK_TO_PLAYER_SELECTION_BUTTON				'P'
+#define BACK_TO_GAME								'G'
 
 #define AI_DIFF_TOGGLE_BUTTON						'd'
 #define AI_PLAYER_COLOR_TOGGLE_BUTTON				'c'
@@ -70,6 +72,9 @@ extern Menu *pMenu_Main;
 extern Menu *pMenu_PlayerSelection;
 extern Menu *pMenu_AI_settings;
 extern Menu *pMenu_Game;
+extern Menu *pMenu_Save;
+extern Menu *pMenu_Load;
+
 //extern Menu *currMenu;
 
 extern Coord selectedTool;
@@ -101,9 +106,17 @@ int AI_SettingsMenu_toggleTool(Menu *menu, struct controlComponent *ccb);
 int AI_Settings_updatePlayButton(Window *window);
 
 
+/* Save, Load Menus Functions */
+int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb);
+int SaveMenu_selectSlot(struct menu *menu, struct controlComponent *ccb);
+int SaveMenu_ResetGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb);
+int SaveMenu_ResetSaveMenuAndShowGamePlayMenu(struct menu *menu, struct controlComponent *ccb);
+int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlComponent *ccb);
+
 /* GamePlayMenu */
 int GamePlayMenu_SaveGame(struct menu *menu, struct controlComponent *ccb);
 int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb);
+
 
 /* Game Play Functions */
 int pawnHighlight(struct menu *menu, struct controlComponent *ccb);

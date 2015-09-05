@@ -17,10 +17,10 @@
 #define NUM_OF_GAME_PLAY_MENU_BUTTONS			3
 
 #define NUM_OF_SAVE_MENU_PANELS					2
-#define NUM_OF_SAVE_MENU_BUTTONS				7
+#define NUM_OF_SAVE_MENU_BUTTONS				10
 
 #define NUM_OF_LOAD_MENU_PANELS					2
-#define NUM_OF_LOAD_MENU_BUTTONS				6
+#define NUM_OF_LOAD_MENU_BUTTONS				9
 
 int GUI_Main(board_t board);
 
