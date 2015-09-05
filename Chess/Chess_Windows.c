@@ -221,7 +221,7 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 	SDL_Rect loadButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
 
 
-	createMenu(pMenu_Save, Rect1024x768, rgbMenuBlue, SAVE_MENU);
+	createMenu(pMenu_Load, Rect1024x768, rgbMenuBlue, SAVE_MENU);
 
 	/* Make the buttons */
 	createButton(ccb_LoadMenuCCBs, btn_LoadMenuButtons, returnToMainMenu, uploadPicture("ReturnToMainMenu.bmp"), LoadMenu_Reset_LoadMenu_And_ShowMainMenu, BACK_TO_MAIN_MENU_BUTTON);
@@ -1199,7 +1199,7 @@ int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb)
 
 	char filename[12] = "chessX.xml \0";
 	*(filename + 5) = selectedSlot;
-	Save1(pBoard, filename);  //TODO: change to regular save.
+	Save(pBoard, filename); 
 
 	selectedSlot = '0';
 	SaveOrLoad_Menu_UpdateVis(menu);
@@ -1207,57 +1207,6 @@ int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb)
 	return 1;
 }
 
-/* Serializes the game into an XML file */
-int Save1(board_t board, char* file_name){
-	int i, j;
-	//replacing '\n' with '\0'
-	file_name[strlen(file_name) - 1] = '\0';
-	FILE *f = fopen(file_name, "w");
-	if (f == NULL){
-		printf("Wrong file name\n");
-		return 0;
-	}
-	fprintf(f, XML_FIRST_LINE);
-	fprintf(f, "<game>\n");
-	if (properties[4] == WHITE_PLAYER)
-		fprintf(f, "\t<next_turn>%s</next_turn>\n", WHITE);
-	else
-		fprintf(f, "\t<next_turn>%s</next_turn>\n", BLACK);
-	fprintf(f, "\t<game_mode>%d</game_mode>\n", properties[5]);
-
-
-	if (properties[5] == 2){
-		if (properties[2] != 0)
-			fprintf(f, "\t<difficulty>%d</difficulty>\n", properties[2]);
-		else
-			fprintf(f, "\t<difficulty>best/difficulty>\n");
-		if (properties[3] == WHITE_PLAYER)
-			fprintf(f, "\t<user_color>%s</user_color>\n", WHITE);
-		else
-			fprintf(f, "\t<user_color>%s</user_color>\n", BLACK);
-	}
-	else
-	{
-		fprintf(f, "\t<difficulty></difficulty>\n");
-		fprintf(f, "\t<user_color></user_color>\n");
-	}
-
-	fprintf(f, "\t<board>\n");
-	for (j = BOARD_SIZE; j > 0; j--){
-		fprintf(f, "\t\t<row_%d>", j);
-		for (i = 0; i < BOARD_SIZE; i++){
-			if (board[i][j - 1] == EMPTY)
-				fprintf(f, "_");
-			else
-				fprintf(f, "%c", board[i][j - 1]);
-		}
-		fprintf(f, "</row_%d>\n", j);
-	}
-	fprintf(f, "\t</board>\n");
-	fprintf(f, "</game>\n");
-	fclose(f);
-	return 0;
-}
 
 /* Sets the game from XML file */
 int LoadFromFile1(char* file_path, board_t board){

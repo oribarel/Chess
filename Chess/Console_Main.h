@@ -2,6 +2,9 @@
 #define CONSOLE_MAIN_H
 
 #include "Chess_Logic.h"
+#include "best.h"
+
+
 
 // board initialization
 #define ENTER_SETTINGS "Enter game settings:\n" 
@@ -9,7 +12,6 @@
 #define TWO_PLAYERS_GAME_MODE "Running game in 2 players mode\n"
 #define PLAYER_VS_AI_GAME_MODE "Running game in player vs. AI mode\n"
 #define WRONG_MINIMAX_DEPTH "Wrong value for minimax depth. The value should be between 1 to 4\n"
-#define WRONG_FILE_NAME "Wrong file name\n"
 #define WRONG_POSITION "Invalid position on the board\n"
 #define NO_PIECE "Setting this piece creates an invalid board\n"  
 #define WROND_BOARD_INITIALIZATION "Wrong board initialization\n"
@@ -34,7 +36,6 @@
 
 #define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;) // TODO: check this
 #define BEST "best"
-#define BESTval 0
 
 
 

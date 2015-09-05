@@ -7,7 +7,7 @@
 /*#define SCREEN_W 1024
 #define SCREEN_H 768*/
 
-typedef ControlComponent ** board_g;
+typedef ControlComponent **board_g;
 
 #define MAIN_MENU				0
 #define PLAYER_SELECTION_MENU	1
@@ -87,6 +87,8 @@ int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, Control
 int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 int createAI_SettingsMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
+int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons);
+int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons);
 
 /* mainMenu */
 int LoadGame(Window *window, ControlComponent *);

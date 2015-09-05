@@ -25,8 +25,8 @@ int gameInfo[6] = { 0, 0, 0, 0, 0, 0 };
 'number of white tools in Black King's danger zone		1
 */
 
-Coord WhiteKing;
-Coord BlackKing;
+Coord WhiteKing = { -1, -1 };
+Coord BlackKing = { -1, -1 };
 
 Coord WhiteKingDangerZone[BOARD_SIZE * 2] = { 0 };
 Coord BlackKingDangerZone[BOARD_SIZE * 2] = { 0 };
@@ -323,19 +323,22 @@ void setSlotInBoard(board_t board, Coord slot, char ch)
 	board[slot.i_coord][slot.j_coord] = ch;
 
 	//update kings' coordinates
-	if (ch == WHITE_K)
+	if (ch == WHITE_K || ch == BLACK_K)
 	{
-		WhiteKing = slot;
+		if (ch == WHITE_K)
+		{
+			WhiteKing = slot;
 
-	}
-	if (ch == BLACK_K)
-	{
-		BlackKing = slot;
+		}
+		if (ch == BLACK_K)
+		{
+			BlackKing = slot;
 
+		}
+		// update danger zones
+		UpdateDangerZone(board, WHITE_PLAYER);
+		UpdateDangerZone(board, BLACK_PLAYER);
 	}
-	// update danger zones
-	UpdateDangerZone(board, WHITE_PLAYER);
-	UpdateDangerZone(board, BLACK_PLAYER);
 }
 
 
@@ -604,7 +607,7 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 {
 	int h, v;
 	Coord tmp;
-	if (getColor(board, attacker) == getColor(board, victim) || GetContentOfCoord(board,attacker) == EMPTY)
+	if (getColor(board, attacker) == getColor(board, victim) || GetContentOfCoord(board, attacker) == EMPTY)
 	{
 		return 0;
 	}
@@ -1039,7 +1042,7 @@ cMove* KnightMoves(board_t board, Coord coord)
 		if (isInBoard(possibilities[i]) &&
 			(GetContentOfCoord(board, possibilities[i]) == EMPTY || DoesCrdContainsEnemy(board, possibilities[i], tool)))
 		{
-			if (!openKingDefences(board,coord,possibilities[i]))
+			if (!openKingDefences(board, coord, possibilities[i]))
 				AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]), 0);
 		}
 	}
@@ -1168,9 +1171,9 @@ int CountToolsOfType(board_t board, char type)
 {
 	int counter = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
-		for (int j = 0; j < BOARD_SIZE; j++)
-			if (board[i][j] == type)
-				counter++;
+	for (int j = 0; j < BOARD_SIZE; j++)
+	if (board[i][j] == type)
+		counter++;
 	return counter;
 }
 
@@ -1224,7 +1227,7 @@ int KingUnderThreat(board_t board, int player)
 	Coord kingCrd, tmpCrd;
 	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
 	for (int i = 0; i < BOARD_SIZE; i++)
-	{		
+	{
 		for (int j = 0; j < BOARD_SIZE; j++)
 		{
 			tmpCrd = GenerateCoord(i, j);
@@ -1241,7 +1244,7 @@ int score(board_t board, int player)
 
 {
 
-		
+
 	Coord coord;
 	int score = 0, ally, enemy, playerBlocked = 1, opponentBlocked = 1;
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
@@ -1264,15 +1267,15 @@ int score(board_t board, int player)
 
 	/*TODO: consider what to do with this part*/
 	if (playerBlocked == 1)
-		if (KingUnderThreat(board, player))
-			return -800;//player lost
-		else
-			return -799; //tie
-	if (opponentBlocked == 1 )
-		if (KingUnderThreat(board, -player))
-			return 800;//player won
-		else
-			return -799; //tie
+	if (KingUnderThreat(board, player))
+		return -800;//player lost
+	else
+		return -799; //tie
+	if (opponentBlocked == 1)
+	if (KingUnderThreat(board, -player))
+		return 800;//player won
+	else
+		return -799; //tie
 	if (DEBUG)
 	{
 		print_board(board);
@@ -1589,4 +1592,147 @@ int mod(int a, int b)
 	return ret;
 }
 
+
+
+int Save(board_t board, char* file_name){
+	int i, j;
+	//replacing '\n' with '\0'
+	file_name[strlen(file_name) - 1] = '\0';
+	FILE *f = fopen(file_name, "w");
+	if (f == NULL){
+		printf(WRONG_FILE_NAME);
+		return 0;
+	}
+	fprintf(f, XML_FIRST_LINE);
+	fprintf(f, "<game>\n");
+	if (properties[4] == WHITE_PLAYER)
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", WHITE);
+	else
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", BLACK);
+	fprintf(f, "\t<game_mode>%d</game_mode>\n", properties[5]);
+
+
+	if (properties[5] == 2){
+		if (properties[2] != BESTval)
+			fprintf(f, "\t<difficulty>%d</difficulty>\n", properties[2]);
+		else
+			fprintf(f, "\t<difficulty>best/difficulty>\n");
+		if (properties[3] == WHITE_PLAYER)
+			fprintf(f, "\t<user_color>%s</user_color>\n", WHITE);
+		else
+			fprintf(f, "\t<user_color>%s</user_color>\n", BLACK);
+	}
+	else
+	{
+		fprintf(f, "\t<difficulty></difficulty>\n");
+		fprintf(f, "\t<user_color></user_color>\n");
+	}
+
+	fprintf(f, "\t<board>\n");
+	for (j = BOARD_SIZE; j > 0; j--){
+		fprintf(f, "\t\t<row_%d>", j);
+		for (i = 0; i < BOARD_SIZE; i++){
+			if (board[i][j - 1] == EMPTY)
+				fprintf(f, "_");
+			else
+				fprintf(f, "%c", board[i][j - 1]);
+		}
+		fprintf(f, "</row_%d>\n", j);
+	}
+	fprintf(f, "\t</board>\n");
+	fprintf(f, "</game>\n");
+	fclose(f);
+	return 0;
+}
+
+
+int LoadFromFile(char* file_path, board_t board){
+	int i, j;
+	char str[51], curTag;
+	FILE *file = fopen(file_path, "r");
+	if (file == NULL)
+	{
+		printf("%s", WRONG_FILE_NAME);
+		return 1;
+	}
+
+
+
+
+	//placing the file pointer on the first tag after <game> tag
+	for (i = 0; i < 5; i++)
+		fscanf(file, "%s", str);
+
+	if (*(str + 1) == 'n'){ //next turn
+		if (*(str + 11) == 'W')
+			properties[4] = WHITE_PLAYER;
+		else
+			properties[4] = BLACK_PLAYER;
+		//read next line
+		fscanf(file, "%s", str);
+	}
+
+	if (*(str + 1) == 'g'){ //game mode
+		properties[5] = *(str + 11) - '0';
+		//read next line
+		fscanf(file, "%s", str);
+	}
+	else
+		properties[5] = 1;
+
+
+	if (*(str + 1) == 'd'){ //difficulty (optional tag)
+		if (*(str + 12) == 'b')
+			properties[2] = BESTval;
+		else
+			properties[2] = *(str + 12) - '0';
+		//read next line
+		fscanf(file, "%s", str);
+	}
+	else
+		properties[2] = 1;
+
+
+	if (*(str + 1) == 'u'){ //user color (optional tag)
+		if (*(str + 12) == 'W')
+			properties[3] = WHITE_PLAYER;
+		else
+			properties[3] = BLACK_PLAYER;
+		//read next line
+		fscanf(file, "%s", str);
+	}
+	else
+		properties[3] = BLACK_PLAYER;
+
+
+	//reading board slots:
+	for (j = BOARD_SIZE - 1; j >= 0; j--){
+		fscanf(file, "%s", str);
+		for (i = 0; i < BOARD_SIZE; i++){
+			if (*(str + 7 + i) != '_')
+			{
+				board[i][j] = *(str + 7 + i);
+				//update kings' coordinates
+				if (*(str + 7 + i) == WHITE_K)
+				{
+					WhiteKing.i_coord = i;
+					WhiteKing.j_coord = j;
+				}
+				if (*(str + 7 + i) == BLACK_K)
+				{
+					BlackKing.i_coord = i;
+					BlackKing.j_coord = j;
+				}
+
+
+			}
+			else
+				board[i][j] = EMPTY;
+		}
+	}
+
+	fclose(file);
+	print_board(board);
+	return 0;
+}
 

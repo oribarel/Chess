@@ -61,7 +61,8 @@
 #define BEST_BOARDS_NUM 1000000
 
 #define XML_FIRST_LINE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-
+#define WRONG_FILE_NAME "Wrong file name\n"
+#define BESTval 0
 
 
 
@@ -154,8 +155,8 @@ int imax(int a, int b);
 int imin(int a, int b);
 int mod(int a, int b);
 int KingUnderThreat(board_t board, int player);
-
-
+int Save(board_t board, char* file_name);
+int LoadFromFile(char* file_path, board_t board);
 
 #endif
 
