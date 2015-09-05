@@ -2,6 +2,7 @@
 #define CHESS_WINDOWS_H
 
 #include "Chess_Controls.h"
+#include "best.h"
 
 /*#define SCREEN_W 1024
 #define SCREEN_H 768*/
@@ -13,7 +14,7 @@ typedef ControlComponent ** board_g;
 #define AI_SETTINGS_MENU		2
 #define GAME_PLAY_MENU			3
 #define SAVE_MENU				4
-#define LOAD MENU				5
+#define LOAD_MENU				5
 
 #define SETTINGS_MODE 1
 #define GAME_MODE 0
@@ -156,6 +157,6 @@ btnFunc getGameFunctionOfCoord(Coord crd);
 /* Misc */
 int isOfPlayer(int player, char tool);
 int freeMovesList(cMove *move);
-eTool get_eToolFromType(char type);
+
 
 #endif

@@ -89,6 +89,7 @@ int passTheBoard(board_t board)
 	return 1;
 }
 
+
 int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns)
 {
 
@@ -690,23 +691,7 @@ int updateGUIBoard_Vis(Menu *menu)
 	return 1;
 }
 
-eTool get_eToolFromType(char type)
-{
-	if (type == WHITE_P || type == BLACK_P)
-		return Pawn;
-	else if (type == WHITE_N || type == BLACK_N)
-		return Knight;
-	else if (type == WHITE_B || type == BLACK_B)
-		return Bishop;
-	else if (type == WHITE_R || type == BLACK_R)
-		return Rook;
-	else if (type == WHITE_Q || type == BLACK_Q)
-		return Queen;
-	else if (type == WHITE_K || type == BLACK_K)
-		return King;
-	else
-		return Empty;
-}
+
 
 
 /* { WAITING, NONE_SELECTED, HIGHLIGHTED, MOVE_MADE, PROMOTE } */
