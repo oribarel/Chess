@@ -60,6 +60,34 @@ void init_board(board_t board)
 
 }
 
+
+
+/* Prints the board to command line*/
+void print_board(board_t board)
+{
+	int i, j;
+	if (board == NULL || properties[1])
+		return;
+	print_line();
+	for (j = BOARD_SIZE - 1; j >= 0; j--)
+	{
+		printf((j < 9 ? " %d" : "%d"), j + 1);
+		for (i = 0; i < BOARD_SIZE; i++){
+			printf("| %c ", board[i][j]);
+		}
+		printf("|\n");
+		print_line();
+	}
+	printf("   ");
+	for (j = 0; j < BOARD_SIZE; j++){
+		printf(" %c  ", (char)('a' + j));
+	}
+	printf("\n");
+}
+
+
+
+
 /*DCLR*/
 //empty
 void init_rowsE(board_t board)
@@ -290,7 +318,24 @@ void setSlotInBoard(board_t board, Coord slot, char ch)
 	/*if (anointAKing(slot.j_coord, ch))
 	board[slot.i_coord][slot.j_coord] = getCorrespondingKing(ch);
 	else*/
+
+	//set
 	board[slot.i_coord][slot.j_coord] = ch;
+
+	//update kings' coordinates
+	if (ch == WHITE_K)
+	{
+		WhiteKing = slot;
+
+	}
+	if (ch == BLACK_K)
+	{
+		BlackKing = slot;
+
+	}
+	// update danger zones
+	UpdateDangerZone(board, WHITE_PLAYER);
+	UpdateDangerZone(board, BLACK_PLAYER);
 }
 
 
@@ -453,9 +498,9 @@ int UpdateDangerZone(board_t board, int playerColor)
 	}
 
 	//rooks
-	tmp = KingCrd;
 	for (int h = -1; h < 2; h += 2)
 	{
+		tmp = KingCrd;
 		while (isInBoard(tmp))
 		{
 			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
@@ -464,9 +509,10 @@ int UpdateDangerZone(board_t board, int playerColor)
 			tmp = offsetCoord(tmp, h, 0);
 		}
 	}
-	tmp = KingCrd;
+
 	for (int v = -1; v < 2; v += 2)
 	{
+		tmp = KingCrd;
 		while (isInBoard(tmp))
 		{
 			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
@@ -487,7 +533,7 @@ int UpdateDangerZone(board_t board, int playerColor)
 				if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Bishop) ||
 					GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
 					addToDangerZone(playerColor, tmp);
-				tmp = offsetCoord(tmp, h, 0);
+				tmp = offsetCoord(tmp, h, v);
 			}
 		}
 	}
@@ -558,7 +604,7 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 {
 	int h, v;
 	Coord tmp;
-	if (getColor(board, attacker) == getColor(board, victim))
+	if (getColor(board, attacker) == getColor(board, victim) || GetContentOfCoord(board,attacker) == EMPTY)
 	{
 		return 0;
 	}
@@ -568,12 +614,12 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 		{
 			int d = getColor(board, attacker) == WHITE_PLAYER ? 1 : -1;
 			if (attacker.j_coord + d == victim.j_coord &&
-				(attacker.i_coord + 1 == victim.i_coord) || (attacker.i_coord - 1 == victim.i_coord))
+				((attacker.i_coord + 1 == victim.i_coord) || (attacker.i_coord - 1 == victim.i_coord)))
 			{
 				return 1;
 			}
 		}
-		else if (getType(board, attacker) == Knight)
+		if (getType(board, attacker) == Knight)
 		{
 			if (AreTwoCoordsEqual(offsetCoord(victim, 1, 2), attacker) ||
 				AreTwoCoordsEqual(offsetCoord(victim, 2, 1), attacker) ||
@@ -587,7 +633,7 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 				return 1;
 			}
 		}
-		else if (getType(board, attacker) == Bishop || getType(board, attacker) == Queen)
+		if (getType(board, attacker) == Bishop || getType(board, attacker) == Queen)
 		{
 			if (abs(attacker.i_coord - victim.i_coord) == abs(attacker.j_coord - victim.j_coord)) //are the two tools on the same diagonal
 			{
@@ -603,26 +649,12 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 				}
 				return 1;
 			}
-			else
-				return 0;
+			//else
+			//	return 0;
 		}
-		else if (getType(board, attacker) == Rook || getType(board, attacker) == Queen)
+		if (getType(board, attacker) == Rook || getType(board, attacker) == Queen)
 		{
-			if (attacker.i_coord == victim.i_coord)  //are the two tools on the same column
-			{
-				h = (attacker.i_coord > victim.i_coord) ? 1 : -1;
-
-				tmp = victim;
-				tmp = offsetCoord(tmp, h, 0);
-				while (!AreTwoCoordsEqual(tmp, attacker))
-				{
-					if (GetContentOfCoord(board, tmp) != EMPTY)
-						return 0;
-					tmp = offsetCoord(tmp, h, 0);
-				}
-				return 1;
-			}
-			if (attacker.j_coord == victim.j_coord) //are the two tools on the same row
+			if (attacker.i_coord == victim.i_coord)  //are the two tools on the same row
 			{
 				v = (attacker.j_coord > victim.j_coord) ? 1 : -1;
 
@@ -636,10 +668,24 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 				}
 				return 1;
 			}
+			if (attacker.j_coord == victim.j_coord) //are the two tools on the same column
+			{
+				h = (attacker.i_coord > victim.i_coord) ? 1 : -1;
+
+				tmp = victim;
+				tmp = offsetCoord(tmp, h, 0);
+				while (!AreTwoCoordsEqual(tmp, attacker))
+				{
+					if (GetContentOfCoord(board, tmp) != EMPTY)
+						return 0;
+					tmp = offsetCoord(tmp, h, 0);
+				}
+				return 1;
+			}
 			else
 				return 0;
 		}
-		else if (getType(board, attacker) == King)
+		if (getType(board, attacker) == King)
 		{
 			if (AreTwoCoordsEqual(offsetCoord(victim, 0, 1), attacker) ||
 				AreTwoCoordsEqual(offsetCoord(victim, 1, 1), attacker) ||
@@ -701,19 +747,21 @@ int safeToMoveKing(board_t board, int player, Coord dst)
 	setSlotInBoard(board, kingCrd, EMPTY);
 	setSlotInBoard(board, dst, generateTool(player, King));
 
-	UpdateDangerZone(board, player);
+
+
+	//UpdateDangerZone(board, player);
 	dangerZone = player == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
 	dangerZone_AmountOfPieces = player == WHITE_PLAYER ? gameInfo[0] : gameInfo[1];
 
 	int result = 1;
 	for (int i = 0; i < dangerZone_AmountOfPieces; i++)
 	{
-		result &= !isAttacking(board, dangerZone[i], kingCrd);
+		result &= !isAttacking(board, dangerZone[i], dst);
 	}
 
 	setSlotInBoard(board, kingCrd, generateTool(player, King));
 	setSlotInBoard(board, dst, dstType);
-	UpdateDangerZone(board, player);
+	//UpdateDangerZone(board, player);
 
 	return result;
 }
@@ -723,7 +771,7 @@ cMove* PawnMoves(board_t board, Coord coord)
 {
 	cMove *head = NULL;
 	int i = coord.i_coord, j = coord.j_coord;
-	char tool = GetContentOfCoord(board, coord);
+	char tool = GetContentOfCoord(board, coord), tmpTool;
 	int color = islower(tool) ? 1 : -1;
 	Coord tmpCoord = coord;
 
@@ -749,15 +797,16 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord.j_coord += color * 1;
 	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, tmpCoord, tool))
 	{
+		tmpTool = GetContentOfCoord(board, tmpCoord);
 		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'r' : 'R');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'b' : 'B');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'q' : 'Q');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'n' : 'N');
 		}
 		else
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, 0);// if promotion isn't needed
 	}
 
 
@@ -767,15 +816,16 @@ cMove* PawnMoves(board_t board, Coord coord)
 	tmpCoord.j_coord += color * 1;
 	if (isInBoard(tmpCoord) == 1 && !openKingDefences(board, coord, tmpCoord) && DoesCrdContainsEnemy(board, tmpCoord, tool))
 	{
+		tmpTool = GetContentOfCoord(board, tmpCoord);
 		if ((j + color * 1 == BOARD_SIZE - 1 && color == 1) || (j + color * 1 == 0 && color == -1)) //if promotion needed
 		{
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'r' : 'R');
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'b' : 'B');
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'q' : 'Q');
-			AddMove(&head, tool, coord, tmpCoord, 0, color == 1 ? 'n' : 'N');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'r' : 'R');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'b' : 'B');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'q' : 'Q');
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, color == 1 ? 'n' : 'N');
 		}
 		else
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);// if promotion isn't needed
+			AddMove(&head, tool, coord, tmpCoord, tmpTool, 0);// if promotion isn't needed
 	}
 	return head;
 }
@@ -785,6 +835,7 @@ cMove* BishopMoves(board_t board, Coord coord){
 	int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
+	int openDif = 0;
 
 
 
@@ -793,29 +844,36 @@ cMove* BishopMoves(board_t board, Coord coord){
 	Coord tmpCoord = offsetCoord(coord, k, k);
 	while (isInBoard(tmpCoord))
 	{
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1)
 		{
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		}
 		if (GetContentOfCoord(board, tmpCoord) == EMPTY)
 		{
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
 			break;
 		tmpCoord = offsetCoord(coord, k, k);
 	}
+	openDif = 0;
 	k = 1;
 	//north-west
 	tmpCoord = offsetCoord(coord, -k, k);
 	while (isInBoard(tmpCoord)) {
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -823,31 +881,38 @@ cMove* BishopMoves(board_t board, Coord coord){
 		tmpCoord = offsetCoord(coord, -k, k);
 	}
 
-
+	openDif = 0;
 	k = 1;
 	//south-east
 	tmpCoord = offsetCoord(coord, k, -k);
 	while (isInBoard(tmpCoord)) {
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
 			break;
 		tmpCoord = offsetCoord(coord, k, -k);
 	}
+	openDif = 0;
 	k = 1;
 	//south-west
 	tmpCoord = offsetCoord(coord, -k, -k);
 	while (isInBoard(tmpCoord)) {
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -862,17 +927,20 @@ cMove* RookMoves(board_t board, Coord coord){
 	int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
-
+	int openDif = 0;
 
 	//north
 	int k = 1;
 	Coord tmpCoord = offsetCoord(coord, 0, k);
 	while (isInBoard(tmpCoord)) {
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -881,14 +949,18 @@ cMove* RookMoves(board_t board, Coord coord){
 	}
 
 	//south
+	openDif = 0;
 	k = 1;
 	tmpCoord = offsetCoord(coord, 0, -k);
 	while (isInBoard(tmpCoord)) {
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -899,14 +971,18 @@ cMove* RookMoves(board_t board, Coord coord){
 
 
 	//east
+	openDif = 0;
 	k = 1;
 	tmpCoord = offsetCoord(coord, k, 0);
 	while (isInBoard(tmpCoord)) {
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		} if (GetContentOfCoord(board, tmpCoord) == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -915,15 +991,19 @@ cMove* RookMoves(board_t board, Coord coord){
 	}
 
 	//west
+	openDif = 0;
 	k = 1;
 	tmpCoord = offsetCoord(coord, -k, 0);
 	while (isInBoard(tmpCoord)) {
+		openDif = openKingDefences(board, coord, tmpCoord);
 		if (getColor(board, tmpCoord) == color * -1){
-			AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, GetContentOfCoord(board, tmpCoord), 0);//eating
 			break;
 		}
 		if (GetContentOfCoord(board, tmpCoord) == EMPTY){
-			AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
+			if (!openDif)
+				AddMove(&head, tool, coord, tmpCoord, 0, 0);//no-eating
 			k++;
 		}
 		else
@@ -959,7 +1039,8 @@ cMove* KnightMoves(board_t board, Coord coord)
 		if (isInBoard(possibilities[i]) &&
 			(GetContentOfCoord(board, possibilities[i]) == EMPTY || DoesCrdContainsEnemy(board, possibilities[i], tool)))
 		{
-			AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]), 0);
+			if (!openKingDefences(board,coord,possibilities[i]))
+				AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]), 0);
 		}
 	}
 	return head;
@@ -1129,11 +1210,38 @@ int NotTooManyOfType(board_t board, char type)
 	return result;
 }
 
+Coord GenerateCoord(int x, int y)
+{
+	Coord crd;
+	crd.i_coord = x;
+	crd.j_coord = y;
+	return crd;
+}
+
+/*return 1 if the king of the given player is under threat*/
+int KingUnderThreat(board_t board, int player)
+{
+	Coord kingCrd, tmpCrd;
+	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{		
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			tmpCrd = GenerateCoord(i, j);
+			if (isAttacking(board, tmpCrd, kingCrd))
+				return 1;
+		}
+	}
+	return 0;
+}
+
 /* the scoring function:
 See instructions for more details.*/
 int score(board_t board, int player)
 
 {
+
+		
 	Coord coord;
 	int score = 0, ally, enemy, playerBlocked = 1, opponentBlocked = 1;
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
@@ -1154,18 +1262,22 @@ int score(board_t board, int player)
 	}
 
 
-	/*TODO: consider what to do with this part
+	/*TODO: consider what to do with this part*/
 	if (playerBlocked == 1)
-	if (KingUnderThreat(board, -player))
-	return -800;//player lost
-	else
-	return -799; //tie
+		if (KingUnderThreat(board, player))
+			return -800;//player lost
+		else
+			return -799; //tie
 	if (opponentBlocked == 1 )
-	if (KingUnderThreat(board, -player))
-	return 800;//player lost
-	else
-	return 799; //tie
-	*/
+		if (KingUnderThreat(board, -player))
+			return 800;//player won
+		else
+			return -799; //tie
+	if (DEBUG)
+	{
+		print_board(board);
+		printf("%d \n", score);
+	}
 
 	return score;
 
@@ -1211,7 +1323,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			if (depth == properties[2] && val >= bestValue) //if depth == minimax_depth
 			{
 				if (val == bestValue)
-					AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
+					*bestMove = AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
 				else
 				{
 					if (*bestMove != NULL)
@@ -1249,7 +1361,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 			if (depth == properties[2] && val <= bestValue) //if depth == minimax_depth
 			{
 				if (val == bestValue)
-					AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
+					*bestMove = AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
 				else
 				{
 					if (*bestMove != NULL)
