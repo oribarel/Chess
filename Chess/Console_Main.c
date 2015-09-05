@@ -4,8 +4,8 @@
 #include "Console_Main.h"
 
 //extern int properties[6];
-extern Coord WhiteKing;
-extern Coord BlackKing;
+//extern Coord WhiteKing;
+//extern Coord BlackKing;
 
 cMove *pMove;
 
@@ -25,10 +25,6 @@ void setSlot(board_t board, char *horiz, char *vert, char type)
 			if (NotTooManyOfType(board, type))
 			{
 				board[i][j] = type;
-				if (isWhite(type) == 1 && coord.j_coord == BOARD_SIZE - 1)
-					board[i][j] = WHITE_K;
-				if (isWhite(type) == 0 && type != EMPTY && coord.j_coord == 0)
-					board[i][j] = BLACK_K;
 			}
 			else
 			{//TODO: test the case in which the number of pieces equal to the maximum number of tools and the set command just changes such a piece to the exact same type
@@ -277,28 +273,7 @@ void print_line()
 	printf("|\n");
 }
 
-/* Prints the board to command line*/
-void print_board(board_t board)
-{
-	int i, j;
-	if (board == NULL || properties[1])
-		return;
-	print_line();
-	for (j = BOARD_SIZE - 1; j >= 0; j--)
-	{
-		printf((j < 9 ? " %d" : "%d"), j + 1);
-		for (i = 0; i < BOARD_SIZE; i++){
-			printf("| %c ", board[i][j]);
-		}
-		printf("|\n");
-		print_line();
-	}
-	printf("   ");
-	for (j = 0; j < BOARD_SIZE; j++){
-		printf(" %c  ", (char)('a' + j));
-	}
-	printf("\n");
-}
+
 
 
 /*CONVD*/
@@ -934,19 +909,18 @@ int Parse(char *line, board_t board)
 			if (CountToolsOfType(board, WHITE_K) < 1 || CountToolsOfType(board, BLACK_K) < 1)
 			{
 				if (!properties[1])
-					printf(WROND_BOARD_INITIALIZATION);
-				return 0;
+					printf(WROND_BOARD_INITIALIZATION);				
 			}
 			else
 			{
-				properties[0] = 0;//change from setting state to game state
-				return 0;
+				properties[0] = 0;//change from setting state to game state				
 			}
+
+			//update kings' coordinates
 			for (int j = BOARD_SIZE - 1; j >= 0; j--){
 				for (int i = 0; i < BOARD_SIZE; i++){
 					tmpCrd.i_coord = i;
 					tmpCrd.j_coord = j;
-					//update kings' coordinates
 					if (GetContentOfCoord(board, tmpCrd) == WHITE_K)
 					{
 						WhiteKing.i_coord = i;
@@ -959,6 +933,17 @@ int Parse(char *line, board_t board)
 					}
 				}
 			}
+
+			//update danger zone
+			UpdateDangerZone(board, WHITE_PLAYER);
+			UpdateDangerZone(board, BLACK_PLAYER);
+
+			if (DEBUG)
+				print_board(board);
+
+			return 0;
+
+							
 		}
 		if (!properties[1])
 			printf(ILLEGAL_COMMAND);
@@ -1059,7 +1044,7 @@ int Parse(char *line, board_t board)
 			int maxScore = MIN_VALUE;
 
 			//parsing the depth d
-			int d;
+			int d, tmpD = properties[2];
 			char *currentPosition = NULL;
 			token = strtok(NULL, "&");
 			currentPosition = token;
@@ -1068,11 +1053,13 @@ int Parse(char *line, board_t board)
 			else
 				d = currentPosition[0] - '0';
 
-			//get  best moves in pMove
+			//get  best moves by pMove
+			properties[2] = d;
 			minimax_score(board, properties[4], d, 1, &pMove, MIN_VALUE, MAX_VALUE, 0);
 
 			//print moves
 			printMovesList(pMove);
+			properties[2] = tmpD;
 			return 0;
 		}
 
@@ -1082,7 +1069,7 @@ int Parse(char *line, board_t board)
 			int score = 0;
 
 			//parsing the depth d
-			int d;
+			int d, tmpD = properties[2];
 			cMove *m;
 			char *currentPosition = NULL;
 			token = strtok(NULL, " ");
@@ -1099,11 +1086,13 @@ int Parse(char *line, board_t board)
 
 
 			//get  best moves in pMove
+			properties[2] = d;
 			score = makeMove_ComputeScore_Undo(board, m, properties[4], d, 1, MIN_VALUE, MAX_VALUE, 0);
 
 			//print score
 			if (!properties[1])
 				printf("%d",score);
+			properties[2] = tmpD;
 			return 0;
 		}
 
@@ -1268,17 +1257,18 @@ Move* chooseMoveRandonly(board_t brd)
 
 
 /*prints to screen who the winner is*/
-int printWinner(int computerWins)
+int printWinner(int player)
 {
 	if (properties[1])
 		return 0;
-	if (computerWins)
-		printf("%s", getComputerColor());
+	if (player == WHITE_PLAYER)
+		printf(WHT_MATE_DCLR);
 	else
-		printf("%s", getPlayerColor());
-	printf(" %s", PLAYER_WINS);
+		printf(BLK_MATE_DCLR);
 	return 0;
 }
+
+
 
 
 int Console_Main(board_t board)
@@ -1326,21 +1316,32 @@ int Console_Main(board_t board)
 	}*/
 
 	print_board(brd);
-	if (!properties[1])
-		printf(ENTER_SETTINGS);
+
 
 
 	/* One loop for both settings and game */
 	while (!properties[1])//while not quit
 	{
+		if (!properties[1] && properties[0])
+			printf(ENTER_SETTINGS);
 		if (properties[5] == 2 && !properties[0] && (properties[4] != properties[3]))//if in AI mode, in game state and it is the computer's turn
 		{
+			int curScore = score(brd, -properties[4]);
 			computerMove = NULL;
-			if (score(brd, getGenericTool(1)) == -100)//no legal move for the computer (computer lost)
+			if (curScore == -800)//no legal move for the computer (computer lost)
 			{
-				printWinner(0);//print player wins;
+				printWinner(properties[4]);//print player wins;
 				properties[1] = 1;
 			}
+			else if (curScore == -799)//no legal move for the computer and for the player (tie)
+			{
+				printf(TIE);//print tie;
+				properties[1] = 1;
+			}
+			else if (KingUnderThreat(board, -properties[4]))
+				printf(CHECK);
+			
+
 
 			//run MINIMAX
 			if (properties[3] == BLACK_PLAYER)//if computer's color is white
@@ -1362,13 +1363,21 @@ int Console_Main(board_t board)
 
 
 			//change player
+			curScore = score(brd, properties[4]);
 			properties[4] = -properties[4];
-			if ((score(brd, getGenericTool(0)) == -100))//if no legal move for the player (player lost)
+			if ((curScore == -800))//if no legal move for the player (player lost - MATE!)
 			{
-				printWinner(1);//print computer wins;
+				printWinner(-properties[4]);//print computer wins;
 				properties[1] = 1;
 
 			}
+			else if (curScore == -799)//no legal move for the computer and for the player (tie)
+			{
+				printf(TIE);//print tie;
+				properties[1] = 1;
+			}
+			else if (KingUnderThreat(board, properties[4]))
+				printf(CHECK);
 			continue;
 		}
 		else if (!properties[0])
@@ -1414,6 +1423,21 @@ int Console_Main(board_t board)
 
 		if (parseResult == 10 || properties[1] == 1)// user has successfully inserted a valid move, we now want to free allPossibleMoves
 		{
+			if (properties[5] == 1)
+			{
+				if (score(brd, -properties[4]) == -800)//no legal move for the other player (other plyer lost - MATE!)
+				{
+					printWinner(properties[4]);//print current player wins;
+					properties[1] = 1;
+				}
+				else if (score(brd, -properties[4]) == -799)//no legal move for both players(tie)
+				{
+					printf(TIE);//print tie;
+					properties[1] = 1;
+				}
+				else if (KingUnderThreat(board, -properties[4]))
+					printf(CHECK);
+			}
 			/*tmp = allPossibleMoves;
 			while (allPossibleMoves != NULL)
 			{

@@ -62,8 +62,7 @@
 
 #define XML_FIRST_LINE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 
-/* Externs */
-extern int properties[6];
+
 
 
 
@@ -89,6 +88,18 @@ typedef enum Tool
 } eTool;
 
 
+
+
+
+/* Externs */
+extern int properties[6];
+extern Coord WhiteKing;
+extern Coord BlackKing;
+
+
+
+
+void print_board(char **);
 void init_board(board_t board);
 void init_rowsE(board_t board);
 void init_rowP(board_t board, int player);
@@ -142,6 +153,7 @@ int quit(void);
 int imax(int a, int b);
 int imin(int a, int b);
 int mod(int a, int b);
+int KingUnderThreat(board_t board, int player);
 
 
 

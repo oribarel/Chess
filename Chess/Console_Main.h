@@ -15,14 +15,17 @@
 #define WROND_BOARD_INITIALIZATION "Wrong board initialization\n"
 #define WHT_ENTER_YOUR_MOVE "White player - enter your move:\n"
 #define BLK_ENTER_YOUR_MOVE "Black player - enter your move:\n"
-
+#define	WHT_MATE_DCLR "Mate! White player wins the game\n"
+#define	BLK_MATE_DCLR "Mate! Black player wins the game\n"
 #define ILLEGAL_COMMAND "Illegal command, please try again\n"
 #define ILLEGAL_MOVE "Illegal move\n"
 
 #define WRONG_ROOK_POSITION "Wrong position for a rook\n" 
+
 #define ILLEGAL_CALTLING_MOVE "Illegal castling move\n"  
 
 #define TIE "The game ends in a tie\n"
+#define CHECK "Check!\n"
 #define NOT_YOUR_PIECE "The specified position does not contain your piece\n"
 
 #define perror_message(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name))
@@ -53,15 +56,16 @@ typedef struct Move {
 } chessMoveArr;*/
 
 int Console_Main(board_t board);
-//void print_board(char **);
+
 //void init_board(char **);
 int mod(int, int);
-//char *getLine(void);
-//void print_line();
+char *getLine(void);
+void *myalloc(int a, int b);
+void print_line();
 //board_t createBoard(void);
 //void copyBoard(board_t, board_t);
-//void printMove(cMove *move);
-//void printMovesList(cMove *move);
+void printMove(cMove *move);
+void printMovesList(cMove *move);
 //Move *createRegularMove(Coord src, Coord dst, int depth, int eater);
 //Move *kingMoves(board_t board, Coord coord);
 //Move *kingMovesDirected(board_t board, Coord coord, int n, int m);
@@ -77,8 +81,8 @@ int mod(int, int);
 //cMove *getMoves(board_t board, int player);
 //Move *filterOutMoves(Move *moves);
 //int isEaterMove(Move *move);
-//void setSlot(board_t board, char *horiz, char *vert, char type);
-//void setBoard(board_t board, char *config);
+void setSlot(board_t board, char *horiz, char *vert, char type);
+void setBoard(board_t board, char *config);
 //int canMoveThisTool(board_t board, Coord coord);
 //int score(board_t board, char player);
 //int isWhite(char type);
@@ -92,18 +96,20 @@ int mod(int, int);
 //board_t GenerateRandomConfiguration();
 //char *configuration(int num);
 //board_t unitTest_movements(int i);
-//int Parse(char *line, board_t board);
-//Move* isLegalMove(char *token, board_t board, Move *allPossibleMoves);
-//int areAllCoordsValid(char *token);
-//int isLegalInitialPosition(char *token, board_t board);
-//void graphicCoordToRealCoord(Coord *crd, char x_coor, int y_coor);
+int Parse(char *line, board_t board);
+cMove* isLegalMove(char *token, board_t board, cMove *allPossibleMoves);
+int areAllCoordsValid(char *token);
+int isLegalInitialPosition(char *token, board_t board);
+void graphicCoordToRealCoord(Coord *crd, char x_coor, int y_coor);
+int LoadFromFile(char* file_path, board_t board);
 //void clearBoard(board_t board);
 //const char* getPlayerColor();
 //const char* getComputerColor();
 //char getGenericTool(int isComputer);
 //Move* chooseMoveRandonly(board_t brd);
 //char getCorrespondingKing(char type);
-//int printWinner(int computerWins);
+int printWinner(int computerWins);
+int Save(board_t board, char* file_name);
 //void quit(board_t brd, int freeBoard);
 //int getColor(board_t board, Coord coord);
 int quit(void);
