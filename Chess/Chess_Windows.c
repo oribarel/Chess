@@ -767,17 +767,7 @@ int kingHighlight(struct menu *menu, struct controlComponent *ccb)
 	return 1;
 }
 
-int freeMovesList(cMove *move)
-{
-	cMove *curr = move, *tmp;
-	while (curr != NULL)
-	{
-		tmp = curr->next;
-		free(curr);
-		curr = tmp;
-	}
-	return 1;
-}
+
 
 int advanceTurnStage(int promotiveSituation)
 {

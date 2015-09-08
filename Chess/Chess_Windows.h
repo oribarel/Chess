@@ -158,7 +158,6 @@ btnFunc getGameFunctionOfCoord(Coord crd);
 
 /* Misc */
 int isOfPlayer(int player, char tool);
-int freeMovesList(cMove *move);
 
 
 #endif

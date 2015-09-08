@@ -1,6 +1,10 @@
 #ifndef CHESS_LOGIC_H
 #define CHESS_LOGIC_H
 
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -96,8 +100,8 @@ typedef enum Tool
 extern int properties[6];
 extern Coord WhiteKing;
 extern Coord BlackKing;
-
-
+extern Coord WhiteKingDangerZone[BOARD_SIZE * 2];
+extern Coord BlackKingDangerZone[BOARD_SIZE * 2];
 
 
 void print_board(char **);
@@ -139,7 +143,7 @@ int NotTooManyOfType(board_t board, char type);
 int score(board_t board, int player);
 int canMoveThisTool(board_t board, Coord coord);
 int isWhite(char type);
-int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int boardsCounter);
+//int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int boardsCounter);
 int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int boardsCounter);
 int makeMove(board_t board, cMove *move);
 char ToolNameToChar(char *toolFullName);
@@ -157,6 +161,9 @@ int mod(int a, int b);
 int KingUnderThreat(board_t board, int player);
 int Save(board_t board, char* file_name);
 int LoadFromFile(char* file_path, board_t board);
+void printMove(cMove *move);
+void printMovesList(cMove *move);
+int freeMovesList(cMove *move);
 
 #endif
 

@@ -1,7 +1,7 @@
 
 #include "Chess_Logic.h"
 
-int properties[6] = { 1, 0, 1, WHITE_PLAYER, WHITE_PLAYER, 0 };
+int properties[6] = { 1, 0, 1, WHITE_PLAYER, WHITE_PLAYER, 1 };
 /*	'settings'		0
 'quit'				1
 'minimax_depth'		2
@@ -322,22 +322,24 @@ void setSlotInBoard(board_t board, Coord slot, char ch)
 	//set
 	board[slot.i_coord][slot.j_coord] = ch;
 
-	//update kings' coordinates
+	//update kings' coordinates and danger zones
 	if (ch == WHITE_K || ch == BLACK_K)
 	{
 		if (ch == WHITE_K)
 		{
 			WhiteKing = slot;
+			//UpdateDangerZone(board, WHITE_PLAYER);
 
 		}
 		if (ch == BLACK_K)
 		{
 			BlackKing = slot;
+			//UpdateDangerZone(board, BLACK_PLAYER);
 
 		}
-		// update danger zones
 		UpdateDangerZone(board, WHITE_PLAYER);
 		UpdateDangerZone(board, BLACK_PLAYER);
+
 	}
 }
 
@@ -412,6 +414,19 @@ Coord offsetCoord(Coord coord, int i_offset, int j_offset)
 	res.i_coord += i_offset;
 	res.j_coord += j_offset;
 	return res;
+}
+
+
+int freeMovesList(cMove *move)
+{
+	cMove *curr = move, *tmp;
+	while (curr != NULL)
+	{
+		tmp = curr->next;
+		free(curr);
+		curr = tmp;
+	}
+	return 1;
 }
 
 /*add a new move in the beginning of the linked list*/
@@ -1171,9 +1186,10 @@ int CountToolsOfType(board_t board, char type)
 {
 	int counter = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
-	for (int j = 0; j < BOARD_SIZE; j++)
-	if (board[i][j] == type)
-		counter++;
+		for (int j = 0; j < BOARD_SIZE; j++)
+			if (board[i][j] == type)
+				counter++;
+	
 	return counter;
 }
 
@@ -1276,17 +1292,27 @@ int score(board_t board, int player)
 		return 800;//player won
 	else
 		return -799; //tie
-	if (DEBUG)
+	/*if (DEBUG)
 	{
 		print_board(board);
 		printf("%d \n", score);
-	}
+	}*/
 
 	return score;
 
 }
 
-int canMoveThisTool(board_t board, Coord coord){ return movesByPieceType(board, coord) != NULL; }
+int canMoveThisTool(board_t board, Coord coord)
+{
+	int result = 0;
+	cMove *head = movesByPieceType(board, coord);
+	if (head != NULL)
+	{
+		freeMovesList(head);
+		result = 1;
+	}
+	return result;
+}
 
 /*returns 1 if type is white and 0 otherwise.*/
 int isWhite(char type)
@@ -1296,103 +1322,6 @@ int isWhite(char type)
 	return 0;
 }
 
-/* the minimax function as instructed.
-pay attention: this function only returns integers. the argument bestMove
-is an address to a pointer that exists outside of minimax_score, and when obtaining the information about
-which move is truely optimal (due to depth restrictions) the content of the address is set to the address of that said move. */
-int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int boardsCounter)
-{
-	cMove *movesList, *tmp;
-	int bestValue, val;
-	if (depth == 0)//base case
-	{
-		if (minOrMax == 1)// 1 for maximizing player
-			return score(board, player);
-		else
-			return score(board, -player);
-	}
-	if (minOrMax == 1)// 1 for maximizing player
-	{
-		bestValue = MIN_VALUE;
-		movesList = getMoves(board, player);
-		tmp = movesList;
-
-
-		while (movesList != NULL)
-		{
-			int bestUpdated = 0;
-			//compute score and return board to its original state
-			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
-			if (depth == properties[2] && val >= bestValue) //if depth == minimax_depth
-			{
-				if (val == bestValue)
-					*bestMove = AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
-				else
-				{
-					if (*bestMove != NULL)
-					{
-						free(*bestMove);
-					}
-					*bestMove = movesList;
-				}
-				bestUpdated = 1;
-			}
-			bestValue = imax(bestValue, val);
-			a = imax(a, bestValue);
-			movesList = movesList->next;
-			if (bestUpdated == 0)
-			{
-				free(tmp);
-			}
-			tmp = movesList;
-			if (b <= a)
-				break; // b cut-off
-		}
-		return bestValue;
-	}
-	else
-	{
-		bestValue = MAX_VALUE;
-		movesList = getMoves(board, player);
-		tmp = movesList;
-
-		while (movesList != NULL)
-		{
-			int bestUpdated = 0;
-			//compute score and return board to its original state
-			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
-			if (depth == properties[2] && val <= bestValue) //if depth == minimax_depth
-			{
-				if (val == bestValue)
-					*bestMove = AddMove(bestMove, movesList->toolType, movesList->src, movesList->dst, movesList->eaten, movesList->promote);
-				else
-				{
-					if (*bestMove != NULL)
-					{
-						free(*bestMove);
-					}
-					*bestMove = movesList;
-				}
-				bestUpdated = 1;
-			}
-			bestValue = imin(bestValue, val);
-			b = imin(b, bestValue);
-			movesList = movesList->next;
-			if (bestUpdated == 0)
-			{
-				free(tmp);
-			}
-			tmp = movesList;
-
-			if (b <= a)
-				break; // a cut-off
-
-		}
-		return bestValue;
-	}
-
-	return 0;
-}
 
 
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
@@ -1736,3 +1665,34 @@ int LoadFromFile(char* file_path, board_t board){
 	return 0;
 }
 
+
+/*CONVD*/
+/*prints the route of the move*/
+void printMove(cMove *move)
+{
+	if (properties[1])
+		return;
+	printf("<%c,%u> to ", (char)((move->src).i_coord) + 97, (move->src).j_coord + 1);
+
+	printf("<%c,%u>", (char)((move->dst).i_coord) + 97, (move->dst).j_coord + 1);
+
+	//if promotion needed
+	if (move->promote)
+		printf(" %s", ToolCharToName(move->promote));
+
+	//print end of line
+	printf("\n");
+
+
+}
+
+/*CONVD*/
+/*prints an entire linked list of Moves*/
+void printMovesList(cMove *move)
+{
+	while (move != NULL)
+	{
+		printMove(move);
+		move = move->next;
+	}
+}

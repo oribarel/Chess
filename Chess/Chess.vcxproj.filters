@@ -36,6 +36,12 @@
     <ClCompile Include="Chess_Logic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="best.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="minimax.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Control_Components.h">
@@ -57,6 +63,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Chess_Logic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="best.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="minimax.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
