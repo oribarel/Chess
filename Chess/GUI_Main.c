@@ -186,23 +186,23 @@ int GUI_Main(board_t passedBoard)
 				return 0;
 			}
 
-			/* Update the Kings Coordinates*/
-			if (properties[0] == GAME_MODE)
-			{
-				Coord crd;
-				for (int i = 0; i < BOARD_SIZE; i++)
-				{
-					for (int j = 0; j < BOARD_SIZE; j++)
-					{
-						crd.i_coord = i; crd.j_coord = j;
-						char tool = GetContentOfCoord(pBoard, crd);
-						if (tool == WHITE_K)
-							WhiteKing = crd;
-						if (tool == BLACK_K)
-							BlackKing = crd;
-					}
-				}
-			}
+			///* Update the Kings Coordinates*/
+			//if (properties[0] == GAME_MODE)
+			//{
+			//	Coord crd;
+			//	for (int i = 0; i < BOARD_SIZE; i++)
+			//	{
+			//		for (int j = 0; j < BOARD_SIZE; j++)
+			//		{
+			//			crd.i_coord = i; crd.j_coord = j;
+			//			char tool = GetContentOfCoord(pBoard, crd);
+			//			if (tool == WHITE_K)
+			//				WhiteKing = crd;
+			//			if (tool == BLACK_K)
+			//				BlackKing = crd;
+			//		}
+			//	}
+			//}
 			///* reset turn data */
 			//selectedTool.i_coord = -1; selectedTool.j_coord = -1;
 			//promoteSquare.i_coord = -1; promoteSquare.j_coord = -1;
@@ -211,6 +211,7 @@ int GUI_Main(board_t passedBoard)
 
 			/* Handle Computer's Turn */
 			/* if in AI mode, in game state and it is the computer's turn */
+			int scr;
 			if (properties[0] == GAME_MODE && properties[5] == PVC_MODE && properties[3] != properties[4])
 			{
 				//computerMove = NULL;
@@ -245,44 +246,58 @@ int GUI_Main(board_t passedBoard)
 				//}
 
 				computerMove = NULL;
+				if (properties[2] != 0)
+					scr = bestScore(pBoard, properties[4]);
+				else
+					scr = score(pBoard, properties[4]);
 
 				/* If both computer and player have no valid moves, it is a TIE */
-				if (bestScore(pBoard, properties[4])==-999999)
-					properties[1] = 1; //print TIE
-				
+				if (scr == -999999)
+				{
+					//print TIE
+					labelTIE(chessWindow);
+					endGamePlay(chessWindow);
+				}
 				/* If the computer has no valid moves (happens because of MATE), it has lost: */
-				if (bestScore(pBoard, properties[4]) == -1000000)
-					properties[1] = 1; //print CHECK MATE
+				else if (scr == -1000000)
+				{
+					labelMATE(chessWindow);
+					endGamePlay(chessWindow);
+					//print CHECK MATE
+				}
 				/* If the computer has valid moves, but KingUnderThreat(board, -properties[4]), it is CHECK */
-				
-				// ---- So make it seen.
-				
+				else if (KingUnderThreat(pBoard, properties[4]))
+
+				{
+					// ---- So make it seen.
+					labelCHECK(chessWindow);
+				}
+
 				/* Run minimax */
-				int score;
 				if (properties[3] == BLACK_PLAYER)//if computer's color is white
-					score = minimax_score(pBoard, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+					scr = minimax_score(pBoard, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 				else
-					score = minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+					scr = minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 				/* Make the computer's move, (if there is one) */
-				printf("minimax score was: %d\n", score);
+				printf("minimax score was: %d\n", scr);
 				printf("For this board, score for white is %d, and for black is %d. \n\n", Material(pBoard, WHITE_PLAYER), Material(pBoard, BLACK_PLAYER));
 				advanceTurnStage(0);
 				if (computerMove != NULL)
 				{
-					
+
 					printf("computer: %d,%d to %d,%d \n", computerMove->src.i_coord, computerMove->src.j_coord, computerMove->dst.i_coord, computerMove->dst.j_coord);
 					selectedTool = computerMove->src;
-					//gui_makeMove(chessWindow->shownMenu, &(guiBoard[computerMove->dst.i_coord][computerMove->dst.j_coord]));
-					makeMove(pBoard, computerMove);//TODO:update kingsCrd?
+
+					makeMove(pBoard, computerMove);
 					setPromoteSquare(computerMove->dst, computerMove->promote);
-					advanceTurnStage(computerMove->promote); //computerMove->promote);
-					//updateGUIBoard(pMenu_Game);
+					advanceTurnStage(computerMove->promote);
+
 					selectedTool.i_coord = -1; selectedTool.j_coord = -1;
 					if (computerMove->promote)
 					{
 						advanceTurnStage(0);
 					}
-					//updateGUIBoard_Vis(pMenu_Game);
+
 					freeMovesList(computerMove);
 					updateGUIBoard(chessWindow->shownMenu);
 					updateGUIBoard_Vis(chessWindow->shownMenu);
@@ -293,10 +308,31 @@ int GUI_Main(board_t passedBoard)
 						return 0;
 					}
 				}
-				/* check for valid moves for the player */
-				if (bestScore(pBoard, properties[4]) == -1000000)
-					properties[1] = 1; //print CHECK MATE
+				if (properties[2] != 0)
+					scr = bestScore(pBoard, properties[4]);
+				else
+					scr = score(pBoard, properties[4]);
+				/* If both computer and player have no valid moves, it is a TIE */
+				if (scr == -999999)
+				{
+					//print TIE
+					labelTIE(chessWindow);
+					endGamePlay(chessWindow);
+				}
+				/* If the computer has no valid moves (happens because of MATE), it has lost: */
+				else if (scr == -1000000)
+				{
+					labelMATE(chessWindow);
+					endGamePlay(chessWindow);
+					//print CHECK MATE
+				}
+				/* If the computer has valid moves, but KingUnderThreat(board, -properties[4]), it is CHECK */
+				else if (KingUnderThreat(pBoard, properties[4]))
 
+				{
+					// ---- So make it seen.
+					labelCHECK(chessWindow);
+				}
 			}
 		}
 	}

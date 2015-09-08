@@ -1935,3 +1935,21 @@ int restartGame(Window *window)
 	return 0;
 }
 
+
+int endGamePlay(Window *window)
+{
+	return 1;
+}
+
+int labelTIE(Window *window)
+{
+	return 1;
+}
+int labelMATE(Window *window)
+{
+	return 1;
+}
+int labelCHECK(Window *window)
+{
+	return 1;
+}

@@ -163,4 +163,11 @@ btnFunc getGameFunctionOfCoord(Coord crd);
 int isOfPlayer(int player, char tool);
 int isThePromotedPiece(Coord crd);
 int setPromoteSquare(Coord crd, int promotiveSituation);
+
+
+
+int endGamePlay(Window *window);
+int labelTIE(Window *window);
+int labelMATE(Window *window);
+int labelCHECK(Window *window);
 #endif
