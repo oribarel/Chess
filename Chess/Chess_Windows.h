@@ -2,7 +2,7 @@
 #define CHESS_WINDOWS_H
 
 #include "Chess_Controls.h"
-#include "best.h"
+#include "minimax.h"
 
 /*#define SCREEN_W 1024
 #define SCREEN_H 768*/
@@ -79,6 +79,7 @@ extern Menu *pMenu_Load;
 //extern Menu *currMenu;
 
 extern Coord selectedTool;
+extern Coord promoteSquare;
 
 int passTheBoard(board_t board);
 
@@ -132,6 +133,8 @@ int changeHighlightedTool(struct menu *menu, struct controlComponent *ccb);
 int gui_makeMove(struct menu *menu, struct controlComponent *ccb);
 int highlightMovesList(Menu *menu, Coord crd, cMove *moves);
 int advanceTurnStage(int promotiveSituation);
+int endPromotionStage(struct menu *menu, struct controlComponent *ccb);
+
 
 /* Button handling */
 int buttonPressHandler(Window *window, SDL_Event e);
@@ -159,6 +162,6 @@ btnFunc getGameFunctionOfCoord(Coord crd);
 /* Misc */
 int isOfPlayer(int player, char tool);
 int freeMovesList(cMove *move);
-
-
+int isThePromotedPiece(Coord crd);
+int setPromoteSquare(Coord crd, int promotiveSituation);
 #endif

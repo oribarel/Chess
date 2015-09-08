@@ -11,13 +11,13 @@
 
 
 /* the values of the pieces */
-int piece_value[6] = {100, 300, 300, 500, 900, 0};
+int piece_value[6] = { 100, 300, 300, 500, 900, 0 };
 
 int pawnPCSQ_col7[BOARD_SIZE] = { 0, 0, 1, 2, 3, 4, 5, 0 };
 int pawnPCSQ_col6[BOARD_SIZE] = { 0, 0, 2, 4, 6, 8, 10, 0 };
 int pawnPCSQ_col5[BOARD_SIZE] = { 0, 0, 3, 6, 9, 12, 15, 0 };
-int pawnPCSQ_col4[BOARD_SIZE] = { 0, -40, -10, 8, 12, 16, 20, 0 };
-int pawnPCSQ_col3[BOARD_SIZE] = { 0, -40, -10, 8, 12, 16, 20, 0 };
+int pawnPCSQ_col4[BOARD_SIZE] = { 0, -40, 8, 8, 12, 16, 20, 0 };
+int pawnPCSQ_col3[BOARD_SIZE] = { 0, -40, 8, 8, 12, 16, 20, 0 };
 int pawnPCSQ_col2[BOARD_SIZE] = { 0, 0, 3, 6, 9, 12, 15, 0 };
 int pawnPCSQ_col1[BOARD_SIZE] = { 0, 0, 2, 4, 6, 8, 10, 0 };
 int pawnPCSQ_col0[BOARD_SIZE] = { 0, 0, 1, 2, 3, 4, 5, 0 };
@@ -154,18 +154,60 @@ eTool get_eToolFromType(char type)
 		return Empty;
 }
 
-
-int bestScore(board_t board)
+/*return 1 if the king of the given player is under threat*/
+int checkDangerZoneForKingUnderThreat(board_t board, int player)
 {
+	Coord kingCrd, *dangerZone;
+	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
+	dangerZone = WHITE_PLAYER == player ? WhiteKingDangerZone : BlackKingDangerZone;
+	for (int i = 0; i < BOARD_SIZE*BOARD_SIZE && isInBoard(dangerZone[i]) ; i++)
+	{
+
+		if (isAttacking(board, dangerZone[i], kingCrd))
+			return 1;
+	}
+	return 0;
+}
+
+int bestScore(board_t board, int player)
+{
+	Coord crd;
 	int column;
 	int score[2];  /* each side's score */
+	int ally, enemy, playerBlocked = 1, opponentBlocked = 1;
+	int CheckOnPlayer;
+
+
+
+	/* Check for win or tie situations: */
+	/* Since getMoves doesn't provide any moves that leave the king at CHECK, if there aren't any moves, it is MATE */
+	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
+	{
+		crd.i_coord = (int)mod(k, BOARD_SIZE);
+		crd.j_coord = k / BOARD_SIZE;
+		ally = IsAlly(GetContentOfCoord(board, crd), player);
+		enemy = IsEnemy(GetContentOfCoord(board, crd), player);
+		if (GetContentOfCoord(board, crd) != EMPTY)
+		{
+			if (ally > 0 && canMoveThisTool(board, crd) == 1)
+				playerBlocked = 0;
+			if (enemy > 0 && canMoveThisTool(board, crd) == 1)
+				opponentBlocked = 0;
+		}
+	}
+	if (playerBlocked && !opponentBlocked)
+		return -1000000;
+	else if (playerBlocked && opponentBlocked)
+		return -999999;
+	else if (opponentBlocked)
+		return 1000000;
 
 	/* this is the first pass: set up pawnRow, piecesScoreValue, and pawnsScoreValue. */
 	for (int i = 0; i < 10; ++i)
 	{
 		// Pawns are set to impossible locations. 
 		pawnRow[LIGHT][i] = BOARD_SIZE;
-		pawnRow[DARK][i] = - 1;
+		pawnRow[DARK][i] = -1;
 	}
 
 	piecesScoreValue[LIGHT] = 0;
@@ -173,7 +215,6 @@ int bestScore(board_t board)
 	pawnsScoreValue[LIGHT] = 0;
 	pawnsScoreValue[DARK] = 0;
 
-	Coord crd;
 	for (int i = 0; i < BOARD_SIZE; i++)
 	{
 		for (int j = 0; j < BOARD_SIZE; j++)
@@ -181,19 +222,19 @@ int bestScore(board_t board)
 			crd.i_coord = i; crd.j_coord = j;
 			if (GetContentOfCoord(board, crd) == EMPTY)
 				continue;
-			if (GetContentOfCoord(board, crd) == WHITE_P || GetContentOfCoord(board,crd) == BLACK_P)
+			if (GetContentOfCoord(board, crd) == WHITE_P || GetContentOfCoord(board, crd) == BLACK_P)
 			{
 				pawnsScoreValue[getColorInLightOrDark(board, crd)] += piece_value[0]; // reminder: int piece_value[6] = {100, 300, 300, 500, 900, 0};
-				
+
 				column = i + 1;  /* add 1 because of the extra column in the array */
 				if (getColorInLightOrDark(board, crd) == LIGHT)
 				{
-					if (pawnRow[LIGHT][column] < j)
+					if (pawnRow[LIGHT][column] > j)
 						pawnRow[LIGHT][column] = j;
 				}
-				else 
+				else
 				{
-					if (pawnRow[DARK][column] > j)
+					if (pawnRow[DARK][column] < j)
 						pawnRow[DARK][column] = j;
 				}
 			}
@@ -209,7 +250,160 @@ int bestScore(board_t board)
 	{
 		for (int j = 0; j < BOARD_SIZE; j++)
 		{
+			crd.i_coord = i; crd.j_coord = j;
+			if (GetContentOfCoord(board, crd) == EMPTY)
+				continue;
+			if (getColorInLightOrDark(board, crd) == LIGHT)
+			{
+				char tool = GetContentOfCoord(board, crd);
+				if (tool == WHITE_P)
+					score[LIGHT] += scoreWhitePawns(crd);
+				else if (tool == WHITE_N)
+					score[LIGHT] += knightPCSQ[i][j];
+				else if (tool == WHITE_B)
+					score[LIGHT] += bishopPCSQ[i][j];
+				else if (tool == WHITE_R)
+				{
+					if (pawnRow[LIGHT][i + 1] == BOARD_SIZE)
+					{
+						if (pawnRow[DARK][i + 1] == -1)
+							score[LIGHT] += ROOK_OPEN_FILE_BONUS;
+						else
+							score[LIGHT] += ROOK_SEMI_OPEN_FILE_BONUS;
+					}
+					if (j == 6)
+						score[LIGHT] += ROOK_ON_SEVENTH_BONUS;
+				}
+				else if (tool == WHITE_K)
+				{
+					if (piecesScoreValue[DARK] <= 1200)
+						score[LIGHT] += kingEndGamePCSQ[i][j];
+					else
+						score[LIGHT] += scoreWhiteKing(crd);
+				}
+			}
+			else // DARK
+			{
+				char tool = GetContentOfCoord(board, crd);
+				if (tool == BLACK_P)
+					score[DARK] += scoreBlackPawns(crd);
+				else if (tool == BLACK_N)
+					score[DARK] += knightPCSQ[i][BOARD_SIZE - 1 - j];
+				else if (tool == BLACK_B)
+					score[DARK] += bishopPCSQ[i][BOARD_SIZE - 1 - j];
+				else if (tool == BLACK_R)
+				{
 
+					if (pawnRow[DARK][i + 1] == -1)
+					{
+						if (pawnRow[LIGHT][i + 1] == BOARD_SIZE)
+							score[DARK] += ROOK_OPEN_FILE_BONUS;
+						else
+							score[DARK] += ROOK_SEMI_OPEN_FILE_BONUS;
+					}
+					if (j == 1)
+						score[DARK] += ROOK_ON_SEVENTH_BONUS;
+				}
+				else if (tool == BLACK_K)
+				{
+					if (piecesScoreValue[LIGHT] <= 1200)
+						score[DARK] += kingEndGamePCSQ[i][BOARD_SIZE - 1 - j];
+					else
+						score[DARK] += scoreBlackKing(crd);
+				}
+			}
+		}
+	}
+
+	/* the score[] array is set, now return the score relative
+	to the side to move */
+	if (player == WHITE_PLAYER)
+		return score[LIGHT] - score[DARK];
+	return score[DARK] - score[LIGHT];
+}
+
+int Material(board_t board, int player)
+{
+	Coord crd;
+	int column;
+	int score[2];  /* each side's score */
+	int ally, enemy, playerBlocked = 1, opponentBlocked = 1;
+	int CheckOnPlayer;
+
+
+
+	/* Check for win or tie situations: */
+	/* Since getMoves doesn't provide any moves that leave the king at CHECK, if there aren't any moves, it is MATE */
+	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
+	{
+		crd.i_coord = (int)mod(k, BOARD_SIZE);
+		crd.j_coord = k / BOARD_SIZE;
+		ally = IsAlly(GetContentOfCoord(board, crd), player);
+		enemy = IsEnemy(GetContentOfCoord(board, crd), player);
+		if (GetContentOfCoord(board, crd) != EMPTY)
+		{
+			if (ally > 0 && canMoveThisTool(board, crd) == 1)
+				playerBlocked = 0;
+			if (enemy > 0 && canMoveThisTool(board, crd) == 1)
+				opponentBlocked = 0;
+		}
+	}
+	if (playerBlocked && !opponentBlocked)
+		return -1000000;
+	else if (playerBlocked && opponentBlocked)
+		return -999999;
+	else if (opponentBlocked)
+		return 1000000;
+
+	/* this is the first pass: set up pawnRow, piecesScoreValue, and pawnsScoreValue. */
+	for (int i = 0; i < 10; ++i)
+	{
+		// Pawns are set to impossible locations. 
+		pawnRow[LIGHT][i] = BOARD_SIZE;
+		pawnRow[DARK][i] = -1;
+	}
+
+	piecesScoreValue[LIGHT] = 0;
+	piecesScoreValue[DARK] = 0;
+	pawnsScoreValue[LIGHT] = 0;
+	pawnsScoreValue[DARK] = 0;
+
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			crd.i_coord = i; crd.j_coord = j;
+			if (GetContentOfCoord(board, crd) == EMPTY)
+				continue;
+			if (GetContentOfCoord(board, crd) == WHITE_P || GetContentOfCoord(board, crd) == BLACK_P)
+			{
+				pawnsScoreValue[getColorInLightOrDark(board, crd)] += piece_value[0]; // reminder: int piece_value[6] = {100, 300, 300, 500, 900, 0};
+
+				column = i + 1;  /* add 1 because of the extra column in the array */
+				if (getColorInLightOrDark(board, crd) == LIGHT)
+				{
+					if (pawnRow[LIGHT][column] > j)
+						pawnRow[LIGHT][column] = j;
+				}
+				else
+				{
+					if (pawnRow[DARK][column] < j)
+						pawnRow[DARK][column] = j;
+				}
+			}
+			else
+				piecesScoreValue[getColorInLightOrDark(board, crd)] += piece_value[(int)get_eToolFromType(GetContentOfCoord(board, crd))];
+		}
+	}
+
+	/* this is the second pass: evaluate each piece */
+	score[LIGHT] = piecesScoreValue[LIGHT] + pawnsScoreValue[LIGHT];
+	score[DARK] = piecesScoreValue[DARK] + pawnsScoreValue[DARK];
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			crd.i_coord = i; crd.j_coord = j;
 			if (GetContentOfCoord(board, crd) == EMPTY)
 				continue;
 			if (getColorInLightOrDark(board, crd) == LIGHT)
@@ -277,9 +471,9 @@ int bestScore(board_t board)
 
 	/* the score[] array is set, now return the score relative
 	to the side to move */
-	if (properties[4] == WHITE_PLAYER)
-		return score[LIGHT] - score[DARK];
-	return score[DARK] - score[LIGHT];
+	if (player == WHITE_PLAYER)
+		return score[LIGHT];
+	return score[DARK];
 }
 
 int scoreWhitePawns(Coord crd)
@@ -379,7 +573,7 @@ int scoreWhiteKing(Coord crd)
 	/* scale the king safety value according to the opponent's material;
 	the premise is that your king safety can only be bad if the
 	opponent has enough pieces to attack you */
-	
+
 	/*res *= piecesScoreValue[DARK];
 	res /= 3100;*/
 
