@@ -803,17 +803,6 @@ int endPromotionStage(struct menu *menu, struct controlComponent *ccb)
 	updateGUIBoard(menu);
 }
 
-int freeMovesList(cMove *move)
-{
-	cMove *curr = move, *tmp;
-	while (curr != NULL)
-	{
-		tmp = curr->next;
-		free(curr);
-		curr = tmp;
-	}
-	return 1;
-}
 
 /*
 WAITING			0
@@ -942,10 +931,10 @@ int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
 	selectedTool = ccb->btn->crd;
 	/*if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-	SDL_FreeSurface(ccb->btn->pic);
-	printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-	quit();
-	return 0;
+		SDL_FreeSurface(ccb->btn->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
 	}*/
 
 	cMove *curr = moves;
@@ -959,10 +948,10 @@ int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
 
 		/*if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 		{
-		SDL_FreeSurface(ccb->btn->pic);
-		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
-		return 0;
+			SDL_FreeSurface(ccb->btn->pic);
+			printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+			quit();
+			return 0;
 		}*/
 		curr = curr->next;
 	}

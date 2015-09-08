@@ -133,36 +133,7 @@ void print_line()
 
 
 
-/*CONVD*/
-/*prints the route of the move*/
-void printMove(cMove *move)
-{
-	if (properties[1])
-		return;
-	printf("<%c,%u> to ", (char)((move->src).i_coord) + 97, (move->src).j_coord + 1);
 
-	printf("<%c,%u>", (char)((move->dst).i_coord) + 97, (move->dst).j_coord + 1);
-
-	//if promotion needed
-	if (move->promote)
-		printf(" %s", ToolCharToName(move->promote));
-
-	//print end of line
-	printf("\n");
-
-
-}
-
-/*CONVD*/
-/*prints an entire linked list of Moves*/
-void printMovesList(cMove *move)
-{
-	while (move != NULL)
-	{
-		printMove(move);
-		move = move->next;
-	}
-}
 
 /*DELETE*/
 /*
@@ -757,6 +728,7 @@ int Parse(char *line, board_t board)
 			//quit
 		{
 			properties[1] = 1;
+			_CrtDumpMemoryLeaks();
 			return 0;
 		}
 		else if (strcmp(token, cmmd11) == 0)
@@ -1305,6 +1277,7 @@ int Console_Main(board_t board)
 			}*/
 			//change color of current player
 			properties[4] = -properties[4];
+
 		}
 
 		if (input != NULL)

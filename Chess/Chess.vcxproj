@@ -75,6 +75,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="best.c" />
     <ClCompile Include="Chess_Logic.c" />
     <ClCompile Include="Console_Main.c" />
     <ClCompile Include="chessprog.c" />
@@ -82,8 +83,10 @@
     <ClCompile Include="Chess_Windows.c" />
     <ClCompile Include="Control_Components.c" />
     <ClCompile Include="GUI_Main.c" />
+    <ClCompile Include="minimax.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="best.h" />
     <ClInclude Include="Chess_Logic.h" />
     <ClInclude Include="Console_Main.h" />
     <ClInclude Include="chessprog.h" />
@@ -91,6 +94,7 @@
     <ClInclude Include="Chess_Windows.h" />
     <ClInclude Include="Control_Components.h" />
     <ClInclude Include="GUI_Main.h" />
+    <ClInclude Include="minimax.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
