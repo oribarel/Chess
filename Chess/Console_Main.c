@@ -817,8 +817,8 @@ int Parse(char *line, board_t board)
 					printf(ILLEGAL_MOVE);
 				return 1;
 			}
-
 			makeMove(board, legalMove);
+			free(legalMove);
 			print_board(board);
 			return 10;//successful move was made
 		}
@@ -861,6 +861,7 @@ int Parse(char *line, board_t board)
 
 			//print moves
 			printMovesList(pMove);
+			freeMovesList(pMove);
 			return 0;
 		}
 
@@ -888,6 +889,7 @@ int Parse(char *line, board_t board)
 
 			//print moves
 			printMovesList(pMove);
+			freeMovesList(pMove);
 			properties[2] = tmpD;
 			return 0;
 		}
@@ -917,6 +919,7 @@ int Parse(char *line, board_t board)
 			//get  best moves in pMove
 			properties[2] = d;
 			score = makeMove_ComputeScore_Undo(board, m, properties[4], d, 1, MIN_VALUE, MAX_VALUE, 0);
+			freeMovesList(m);
 
 			//print score
 			if (!properties[1])
@@ -943,6 +946,7 @@ int Parse(char *line, board_t board)
 }
 
 
+
 /*return NULL if the move is illegal, and a pointer to the move otherwise*/
 cMove* isLegalMove(char *token, board_t board, cMove *allPossibleMoves)
 {
@@ -954,6 +958,7 @@ cMove* isLegalMove(char *token, board_t board, cMove *allPossibleMoves)
 	char tool;
 	Coord source, dest;
 	int difference;
+	cMove* tmp = NULL;
 
 
 	//fill coordinates
@@ -986,9 +991,14 @@ cMove* isLegalMove(char *token, board_t board, cMove *allPossibleMoves)
 		if (!isEqualCoordinates(source, allPossibleMoves->src) || !isEqualCoordinates(dest, allPossibleMoves->dst) || promoteTo != allPossibleMoves->promote)
 			difference = 1;
 		if (difference == 0)//if a legal move has been found
+		{
 			return allPossibleMoves;
+		}
+		tmp = allPossibleMoves;
 		allPossibleMoves = allPossibleMoves->next;
+		free(tmp);
 	}
+	freeMovesList(allPossibleMoves);
 	return NULL;
 }
 
@@ -1157,12 +1167,12 @@ int Console_Main(board_t board)
 		{
 			int curScore = score(brd, -properties[4]);
 			computerMove = NULL;
-			if (curScore == -800)//no legal move for the computer (computer lost)
+			if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
 			{
 				printWinner(properties[4]);//print player wins;
 				properties[1] = 1;
 			}
-			else if (curScore == -799)//no legal move for the computer and for the player (tie)
+			else if (curScore == TIE_SCORE)//no legal move for the computer and for the player (tie)
 			{
 				printf(TIE);//print tie;
 				properties[1] = 1;
@@ -1194,13 +1204,13 @@ int Console_Main(board_t board)
 			//change player
 			curScore = score(brd, properties[4]);
 			properties[4] = -properties[4];
-			if ((curScore == -800))//if no legal move for the player (player lost - MATE!)
+			if ((curScore == MATE_WIN_LOSE))//if no legal move for the player (player lost - MATE!)
 			{
 				printWinner(-properties[4]);//print computer wins;
 				properties[1] = 1;
 
 			}
-			else if (curScore == -799)//no legal move for the computer and for the player (tie)
+			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and (tie)
 			{
 				printf(TIE);//print tie;
 				properties[1] = 1;
@@ -1254,12 +1264,12 @@ int Console_Main(board_t board)
 		{
 			if (properties[5] == 1)
 			{
-				if (score(brd, -properties[4]) == -800)//no legal move for the other player (other plyer lost - MATE!)
+				if (score(brd, -properties[4]) == MATE_WIN_LOSE)//no legal move for the other player (other plyer lost - MATE!)
 				{
 					printWinner(properties[4]);//print current player wins;
 					properties[1] = 1;
 				}
-				else if (score(brd, -properties[4]) == -799)//no legal move for both players(tie)
+				else if (score(brd, -properties[4]) == TIE_SCORE)//no legal move for both players(tie)
 				{
 					printf(TIE);//print tie;
 					properties[1] = 1;

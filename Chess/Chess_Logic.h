@@ -27,8 +27,11 @@
 #define MAX 1
 
 #define MAX_SCORE 400 //TODO: what to do?
-#define MAX_VALUE 801
-#define MIN_VALUE -801
+#define MAX_VALUE 1000001
+#define MIN_VALUE -1000001
+#define TIE_SCORE -999999
+#define MATE_WIN_SCORE 1000000
+#define MATE_WIN_LOSE -1000000
 
 
 #define WHITE_P 'm'		//pawn		hayal
@@ -144,7 +147,7 @@ int score(board_t board, int player);
 int canMoveThisTool(board_t board, Coord coord);
 int isWhite(char type);
 //int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int boardsCounter);
-int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int boardsCounter);
+//int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int boardsCounter);
 int makeMove(board_t board, cMove *move);
 char ToolNameToChar(char *toolFullName);
 char* ToolCharToName(char toolChar);
@@ -164,6 +167,7 @@ int LoadFromFile(char* file_path, board_t board);
 void printMove(cMove *move);
 void printMovesList(cMove *move);
 int freeMovesList(cMove *move);
+Coord GenerateCoord(int x, int y);
 
 #endif
 

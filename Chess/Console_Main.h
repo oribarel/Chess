@@ -2,7 +2,8 @@
 #define CONSOLE_MAIN_H
 
 #include "Chess_Logic.h"
-#include "best.h"
+#include "minimax.h"
+
 
 
 
