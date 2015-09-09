@@ -294,8 +294,20 @@ int drawButtonsOfPanel(ControlComponent *ccp)
 	return 1;
 }
 
+int drawLabel(ControlComponent *ccl)
+{
+	if (SDL_BlitSurface(ccl->lbl->pic, NULL, chessWindow->self, &(ccl->rect)) != 0)
+	{
+		SDL_FreeSurface(ccl->lbl->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
+}
+
 //returns 0 on failure and 1 on success.
-int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild, Window *window){
+int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild, Window *window)
+{
 
 	addControlToPanelList(ccpParent, cclChild);
 

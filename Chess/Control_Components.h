@@ -65,8 +65,11 @@ typedef struct menu
 	struct controlComponent *panel_2;
 	struct controlComponent *panel_3;
 	struct controlComponent *panel_4;
-
+	
+	struct ControlComponent *header;
+	
 	struct rgb rgb_triplet;
+	
 	SDL_Rect rect;
 	int identifier;
 } Menu;
@@ -118,6 +121,7 @@ int addMenuToWindow(Window *window, Menu *pMenu);
 
 int drawPanelToMenu(ControlComponent *ccp);
 int drawButtonsOfPanel(ControlComponent *ccp);
+int drawLabel(ControlComponent *ccl);
 
 ControlComponent *getLastInPanelList(ControlComponent* ccpParent);
 Uint32 getColorOfPanel(Window *window, ControlComponent *ccp);
