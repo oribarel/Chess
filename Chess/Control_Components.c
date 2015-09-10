@@ -294,32 +294,30 @@ int drawButtonsOfPanel(ControlComponent *ccp)
 	return 1;
 }
 
-int drawLabel(ControlComponent *ccl)
+int drawLabelsOfPanel(ControlComponent *ccl)
 {
-	if (SDL_BlitSurface(ccl->lbl->pic, NULL, chessWindow->self, &(ccl->rect)) != 0)
+	while (ccl != NULL && ccl->lbl)
 	{
-		SDL_FreeSurface(ccl->lbl->pic);
-		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
-		return 0;
+		if (SDL_BlitSurface(ccl->lbl->pic, NULL, chessWindow->self, &(ccl->rect)) != 0)
+		{
+			SDL_FreeSurface(ccl->lbl->pic);
+			printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+			quit();
+			return 0;
+		}
+		ccl = ccl->next;
 	}
 }
 
 //returns 0 on failure and 1 on success.
-int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild, Window *window)
+int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild)
 {
 
 	addControlToPanelList(ccpParent, cclChild);
 
 	cclChild->rect.x += ccpParent->rect.x;
 	cclChild->rect.y += ccpParent->rect.y;
-	if (SDL_BlitSurface(cclChild->lbl->pic, NULL, window->self, &(cclChild->rect)) != 0)
-	{
-		SDL_FreeSurface(cclChild->lbl->pic);
-		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
-		return 0;
-	}
+	
 	return 1;
 }
 

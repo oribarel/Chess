@@ -88,13 +88,16 @@ extern Menu *pMenu_Load;
 extern Coord selectedTool;
 extern Coord promoteSquare;
 
+extern int whitePlayerTurnStage;
+extern int blackPlayerTurnStage;
+
 int passTheBoard(board_t board);
 
 /* Create Menus Functions */
 int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
 int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
 int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
-int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
+int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
 int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons);
 int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons);
 
@@ -172,12 +175,12 @@ int labelMaker(ControlComponent *ccl, Label *lbl, SDL_Rect rect, char *filename)
 
 
 /* Misc */
-
+SDL_Rect create1024x768Rect();
 
 int isOfPlayer(int player, char tool);
 int isThePromotedPiece(Coord crd);
 int setPromoteSquare(Coord crd, int promotiveSituation);
-
+int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn);
 
 
 int endGamePlay(Window *window);

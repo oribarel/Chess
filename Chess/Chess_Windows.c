@@ -61,20 +61,34 @@ Coord src, dest;
 char selectedSlot = '0';
 
 
+/* Methods */
 
-
-
-SDL_Rect create1024x768Rect()
+int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color)
 {
-	SDL_Rect Rect1024x768 = createSDL_Rect(SCREEN_W, SCREEN_H, 0, 0);
-	return Rect1024x768;
-}
+	ccp->pnl = pnl;
+	ccp->btn = NULL;
+	ccp->lbl = NULL;
+	ccp->next = NULL;
+	ccp->rect = rect;
+	ccp->pnl->children = NULL;
+	ccp->pnl->rgb_triplet = color;
 
-int passTheBoard(board_t board)
-{
-	pBoard = board;
 	return 1;
 }
+
+int labelMaker(ControlComponent *ccl, Label *lbl, SDL_Rect rect, char *filename)
+{
+	ccl->pnl = NULL;
+	ccl->btn = NULL;
+	ccl->lbl = lbl;
+	ccl->next = NULL;
+	ccl->rect = rect;
+
+	ccl->lbl->pic = uploadPicture(filename);
+
+	return 1;
+}
+
 
 
 int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns)
@@ -107,7 +121,6 @@ int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, Control
 	return 1;
 }
 
-/* TODO: need to convert this */
 int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons)
 { /* This menu has a 'return to game', a 'quit', 'save' and 7 slots buttons. */
 
@@ -151,7 +164,7 @@ int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *
 
 	/* Make the Panels*/
 	panelMaker(ccp_SaveMenuCCPs, pnl_SaveMenuPanels, returnsPanel, rgbRed);
-	panelMaker(ccp_SaveMenuCCPs + 1, pnl_SaveMenuPanels + 1, slotsPanel, rgbPurple);
+	panelMaker(ccp_SaveMenuCCPs + 1, pnl_SaveMenuPanels + 1, slotsPanel, rgbMenuBlue);
 
 	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs);
 	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 1);
@@ -215,7 +228,7 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 	createButton(ccb_LoadMenuCCBs + 8, btn_LoadMenuButtons + 8, loadButton, uploadPicture("loadGame.bmp"), LoadGame, LOAD_GAME_BUTTON);
 	/* Make the Panels*/
 	panelMaker(ccp_LoadMenuCCPs, pnl_LoadMenuPanels, returnsPanel, rgbRed);
-	panelMaker(ccp_LoadMenuCCPs + 1, pnl_LoadMenuPanels + 1, slotsPanel, rgbPurple);
+	panelMaker(ccp_LoadMenuCCPs + 1, pnl_LoadMenuPanels + 1, slotsPanel, rgbMenuBlue);
 
 	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs);
 	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 1);
@@ -250,18 +263,19 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	/* Screen Rect */
 	SDL_Rect Rect1024x768 = create1024x768Rect();
 
+
 	/* Panel Rects */
 	SDL_Rect returnsPanel = createSDL_Rect(wGameModeSetting, hGameModeSetting, wSide, 9);
-	SDL_Rect togglesPanel = createSDL_Rect(wGameModeSetting, 300, wSide, 9 + 250);
-	SDL_Rect continueOrPlayPanel = createSDL_Rect(wGameModeSetting, 150, wSide, 9 + 550);
+	SDL_Rect togglesPanel = createSDL_Rect(wGameModeSetting, 250, wSide, 9 + 250);
+	SDL_Rect continueOrPlayPanel = createSDL_Rect(wGameModeSetting, 250, wSide, 9 + 500);
 	SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
 
 	/* Button Rects */
 	SDL_Rect returnToMainMenuButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
 	SDL_Rect gameModeButton = createSDL_Rect(wGameModeSetting - 2 * wSide, hGameModeSetting / 2 - 2 * hSide, wSide, hSide);
 	SDL_Rect nextPlayerButton = createSDL_Rect(80, 80, wGameModeSetting / 2 - 40, hGameModeSetting / 2);
-	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * hSide, hGameModeSetting - 4 * hSide, wSide, 2 * hSide);
-
+	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (wGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+	
 	/* label rects */
 	SDL_Rect header = createSDL_Rect(wBoardSetting, 75, wGameModeSetting + wSide, 10);
 
@@ -387,7 +401,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 	/* Panel Rects */
 	SDL_Rect returnsPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9);
-	SDL_Rect emptyPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 250);
+	SDL_Rect infoPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 250);
 	SDL_Rect saveAndQuitPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 500);
 
 
@@ -398,7 +412,8 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 	/* label rects */
 	SDL_Rect header = createSDL_Rect(wBoardPanel, 75, wTogglePanels + wSide, 10);
-
+	SDL_Rect infoRect_top = createSDL_Rect(wTogglePanels - 2 * wSide, hTogglePanels / 2 - 2 * hSide, wSide, 0);
+	SDL_Rect infoRect_bottom = createSDL_Rect(wTogglePanels - 2 * wSide, hTogglePanels / 2 - 2 * hSide, wSide, hTogglePanels / 2);
 
 	createMenu(GamePlayMenu, Rect1024x768, rgbMenuBlue, GAME_PLAY_MENU);
 
@@ -409,7 +424,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 	/* Make the Panels*/
 	panelMaker(ccps, panel, returnsPanel, rgbRed);
-	panelMaker(ccps + 1, panel + 1, emptyPanel, rgbOrange);
+	panelMaker(ccps + 1, panel + 1, infoPanel, rgbOrange);
 	panelMaker(ccps + 2, panel + 2, saveAndQuitPanel, rgbGreen);
 
 	addButtonToPanel(ccps, ccbs);
@@ -423,8 +438,14 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 	/* Make the labels */
 	labelMaker(ccl, lbl, header, "GameHeader.bmp");
+	labelMaker(ccl + 1, lbl + 1, infoRect_top, "info_WhitePlayerTurn.bmp");
+	labelMaker(ccl + 2, lbl + 2, infoRect_bottom, "info_makeMove.bmp");
 
-	/* Add the label to the Menu */
+	addLabelToPanel(GamePlayMenu->panel_2, ccl + 1);
+	addLabelToPanel(GamePlayMenu->panel_2, ccl + 2);
+
+
+	/* Add the header to the Menu */
 	GamePlayMenu->header = ccl;
 	return 1;
 }
@@ -432,14 +453,6 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 int showMenu(Window *window, Menu *menu)
 {
-	/*
-	1. Need to attach the menu to the window.
-	2. Need to paint the rect of the menu (menuBlue).
-	3. Need to paint each of the rects of the panels, and
-	4. Inside each panel, paint the buttons.
-	*/
-
-	//window->shownMenu = menu;
 	addMenuToWindow(chessWindow, menu);
 
 	if (SDL_Flip(chessWindow->self) != 0)
@@ -462,7 +475,7 @@ int showMenu(Window *window, Menu *menu)
 	}
 	if (menu->panel_2 != NULL)
 	{
-		if (drawPanelToMenu(menu->panel_2) == 0 || drawButtonsOfPanel(menu->panel_2) == 0)
+		if (drawPanelToMenu(menu->panel_2) == 0 || drawButtonsOfPanel(menu->panel_2) == 0 || drawLabelsOfPanel(menu->panel_2->pnl->children) == 0)
 			return 0;
 	}
 	if (menu->panel_3 != NULL)
@@ -477,16 +490,17 @@ int showMenu(Window *window, Menu *menu)
 	}
 	if (menu->header != NULL)
 	{
-		if (drawLabel(menu->header) == 0)
+		if (drawLabelsOfPanel(menu->header) == 0)
 			return 0;
 	}
 	return 1;
 }
 
 
-/* This also adds each of the squares to the panel! */
+
 int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *btn_BoardPanelButtons, board_t board)
 {
+	/* This also adds each of the squares to the panel! */
 
 	Coord crd;
 	eTool type;
@@ -514,15 +528,9 @@ int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *b
 	return 1;
 }
 
-
-/*
-	This function only updates the function of the GUIBoard
-	for PLAYER_SELECTION_MENU: toggle pieces function.
-	for AI_SETTINGS_MENU: builds a guiBoard from board
-	for GAME_MENU: game mode function
-	*/
 int updateGUIBoard(Menu *menu)
 {
+	/* updates the function of the GUIBoard */
 	ControlComponent *ccb;
 	Coord crd;
 	eTool type;
@@ -554,12 +562,54 @@ int updateGUIBoard(Menu *menu)
 	return 1;
 }
 
-int isOfPlayer(int player, char tool)
+int updateGUIBoard_Vis(Menu *menu)
 {
-	if (player == WHITE_PLAYER && islower(tool) || player == BLACK_PLAYER && isupper(tool))
-		return 1;
-	return 0;
+	Coord crd;
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			int selectionStatus;
+
+			/* If it is the selected Coord then SelectionStatus == SEL */
+			if (properties[0] == 1)
+				selectionStatus = NON_SEL;
+			else if (selectedTool.i_coord == i && selectedTool.j_coord == j)
+				selectionStatus = SEL;
+			/* Else we go over the highlighted squares array and check for a match: */
+			else
+			{
+				int inHighlightedSquares = 0;
+				for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
+					inHighlightedSquares |= (highlightedSquares[k].i_coord == i && highlightedSquares[k].j_coord == j);
+				if (inHighlightedSquares)
+					selectionStatus = ATT; /* If it is in the highlighted squares, then it is being attacked */
+				else
+					selectionStatus = NON_SEL;
+			}
+
+
+
+			crd.i_coord = i; crd.j_coord = j;
+			SDL_FreeSurface(guiBoard[i][j].btn->pic); //TODO: be careful!
+			guiBoard[i][j].btn->pic = uploadPicture(getPictureName_tools(crd, getColor(pBoard, crd),
+				get_eToolFromType(GetContentOfCoord(pBoard, crd)), selectionStatus));
+
+			if (SDL_BlitSurface(guiBoard[i][j].btn->pic, NULL, chessWindow->self, &(guiBoard[i][j].rect)) != 0)
+			{
+				SDL_FreeSurface(guiBoard[i][j].btn->pic);
+				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+				quit();
+				return 0;
+			}
+		}
+	}
+	return 1;
 }
+
+
+
+/* btnFuncs */
 
 btnFunc getGameFunctionOfCoord(Coord crd)
 {
@@ -675,67 +725,9 @@ btnFunc getHighlightFunctionOfTool(char tool)
 		return kingHighlight;
 }
 
-int isHighlighted(Coord crd)
-{
-	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
-	{
-		if (crd.i_coord == highlightedSquares[k].i_coord && crd.j_coord == highlightedSquares[k].j_coord)
-			return 1;
-	}
-	return 0;
-}
-
-int updateGUIBoard_Vis(Menu *menu)
-{
-	Coord crd;
-	for (int i = 0; i < BOARD_SIZE; i++)
-	{
-		for (int j = 0; j < BOARD_SIZE; j++)
-		{
-			int selectionStatus;
-
-			/* If it is the selected Coord then SelectionStatus == SEL */
-			if (properties[0] == 1)
-				selectionStatus = NON_SEL;
-			else if (selectedTool.i_coord == i && selectedTool.j_coord == j)
-				selectionStatus = SEL;
-			/* Else we go over the highlighted squares array and check for a match: */
-			else
-			{
-				int inHighlightedSquares = 0;
-				for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
-					inHighlightedSquares |= (highlightedSquares[k].i_coord == i && highlightedSquares[k].j_coord == j);
-				if (inHighlightedSquares)
-					selectionStatus = ATT; /* If it is in the highlighted squares, then it is being attacked */
-				else
-					selectionStatus = NON_SEL;
-			}
-
-
-
-			crd.i_coord = i; crd.j_coord = j;
-			SDL_FreeSurface(guiBoard[i][j].btn->pic); //TODO: be careful!
-			guiBoard[i][j].btn->pic = uploadPicture(getPictureName_tools(crd, getColor(pBoard, crd),
-				get_eToolFromType(GetContentOfCoord(pBoard, crd)), selectionStatus));
-
-			if (SDL_BlitSurface(guiBoard[i][j].btn->pic, NULL, chessWindow->self, &(guiBoard[i][j].rect)) != 0)
-			{
-				SDL_FreeSurface(guiBoard[i][j].btn->pic);
-				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-				quit();
-				return 0;
-			}
-		}
-	}
-	return 1;
-}
-
-
-
-
-/* { WAITING, NONE_SELECTED, HIGHLIGHTED, MOVE_MADE, PROMOTE } */
 int pawnHighlight(struct menu *menu, struct controlComponent *ccb)
 {
+	/* { WAITING, NONE_SELECTED, HIGHLIGHTED, MOVE_MADE, PROMOTE } */
 	advanceTurnStage(0);
 	Coord crd = ccb->btn->crd;
 	selectedTool = crd;
@@ -812,16 +804,16 @@ int endPromotionStage(struct menu *menu, struct controlComponent *ccb)
 	updateGUIBoard(menu);
 }
 
-
-/*
-WAITING			0
-NONE_SELECTED	1
-HIGHLIGHTED		2
-MOVE_MADE		3
-PROMOTE			4
-*/
 int advanceTurnStage(int promotiveSituation)
 {
+
+	/*
+	WAITING			0
+	NONE_SELECTED	1
+	HIGHLIGHTED		2
+	MOVE_MADE		3
+	PROMOTE			4
+	*/
 	int player = properties[4], waiter = generateEnemyColor(player);
 	int *playerStageInd = (properties[4] == WHITE_PLAYER) ? &whitePlayerTurnStage : &blackPlayerTurnStage;
 	int *waiterStageInd = (properties[4] == WHITE_PLAYER) ? &blackPlayerTurnStage : &whitePlayerTurnStage;
@@ -915,46 +907,6 @@ int gui_makeMove(struct menu *menu, struct controlComponent *ccb)
 	return 1;
 }
 
-int isThePromotedPiece(Coord crd)
-{
-	if (crd.i_coord == promoteSquare.i_coord && crd.j_coord == promoteSquare.j_coord)
-		return 1;
-	else
-		return 0;
-}
-
-
-int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
-{
-	/* Reset Highlighted Squares Array */
-	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
-	{
-		highlightedSquares[k].i_coord = -1;
-		highlightedSquares[k].j_coord = -1;
-	}
-
-	ControlComponent *ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
-
-	
-	selectedTool = ccb->btn->crd;
-	
-
-	cMove *curr = moves;
-	int count = 0;
-	while (curr != NULL)
-	{
-		ccb = &(guiBoard[curr->dst.i_coord][curr->dst.j_coord]);
-		
-		highlightedSquares[count++] = ccb->btn->crd;
-
-		curr = curr->next;
-	}
-	updateGUIBoard_Vis(menu);
-	return 1;
-
-}
-
-
 
 
 int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
@@ -1035,9 +987,9 @@ int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *ccb)
 	return 1;
 }
 
-/* updates this button's function and picture (not global gameMode) */
 int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
 {
+	/* updates this button's function and picture (not global gam`eMode) */
 	if (pMenu_PlayerSelection == NULL)
 	{
 		return 0;
@@ -1110,8 +1062,6 @@ int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *cc
 
 
 
-
-
 int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
 {
 	properties[2] = mod(properties[2] + 1, 5);
@@ -1127,7 +1077,6 @@ int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
 	}
 	return 1;
 }
-
 
 int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *ccb)
 {
@@ -1236,6 +1185,7 @@ int AI_Settings_updatePlayButton(Window *window)
 }
 
 
+
 int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb)
 {
 	properties[0] = 1;
@@ -1297,6 +1247,7 @@ int GamePlayMenu_PromoteToggle(struct menu *menu, struct controlComponent *ccb)
 }
 
 
+
 int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb)
 {
 	if (selectedSlot == '0')
@@ -1311,7 +1262,6 @@ int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb)
 
 	return 1;
 }
-
 
 int SaveMenu_selectSlot(struct menu *menu, struct controlComponent *ccb)
 {
@@ -1365,6 +1315,8 @@ int SaveMenu_ResetSaveMenuAndShowGamePlayMenu(struct menu *menu, struct controlC
 	return 1;
 }
 
+
+
 int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlComponent *ccb)
 {
 	//TODO: Reset all of this menu's data ( selected slot... ) and then:
@@ -1372,53 +1324,125 @@ int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlCo
 	return 1;
 }
 
-/* shared with main menu and game play menu */
+int LoadGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
+{
+	if (selectedSlot == '0')
+		return 0;
+
+	char filename[12] = "chessX.xml \0";
+	*(filename + 5) = selectedSlot;
+	LoadFromFile(filename, pBoard);
+
+	selectedSlot = '0';
+	properties[0] = GAME_MODE;
+
+	if (properties[4] == WHITE_PLAYER)
+	{
+		whitePlayerTurnStage = NONE_SELECTED;
+		blackPlayerTurnStage = WAITING;
+	}
+	else
+	{
+		whitePlayerTurnStage = WAITING;
+		blackPlayerTurnStage = NONE_SELECTED;
+	}
+	UpdateDangerZone(pBoard, WHITE_PLAYER);
+	UpdateDangerZone(pBoard, BLACK_PLAYER);
+	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
+
+
+	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
+	updateGUIBoard(pMenu_Game);
+	updateGUIBoard_Vis(chessWindow->shownMenu);
+	showGamePlayMenu(pMenu_Game, NULL);
+	return 1;
+}
+
+
+
+int showMainMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	/* This functions as hard reset to all game */
+	properties[0] = SETTINGS_MODE;
+	init_board(pBoard);
+	resetPlayerSelectionMenu();
+	resetAISettingsMenu();
+
+	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
+	promoteSquare.i_coord = -1; promoteSquare.j_coord = -1;
+
+	showMenu(chessWindow, pMenu_Main);
+	return 0;
+}
+
+int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	properties[0] = SETTINGS_MODE;
+	showMenu(chessWindow, pMenu_PlayerSelection);
+	updateGUIBoard(pMenu_PlayerSelection);
+	updateGUIBoard_Vis(pMenu_PlayerSelection);
+	playerSelectionMenu_updateContinueOrPlayButton(chessWindow);
+
+	return 0;
+}
+
+int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	properties[0] = SETTINGS_MODE;
+	showMenu(chessWindow, pMenu_AI_settings);
+
+	AI_Settings_updatePlayButton(chessWindow);
+	return 0;
+}
+
+int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	properties[0] = GAME_MODE;
+	Coord crd;
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			crd.i_coord = i; crd.j_coord = j;
+			char tool = GetContentOfCoord(pBoard, crd);
+			if (tool == WHITE_K)
+				WhiteKing = crd;
+			if (tool == BLACK_K)
+				BlackKing = crd;
+		}
+	}
+	int scr = score(pBoard, properties[4]);
+	int threat = KingUnderThreat(pBoard, properties[4]);
+	updateInfoLabels(scr, threat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);
+
+	showMenu(chessWindow, pMenu_Game);
+	return 0;
+}
+
+int showSaveGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
+	showMenu(chessWindow, pMenu_Save);
+	return 0;
+}
+
+int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
+	showMenu(chessWindow, pMenu_Load);
+	return 0;
+}
+
+
 int QuitGame(struct menu *menu, struct controlComponent *ccb)
 {
+	/* shared with main menu and game play menu */
 	return 0;
 }
 
 
 
-
-
-/* Not in USE!!!*/
-/* If Menu has n sub-panels then this function should be ran on it with i_next from 0 to n-1. */
-void blitMenu(ControlComponent *ccpParent, int i_next, Window *window)
-{
-	ControlComponent *curr = ccpParent->pnl->children;
-
-	while (i_next-- > 0)
-		curr = curr->next;
-
-	Uint32 color = getColorOfPanel(window, curr);
-	if (SDL_FillRect(window->self, &(curr->rect), color) != 0)
-	{
-		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
-		quit();
-
-	}
-
-
-	ControlComponent *ccbCurr = curr->pnl->children;
-	while (ccbCurr != NULL)
-	{
-		if (ccbCurr->btn != NULL)
-		{
-			if (SDL_BlitSurface(ccbCurr->btn->pic, NULL, window->self, &(ccbCurr->rect)) != 0)
-			{
-				SDL_FreeSurface(ccbCurr->btn->pic);
-				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-				quit();
-
-			}
-		}
-		ccbCurr = ccbCurr->next;
-	}
-}
-
-
-
+/* Button Handlers*/
 
 int buttonPressHandler(Window *window, SDL_Event e)
 {
@@ -1531,13 +1555,12 @@ int buttonPressHandler(Window *window, SDL_Event e)
 
 }
 
-
 int rightClicksHandler(Window *chessWindow, SDL_Event e)
 {
 	Menu *menu = chessWindow->shownMenu;
 	ControlComponent *currChild;
 
-	if (menu->identifier == PLAYER_SELECTION_MENU || menu->identifier == GAME_PLAY_MENU)
+	if (menu->identifier == PLAYER_SELECTION_MENU || menu->identifier == AI_SETTINGS_MENU || menu->identifier == GAME_PLAY_MENU)
 	{
 		if (menu->panel_4 != NULL)
 		{
@@ -1554,6 +1577,13 @@ int rightClicksHandler(Window *chessWindow, SDL_Event e)
 						{
 							setSlotInBoard(pBoard, crd, EMPTY);
 							playerSelectionMenu_updateContinueOrPlayButton(chessWindow);
+							updateGUIBoard_Vis(menu);
+							return 1;
+						}
+						else if (menu->identifier == AI_SETTINGS_MENU)
+						{
+							setSlotInBoard(pBoard, crd, EMPTY);
+							AI_Settings_updatePlayButton(chessWindow);
 							updateGUIBoard_Vis(menu);
 							return 1;
 						}
@@ -1578,11 +1608,9 @@ int rightClicksHandler(Window *chessWindow, SDL_Event e)
 	return 0;
 }
 
-
-
-/* Executes pressing of the button if and only if e indicates that button was pressed */
 int pressIfNeeded(Menu *menu, struct controlComponent *ccb, SDL_Event e)
 {
+/* Executes pressing of the button iff e indicates the button was pressed */
 	if (isPressInsideButton(e, ccb))
 	{
 		ccb->btn->f(menu, ccb);
@@ -1602,123 +1630,6 @@ int isPressInsideButton(SDL_Event e, ControlComponent *ccb)
 		return 0;
 }
 
-
-int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color)
-{
-	ccp->pnl = pnl;
-	ccp->btn = NULL;
-	ccp->lbl = NULL;
-	ccp->next = NULL;
-	ccp->rect = rect;
-	ccp->pnl->children = NULL;
-	ccp->pnl->rgb_triplet = color;
-
-	return 1;
-}
-
-int labelMaker(ControlComponent *ccl, Label *lbl, SDL_Rect rect, char *filename)
-{
-	ccl->pnl = NULL;
-	ccl->btn = NULL;
-	ccl->lbl = lbl;
-	ccl->next = NULL;
-	ccl->rect = rect;
-
-	ccl->lbl->pic = uploadPicture(filename);
-
-	return 1;
-}
-
-
-/* Pre: coord is in board */
-eTool getInitialTypeOfCoord(Coord crd)
-{
-	if (crd.j_coord > 1 && crd.j_coord < 6)
-		return Empty;
-	else if (crd.j_coord == 1 || crd.j_coord == 6)
-		return Pawn;
-	else
-	{
-		if (crd.i_coord == 0 || crd.i_coord == 7)
-			return Rook;
-		else if (crd.i_coord == 1 || crd.i_coord == 6)
-			return Knight;
-		else if (crd.i_coord == 2 || crd.i_coord == 5)
-			return Bishop;
-		else if (crd.i_coord == 3)
-			return Queen;
-		else
-			return King;
-	}
-}
-
-/* Pre: crd is in the board */
-int getInitialPlayerOfCoord(Coord crd)
-{
-	if (crd.j_coord == 0 || crd.j_coord == 1)
-		return WHITE_PLAYER;
-	else if (crd.j_coord == 6 || crd.j_coord == 7)
-		return BLACK_PLAYER;
-	else
-		return NO_PLAYER;
-}
-
-
-/* AI_Difficulty is between 0 and 4 inclusive */
-const char *getDifficultyPicName(void)
-{
-	if (properties[2] == 0)
-		return "BestDiff.bmp";
-	else if (properties[2] == 1)
-		return "1Diff.bmp";
-	else if (properties[2] == 2)
-		return "2Diff.bmp";
-	else if (properties[2] == 3)
-		return "3Diff.bmp";
-	else
-		return "4Diff.bmp";
-}
-
-const char *getPlayerColorPicName()
-{
-	if (properties[3] == WHITE_PLAYER)
-		return "PlayerIsWhite.bmp";
-	else
-		return "PlayerIsBlack.bmp";
-}
-
-
-
-
-
-/* Returns 1 iff it is legal to start a game with the board setting */
-/* TODO: move this function to Chess_Logic.c */
-int isValidBoardInitialization(board_t board)
-{
-	char types[] = { BLACK_P, BLACK_N, BLACK_B, BLACK_R, BLACK_Q, BLACK_K, WHITE_P, WHITE_N, WHITE_B, WHITE_R, WHITE_Q, WHITE_K };
-	int result = 1;
-
-	for (int i = 0; i < 12; i++)
-	{
-		result &= NotTooManyOfType(board, types[i]);
-	}
-
-	if (CountToolsOfType(board, WHITE_K) < 1 || CountToolsOfType(board, BLACK_K) < 1)
-		result = 0;
-
-	return result;
-}
-
-/* This functions as hard reset to all game */
-int showMainMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	properties[0] = SETTINGS_MODE;
-	init_board(pBoard);
-	resetPlayerSelectionMenu();
-	resetAISettingsMenu();
-	showMenu(chessWindow, pMenu_Main);
-	return 0;
-}
 
 
 int resetPlayerSelectionMenu()
@@ -1748,204 +1659,76 @@ int resetAISettingsMenu()
 }
 
 
-int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	properties[0] = SETTINGS_MODE;
-	showMenu(chessWindow, pMenu_PlayerSelection);
-	updateGUIBoard(pMenu_PlayerSelection);
-	updateGUIBoard_Vis(pMenu_PlayerSelection);
-	playerSelectionMenu_updateContinueOrPlayButton(chessWindow);
-
-	return 0;
-}
-
-int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	properties[0] = SETTINGS_MODE;
-	showMenu(chessWindow, pMenu_AI_settings);
-
-	AI_Settings_updatePlayButton(chessWindow);
-	return 0;
-}
-
-int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	properties[0] = GAME_MODE;
-	Coord crd;
-	for (int i = 0; i < BOARD_SIZE; i++)
-	{
-		for (int j = 0; j < BOARD_SIZE; j++)
-		{
-			crd.i_coord = i; crd.j_coord = j;
-			char tool = GetContentOfCoord(pBoard, crd);
-			if (tool == WHITE_K)
-				WhiteKing = crd;
-			if (tool == BLACK_K)
-				BlackKing = crd;
-		}
-	}
-	showMenu(chessWindow, pMenu_Game);
-	return 0;
-}
-
-int showSaveGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
-	showMenu(chessWindow, pMenu_Save);
-	return 0;
-}
-
-int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
-{
-	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
-	showMenu(chessWindow, pMenu_Load);
-	return 0;
-}
-
-
-
-
-
-
-
-
-
-
-
-int freeBoardAndTree(Window *window)
-{
-	return 0;
-}
-
-
-int RebuildSettingsMenu(Window *window, ControlComponent **second_settings_window,
-	ControlComponent **choose_color, ControlComponent **white, ControlComponent **black,
-	ControlComponent **choose_difficulty, ControlComponent **one, ControlComponent **two,
-	ControlComponent **three, ControlComponent **four, ControlComponent **best,
-	ControlComponent **start_game)
-{
-	return 0;
-}
-
-
-
-/* difficulty should be 1 to 4 or 0 for best */
-int setDifficulty(Window *window, int difficulty)
-{
-	return 0;
-}
-
-int LoadGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
-{
-	if (selectedSlot == '0')
-		return 0;
-
-	char filename[12] = "chessX.xml \0";
-	*(filename + 5) = selectedSlot;
-	LoadFromFile(filename, pBoard);
-
-	selectedSlot = '0';
-	properties[0] = GAME_MODE;
-	updateGUIBoard(pMenu_Game);
-	updateGUIBoard_Vis(chessWindow->shownMenu);
-	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
-	showGamePlayMenu(pMenu_Game, NULL);
-	return 1;
-}
-
-int Load(Window *window, char *path)
-{
-	return 0;
-}
-
-int SetFromFileGui(char* path)
-{
-	return 0;
-}
-
-int loadGameNum(Window *window, int n)
-{
-
-	return 0;
-}
-
-int SaveGUI(char* file_name)
-{
-	return 0;
-}
-
-int saveGameNum(Window *window, int n)
-{
-	return 0;
-}
-
-int BackFromSave(Window *window)
-{
-	return 0;
-}
-
-int inBoardBoundaries(Pixel px)
-{
-	return 0;
-}
-
-int colorByPixel(char** board, Pixel px)
-{
-	return 0;
-}
-
-int RebuildGameMenu(Window *window, ControlComponent **full_panel, ControlComponent **menu_panel, ControlComponent **restart, ControlComponent **save_game, ControlComponent **main_menu, ControlComponent **quit_b)
-{
-	return 0;
-}
-
-int CreateGame(Window *window, ControlComponent *panel_node, char** current_board)
-{
-	return 0;
-}
-
-int SendErrorMessage(Window *window)
-{
-	return 0;
-}
-
-int ExecutePawnPromotion(Window *window)
-{
-	return 0;
-}
-
-int SetPromotionAs(Window *window, eTool type)
-{
-	return 0;
-}
-
-int restartGame(Window *window)
-{
-	return 0;
-}
-
-
 int endGamePlay(Window *window)
 {
 	properties[0] = SETTINGS_MODE;
 	return 1;
 }
 
-int GameLabel(Window *window, int labelType)
+int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
+{
+	/* The score must be calculated for current player */
+
+	SDL_FreeSurface(pMenu_Game->panel_2->pnl->children->lbl->pic);
+	SDL_FreeSurface(pMenu_Game->panel_2->pnl->children->next->lbl->pic);
+	if (scr == MATE_WIN_LOSE)
+	{
+		if (properties[4] == WHITE_PLAYER)
+			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_checkMate_BlackWins.bmp");
+		else
+			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_checkMate_WhiteWins.bmp");
+	}
+	else if (scr == TIE_SCORE)
+		pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_Tie.bmp");
+	else if (kingUnderThreat)
+	{
+		if (properties[4] == WHITE_PLAYER)
+			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_WhitePlaysCheck.bmp");
+		else
+			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_BlackPlaysCheck.bmp");
+	}
+	else
+	{
+		if (properties[4] == WHITE_PLAYER)
+			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_WhitePlayerTurn.bmp");
+		else
+			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_BlackPlayerTurn.bmp");
+	}
+
+	if (stageTurn == PROMOTE)
+	{
+		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_promote.bmp");
+	}
+
+	else
+	{
+		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_makeMove.bmp");
+	}
+	drawLabelsOfPanel(pMenu_Game->panel_2->pnl->children);
+
+}
+
+int GameLabel(Window *window, int thinking, int currentPlayer, int status)
 {
 	Menu *menu = window->shownMenu;
 	ControlComponent *ccl_gameHeader = menu->header;
 	Label *lbl_gameHeader = ccl_gameHeader->lbl;
 
+	ControlComponent *ccl_info = menu->panel_2->pnl->children;
+	Label *lbl_infoTurn;
+
 	char *filename;
-	if (labelType == GAME_H)
+	if (thinking == GAME_H)
 		filename = "GameHeader.bmp";
-	else if (labelType == GAME_THINKING_H)
+	else if (thinking == GAME_THINKING_H)
 		filename = "GameHeaderThinking.bmp";
 
 	SDL_FreeSurface(lbl_gameHeader->pic);
 	lbl_gameHeader->pic = uploadPicture(filename);
-	
+
+
+
+
 	if (SDL_BlitSurface(lbl_gameHeader->pic, NULL, chessWindow->self, &(ccl_gameHeader->rect)) != 0)
 	{
 		SDL_FreeSurface(lbl_gameHeader->pic);
@@ -1954,4 +1737,148 @@ int GameLabel(Window *window, int labelType)
 		return 0;
 	}
 	return 1;
+}
+
+int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
+{
+	/* Reset Highlighted Squares Array */
+	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
+	{
+		highlightedSquares[k].i_coord = -1;
+		highlightedSquares[k].j_coord = -1;
+	}
+
+	ControlComponent *ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
+
+
+	selectedTool = ccb->btn->crd;
+
+
+	cMove *curr = moves;
+	int count = 0;
+	while (curr != NULL)
+	{
+		ccb = &(guiBoard[curr->dst.i_coord][curr->dst.j_coord]);
+
+		highlightedSquares[count++] = ccb->btn->crd;
+
+		curr = curr->next;
+	}
+	updateGUIBoard_Vis(menu);
+	return 1;
+
+}
+
+
+/* Misc Logics Methods */
+
+int isOfPlayer(int player, char tool)
+{
+	if (player == WHITE_PLAYER && islower(tool) || player == BLACK_PLAYER && isupper(tool))
+		return 1;
+	return 0;
+}
+
+int isValidBoardInitialization(board_t board)
+{
+	/* Returns 1 iff it is legal to start a game with the board setting */
+	/* TODO: move this function to Chess_Logic.c */
+	char types[] = { BLACK_P, BLACK_N, BLACK_B, BLACK_R, BLACK_Q, BLACK_K, WHITE_P, WHITE_N, WHITE_B, WHITE_R, WHITE_Q, WHITE_K };
+	int result = 1;
+
+	for (int i = 0; i < 12; i++)
+	{
+		result &= NotTooManyOfType(board, types[i]);
+	}
+
+	if (CountToolsOfType(board, WHITE_K) < 1 || CountToolsOfType(board, BLACK_K) < 1)
+		result = 0;
+
+	return result;
+}
+
+int isThePromotedPiece(Coord crd)
+{
+	if (crd.i_coord == promoteSquare.i_coord && crd.j_coord == promoteSquare.j_coord)
+		return 1;
+	else
+		return 0;
+}
+
+SDL_Rect create1024x768Rect()
+{
+	SDL_Rect Rect1024x768 = createSDL_Rect(SCREEN_W, SCREEN_H, 0, 0);
+	return Rect1024x768;
+}
+
+int passTheBoard(board_t board)
+{
+	pBoard = board;
+	return 1;
+}
+
+const char *getPlayerColorPicName()
+{
+	if (properties[3] == WHITE_PLAYER)
+		return "PlayerIsWhite.bmp";
+	else
+		return "PlayerIsBlack.bmp";
+}
+
+const char *getDifficultyPicName(void)
+{
+	/* AI_Difficulty is between 0 and 4 inclusive */
+	if (properties[2] == 0)
+		return "BestDiff.bmp";
+	else if (properties[2] == 1)
+		return "1Diff.bmp";
+	else if (properties[2] == 2)
+		return "2Diff.bmp";
+	else if (properties[2] == 3)
+		return "3Diff.bmp";
+	else
+		return "4Diff.bmp";
+}
+
+eTool getInitialTypeOfCoord(Coord crd)
+{
+	/* Pre: coord is in board */
+	if (crd.j_coord > 1 && crd.j_coord < 6)
+		return Empty;
+	else if (crd.j_coord == 1 || crd.j_coord == 6)
+		return Pawn;
+	else
+	{
+		if (crd.i_coord == 0 || crd.i_coord == 7)
+			return Rook;
+		else if (crd.i_coord == 1 || crd.i_coord == 6)
+			return Knight;
+		else if (crd.i_coord == 2 || crd.i_coord == 5)
+			return Bishop;
+		else if (crd.i_coord == 3)
+			return Queen;
+		else
+			return King;
+	}
+}
+
+int getInitialPlayerOfCoord(Coord crd)
+{
+	/* Pre: crd is in the board */
+	if (crd.j_coord == 0 || crd.j_coord == 1)
+		return WHITE_PLAYER;
+	else if (crd.j_coord == 6 || crd.j_coord == 7)
+		return BLACK_PLAYER;
+	else
+		return NO_PLAYER;
+}
+
+int isHighlighted(Coord crd)
+{
+	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE && isInBoard(highlightedSquares[k]); k++)
+	{
+		if (crd.i_coord == highlightedSquares[k].i_coord && crd.j_coord == highlightedSquares[k].j_coord)
+			return 1;
+	}
+	return 0;
 }

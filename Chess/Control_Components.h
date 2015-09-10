@@ -115,13 +115,13 @@ int addPanelToWindow(Window *window, ControlComponent *ccp);
 int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb);
 int addControlToPanelList(ControlComponent *panelComponent, ControlComponent *toAdd);
 int addPanelToPanel(ControlComponent *ccpParent, ControlComponent *ccpChild, Window *window);
-int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild, Window *window);
+int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild);
 int addPanelToMenu(Menu *menuParent, ControlComponent *ccp, int panelNum);
 int addMenuToWindow(Window *window, Menu *pMenu);
 
 int drawPanelToMenu(ControlComponent *ccp);
 int drawButtonsOfPanel(ControlComponent *ccp);
-int drawLabel(ControlComponent *ccl);
+int drawLabelsOfPanel(ControlComponent *ccl);
 
 ControlComponent *getLastInPanelList(ControlComponent* ccpParent);
 Uint32 getColorOfPanel(Window *window, ControlComponent *ccp);

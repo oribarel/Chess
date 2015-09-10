@@ -43,9 +43,14 @@ int GUI_Main(board_t passedBoard)
 	rgbBlack = createRGB(0, 0, 0);
 	rgbWhite = createRGB(255, 255, 255);
 	rgbRed = createRGB(153, 0, 0);
+	//rgbRed = createRGB(75, 0, 0);
 	rgbOrange = createRGB(255, 128, 0);
+	//rgbOrange = createRGB(102, 51, 0);
 	rgbGreen = createRGB(0, 153, 0);
+	//rgbGreen = createRGB(0, 75, 0);
 	rgbPurple = createRGB(127, 0, 255);
+
+
 
 	/* Initialize default properties: */
 	properties[0] = 1; //settings
@@ -56,6 +61,7 @@ int GUI_Main(board_t passedBoard)
 	properties[5] = PVP_MODE; //default game mode
 
 
+
 	/* Main Menu  CCPs, PNLs, BTNs*/
 	ControlComponent ccp_MainMenu, *pCCP_MainMenu = &ccp_MainMenu;
 	Panel pnl_MainMenu, *pPnl_MainMenu = &pnl_MainMenu;
@@ -63,6 +69,8 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccb_mainMenuCCBs[NUM_OF_MAIN_MENU_BUTTONS];
 
 	Button btn_mainMenuButtons[NUM_OF_MAIN_MENU_BUTTONS];
+
+
 
 
 	/* Player Selection Menu CCPs, PNLs,CCBs, BTNs*/
@@ -75,6 +83,9 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccl_PlayerSelectionMenuHeader;
 	Label lbl_PlayerSelectionMenuHeader;
 
+
+
+
 	/* AI_Settings Menu CCPs, PNLs, BTNs */
 	ControlComponent ccp_AI_SettingsMenuCCPs[NUM_OF_AI_MENU_PANELS];
 	Panel pnl_AI_SettingsMenuPanels[NUM_OF_AI_MENU_PANELS];
@@ -85,6 +96,9 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccl_AI_settingsHeader;
 	Label lbl_AI_settingsHeader;
 
+
+
+
 	/* Game Play Menu CCPs, PNLs, BTNs */
 	ControlComponent ccp_GamePlayMenuCCPs[NUM_OF_GAME_PLAY_MENU_PANELS];
 	Panel pnl_GamePlayMenuPanels[NUM_OF_GAME_PLAY_MENU_PANELS];
@@ -92,8 +106,11 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccb_GamePlayMenuCCBs[NUM_OF_GAME_PLAY_MENU_BUTTONS];
 	Button btnb_GamePlayMenuButtons[NUM_OF_GAME_PLAY_MENU_BUTTONS];
 
-	ControlComponent ccl_gamePlayHeader;
-	Label lbl_gamePlayHeader;
+	ControlComponent ccl_gamePlayCCLs[3];
+	Label lbl_gamePlayLabels[3];
+
+
+
 
 	/* Board Panel CCPs, PNLs, BTNs*/
 	ControlComponent ccp_Board, *pCCP_Board = &ccp_Board;
@@ -106,10 +123,12 @@ int GUI_Main(board_t passedBoard)
 	int wGameModeSetting = SCREEN_W - wBoardSetting - 2 * wSide;
 
 	SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
-	panelMaker(pCCP_Board, pPnl_Board, boardSettingPanel, rgbPurple);
+	panelMaker(pCCP_Board, pPnl_Board, boardSettingPanel, rgbMenuBlue);
 
-	ControlComponent ccb_BoardPanelCCBs[4]; //These are for promoting purposes
 	Button btn_BoardPanelButtons[BOARD_SIZE*BOARD_SIZE + 4]; // these are 64 buttons for the squares and 4 for the promoting purpose.
+
+
+
 
 	/* Save Menu  CCPs, PNLs, BTNs */
 	ControlComponent ccp_SaveMenuCCPs[NUM_OF_SAVE_MENU_PANELS];
@@ -118,6 +137,9 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccb_SaveMenuCCBs[NUM_OF_SAVE_MENU_BUTTONS];
 	Button btn_SaveMenuButtons[NUM_OF_SAVE_MENU_BUTTONS];
 
+
+
+
 	/* Load Menu  CCPs, PNLs, BTNs */
 	ControlComponent ccp_LoadMenuCCPs[NUM_OF_LOAD_MENU_PANELS];
 	Panel pnl_LoadMenuPanels[NUM_OF_LOAD_MENU_PANELS];
@@ -125,10 +147,14 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccb_LoadMenuCCBs[NUM_OF_LOAD_MENU_BUTTONS];
 	Button btn_LoadMenuButtons[NUM_OF_LOAD_MENU_BUTTONS];
 
+
+
 	/* Pass the board */
 	pBoard = passedBoard;
 	init_board(pBoard);
 	passTheBoard(passedBoard);
+
+
 
 	/* cMoves */
 	cMove *computerMove = NULL;
@@ -159,11 +185,12 @@ int GUI_Main(board_t passedBoard)
 	/* Create the window */
 	createWindow(chessWindow);
 
+
 	/* Create Menus */
 	createMainMenu(pMenu_Main, pCCP_MainMenu, pPnl_MainMenu, ccb_mainMenuCCBs, btn_mainMenuButtons);
 	createPlayerSelectionMenu(pMenu_PlayerSelection, ccp_PlayerSelectionMenuCCPs, pnl_PlayerSelectionMenuPanels, ccb_PlayerSelectionMenuCCBs, btn_PlayerSelectionMenuButtons, &ccl_PlayerSelectionMenuHeader, &lbl_PlayerSelectionMenuHeader);
 	createAI_SettingsMenu(pMenu_AI_settings, ccp_AI_SettingsMenuCCPs, pnl_AI_SettingsMenuPanels, ccb_AI_SettingsCCBs, btn_AI_SettingsButtons, &ccl_AI_settingsHeader, &lbl_AI_settingsHeader);
-	createGameMenu(pMenu_Game, ccp_GamePlayMenuCCPs, pnl_GamePlayMenuPanels, ccb_GamePlayMenuCCBs, btnb_GamePlayMenuButtons);
+	createGameMenu(pMenu_Game, ccp_GamePlayMenuCCPs, pnl_GamePlayMenuPanels, ccb_GamePlayMenuCCBs, btnb_GamePlayMenuButtons, ccl_gamePlayCCLs, lbl_gamePlayLabels);
 	createSaveMenu(pMenu_Save, ccp_SaveMenuCCPs, pnl_SaveMenuPanels, ccb_SaveMenuCCBs, btn_SaveMenuButtons);
 	createLoadMenu(pMenu_Load, ccp_LoadMenuCCPs, pnl_LoadMenuPanels, ccb_LoadMenuCCBs, btn_LoadMenuButtons);
 
@@ -184,12 +211,13 @@ int GUI_Main(board_t passedBoard)
 	}
 
 	int lastCurrentPlayer = properties[4];
-	int scr;
+	int scr,currKingUnderThreat;
 	while (!properties[1])
 	{
 		SDL_Event e;
 		while (SDL_PollEvent(&e) == 1 && properties[1] == 0)
 		{
+			SDL_Delay(40);
 			if (e.type == SDL_QUIT)
 			{
 				/*freeCCTree(window->panelChild);
@@ -199,12 +227,13 @@ int GUI_Main(board_t passedBoard)
 				intQuit = 1;
 				break;*/
 			}
-			// add right click https://www.libsdl.org/release/SDL-1.2.15/docs/html/sdlmousebuttonevent.html?
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
+				/* Left Click*/
 				if (e.button.button == SDL_BUTTON_LEFT)
 					buttonPressHandler(chessWindow, e);
-				else if (e.button.button == SDL_BUTTON_RIGHT)
+				/* Right Click https://www.libsdl.org/release/SDL-1.2.15/docs/html/sdlmousebuttonevent.html */
+				else if (e.button.button == SDL_BUTTON_RIGHT) 
 					rightClicksHandler(chessWindow, e);
 			}
 
@@ -214,7 +243,9 @@ int GUI_Main(board_t passedBoard)
 				quit();
 				return 0;
 			}
-
+			
+			if ((properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage) == PROMOTE) //if current player promotes now
+				updateInfoLabels(0, 0, PROMOTE);
 
 			/* Enter here in PVP only when turn changes */
 			if (properties[0] == GAME_MODE && properties[5] == PVP_MODE && lastCurrentPlayer != properties[4])
@@ -222,23 +253,23 @@ int GUI_Main(board_t passedBoard)
 				lastCurrentPlayer = properties[4];
 
 				scr = score(pBoard, properties[4]);
+				currKingUnderThreat = KingUnderThreat(pBoard, properties[4]);
 
+				updateInfoLabels(scr, currKingUnderThreat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);
+				
 				if (scr == MATE_WIN_LOSE)
 				{
 					printf("Check Mate!\n %s Player Win", properties[4] == WHITE_PLAYER ? "Black" : "White");
-					//labelMATE(chessWindow);
 					endGamePlay(chessWindow);
 				}
 				else if (scr == TIE_SCORE)
 				{
 					printf("Tie!\n Nobody wins, How sad.");
-					//labelTIE(chessWindow);
 					endGamePlay(chessWindow);
 				}
 				else if (KingUnderThreat(pBoard, properties[4]))
 				{
 					printf("Check on %s King!", properties[4] == WHITE_PLAYER ? "White" : "Black");
-					//labelCHECK(chessWindow);
 				}
 			}
 
@@ -348,6 +379,12 @@ int GUI_Main(board_t passedBoard)
 						}
 					}
 				}
+			}
+			if (SDL_Flip(chessWindow->self) != 0)
+			{
+				printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+				quit();
+				return 0;
 			}
 		}
 	}
