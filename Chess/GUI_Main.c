@@ -65,6 +65,10 @@ int GUI_Main(board_t passedBoard)
 
 	ControlComponent ccb_mainMenuCCBs[NUM_OF_MAIN_MENU_BUTTONS];
 	Button btn_mainMenuButtons[NUM_OF_MAIN_MENU_BUTTONS];
+	
+	ControlComponent ccl_MainMenuLabels[2];
+	Label lbl_MainMenuLabels[2];
+
 
 
 
@@ -180,9 +184,8 @@ int GUI_Main(board_t passedBoard)
 	/* Create the window */
 	createWindow(chessWindow);
 
-
 	/* Create Menus */
-	createMainMenu(pMenu_Main, pCCP_MainMenu, pPnl_MainMenu, ccb_mainMenuCCBs, btn_mainMenuButtons);
+	createMainMenu(pMenu_Main, pCCP_MainMenu, pPnl_MainMenu, ccb_mainMenuCCBs, btn_mainMenuButtons, ccl_MainMenuLabels, lbl_MainMenuLabels);
 	createPlayerSelectionMenu(pMenu_PlayerSelection, ccp_PlayerSelectionMenuCCPs, pnl_PlayerSelectionMenuPanels, ccb_PlayerSelectionMenuCCBs, btn_PlayerSelectionMenuButtons, &ccl_PlayerSelectionMenuHeader, &lbl_PlayerSelectionMenuHeader);
 	createAI_SettingsMenu(pMenu_AI_settings, ccp_AI_SettingsMenuCCPs, pnl_AI_SettingsMenuPanels, ccb_AI_SettingsCCBs, btn_AI_SettingsButtons, &ccl_AI_settingsHeader, &lbl_AI_settingsHeader);
 	createGameMenu(pMenu_Game, ccp_GamePlayMenuCCPs, pnl_GamePlayMenuPanels, ccb_GamePlayMenuCCBs, btnb_GamePlayMenuButtons, ccl_gamePlayCCLs, lbl_gamePlayLabels);

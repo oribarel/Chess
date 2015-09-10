@@ -94,7 +94,7 @@ extern int blackPlayerTurnStage;
 int passTheBoard(board_t board);
 
 /* Create Menus Functions */
-int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns);
+int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
 int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
 int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
 int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
