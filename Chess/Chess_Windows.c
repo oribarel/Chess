@@ -263,7 +263,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * hSide, hGameModeSetting - 4 * hSide, wSide, 2 * hSide);
 
 	/* label rects */
-	SDL_Rect header = createSDL_Rect(300, 75, 450, 10);
+	SDL_Rect header = createSDL_Rect(wBoardSetting, 75, wGameModeSetting + wSide, 10);
 
 
 	createMenu(playerSelectionMenu, Rect1024x768, rgbMenuBlue, PLAYER_SELECTION_MENU);
@@ -336,7 +336,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	SDL_Rect startGameButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
 
 	/* label rects */
-	SDL_Rect header = createSDL_Rect(300, 75, 450, 10);
+	SDL_Rect header = createSDL_Rect(wBoardPanel, 75, wTogglePanels + wSide, 10);
 
 	createMenu(AI_SettingsMenu, Rect1024x768, rgbMenuBlue, AI_SETTINGS_MENU);
 
@@ -397,7 +397,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 	SDL_Rect quitButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide + (wTogglePanels*0.6));
 
 	/* label rects */
-	SDL_Rect header = createSDL_Rect(300, 75, 450, 10);
+	SDL_Rect header = createSDL_Rect(wBoardPanel, 75, wTogglePanels + wSide, 10);
 
 
 	createMenu(GamePlayMenu, Rect1024x768, rgbMenuBlue, GAME_PLAY_MENU);
@@ -935,33 +935,18 @@ int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
 
 	ControlComponent *ccb = &(guiBoard[crd.i_coord][crd.j_coord]);
 
-	//SDL_FreeSurface(ccb->btn->pic);
-	//ccb->btn->pic = uploadPicture("selected.bmp");
+	
 	selectedTool = ccb->btn->crd;
-	/*if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
-	{
-	SDL_FreeSurface(ccb->btn->pic);
-	printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-	quit();
-	return 0;
-	}*/
+	
 
 	cMove *curr = moves;
 	int count = 0;
 	while (curr != NULL)
 	{
 		ccb = &(guiBoard[curr->dst.i_coord][curr->dst.j_coord]);
-		//SDL_FreeSurface(ccb->btn->pic);
-		//ccb->btn->pic = uploadPicture("threatened.bmp");
+		
 		highlightedSquares[count++] = ccb->btn->crd;
 
-		/*if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
-		{
-		SDL_FreeSurface(ccb->btn->pic);
-		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
-		return 0;
-		}*/
 		curr = curr->next;
 	}
 	updateGUIBoard_Vis(menu);
@@ -1280,9 +1265,13 @@ int GamePlayMenu_PromoteToggle(struct menu *menu, struct controlComponent *ccb)
 	char currTool = GetContentOfCoord(pBoard, ccb->btn->crd);
 
 	if (currTool == WHITE_P)
-		currTool = WHITE_Q;
+	{
+		setSlotInBoard(pBoard, ccb->btn->crd, WHITE_Q);
+	}
 	else if (currTool == BLACK_P)
-		currTool = BLACK_Q;
+	{
+		setSlotInBoard(pBoard, ccb->btn->crd, BLACK_Q);
+	}
 	else
 	{
 		int i = 0;
@@ -1302,8 +1291,8 @@ int GamePlayMenu_PromoteToggle(struct menu *menu, struct controlComponent *ccb)
 			}
 			setSlotInBoard(pBoard, ccb->btn->crd, toggleArray_b[mod(i + 1, 4)]);
 		}
-		updateGUIBoard(pMenu_Game);
 	}
+	updateGUIBoard(pMenu_Game);
 	return 1;
 }
 
@@ -1720,13 +1709,44 @@ int isValidBoardInitialization(board_t board)
 	return result;
 }
 
+/* This functions as hard reset to all game */
 int showMainMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
 	properties[0] = SETTINGS_MODE;
 	init_board(pBoard);
+	resetPlayerSelectionMenu();
+	resetAISettingsMenu();
 	showMenu(chessWindow, pMenu_Main);
 	return 0;
 }
+
+
+int resetPlayerSelectionMenu()
+{
+	SDL_FreeSurface(pMenu_PlayerSelection->panel_2->pnl->children->btn->pic);
+	pMenu_PlayerSelection->panel_2->pnl->children->btn->pic = uploadPicture("PVP.bmp");
+
+	SDL_FreeSurface(pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic);
+	pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic = uploadPicture("NextPlayerWhite.bmp");
+
+	SDL_FreeSurface(pMenu_PlayerSelection->panel_3->pnl->children->btn->pic);
+	pMenu_PlayerSelection->panel_3->pnl->children->btn->pic = uploadPicture("StartGame.bmp");
+	return 1;
+}
+
+int resetAISettingsMenu()
+{
+	SDL_FreeSurface(pMenu_AI_settings->panel_2->pnl->children->btn->pic);
+	pMenu_AI_settings->panel_2->pnl->children->btn->pic = uploadPicture("1Diff.bmp");
+
+	SDL_FreeSurface(pMenu_AI_settings->panel_2->pnl->children->next->btn->pic);
+	pMenu_AI_settings->panel_2->pnl->children->next->btn->pic = uploadPicture("PlayerIsWhite.bmp");
+
+	SDL_FreeSurface(pMenu_AI_settings->panel_3->pnl->children->btn->pic);
+	pMenu_AI_settings->panel_3->pnl->children->btn->pic = uploadPicture("StartGame.bmp");
+	return 1;
+}
+
 
 int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
@@ -1911,20 +1931,27 @@ int endGamePlay(Window *window)
 	return 1;
 }
 
-int labelTIE(Window *window)
+int GameLabel(Window *window, int labelType)
 {
-	endGamePlay(chessWindow);
-	printf("Tie!");
-	return 1;
-}
-int labelMATE(Window *window)
-{
-	endGamePlay(chessWindow);
-	printf("Check Mate!");
-	return 1;
-}
-int labelCHECK(Window *window)
-{
-	printf("Check!");
+	Menu *menu = window->shownMenu;
+	ControlComponent *ccl_gameHeader = menu->header;
+	Label *lbl_gameHeader = ccl_gameHeader->lbl;
+
+	char *filename;
+	if (labelType == GAME_H)
+		filename = "GameHeader.bmp";
+	else if (labelType == GAME_THINKING_H)
+		filename = "GameHeaderThinking.bmp";
+
+	SDL_FreeSurface(lbl_gameHeader->pic);
+	lbl_gameHeader->pic = uploadPicture(filename);
+	
+	if (SDL_BlitSurface(lbl_gameHeader->pic, NULL, chessWindow->self, &(ccl_gameHeader->rect)) != 0)
+	{
+		SDL_FreeSurface(lbl_gameHeader->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		quit();
+		return 0;
+	}
 	return 1;
 }

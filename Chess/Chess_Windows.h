@@ -49,6 +49,13 @@ typedef ControlComponent **board_g;
 #define MOVE_MADE		3
 #define PROMOTE			4
 
+#define GAME_H 0
+#define GAME_THINKING_H 1
+#define CHECK_H 2
+#define CHECK_THINKING_H 3
+#define CHECK_MATE_WHITE_H 4
+#define CHECK_MATE_BLACK_H 5
+#define TIE_H 6
 
 
 extern ControlComponent *guiBoard[BOARD_SIZE];
@@ -174,7 +181,5 @@ int setPromoteSquare(Coord crd, int promotiveSituation);
 
 
 int endGamePlay(Window *window);
-int labelTIE(Window *window);
-int labelMATE(Window *window);
-int labelCHECK(Window *window);
+int GameLabel(Window *window, int labelType);
 #endif

@@ -215,8 +215,9 @@ int GUI_Main(board_t passedBoard)
 				return 0;
 			}
 
+
 			/* Enter here in PVP only when turn changes */
-			if (properties[0] == GAME_MODE && properties[5] == PVC_MODE && lastCurrentPlayer != properties[4])
+			if (properties[0] == GAME_MODE && properties[5] == PVP_MODE && lastCurrentPlayer != properties[4])
 			{
 				lastCurrentPlayer = properties[4];
 
@@ -225,19 +226,19 @@ int GUI_Main(board_t passedBoard)
 				if (scr == MATE_WIN_LOSE)
 				{
 					printf("Check Mate!\n %s Player Win", properties[4] == WHITE_PLAYER ? "Black" : "White");
-					labelMATE(chessWindow);
+					//labelMATE(chessWindow);
 					endGamePlay(chessWindow);
 				}
 				else if (scr == TIE_SCORE)
 				{
 					printf("Tie!\n Nobody wins, How sad.");
-					labelTIE(chessWindow);
+					//labelTIE(chessWindow);
 					endGamePlay(chessWindow);
 				}
 				else if (KingUnderThreat(pBoard, properties[4]))
 				{
 					printf("Check on %s King!", properties[4] == WHITE_PLAYER ? "White" : "Black");
-					labelCHECK(chessWindow);
+					//labelCHECK(chessWindow);
 				}
 			}
 
@@ -252,29 +253,48 @@ int GUI_Main(board_t passedBoard)
 				if (scr == MATE_WIN_LOSE)
 				{
 					printf("Check Mate!\n %s Player Win", properties[4] == WHITE_PLAYER ? "Black" : "White");
-					labelMATE(chessWindow);
+					GameLabel(chessWindow, properties[3] == WHITE_PLAYER ? CHECK_MATE_WHITE_H : CHECK_MATE_BLACK_H);
 					endGamePlay(chessWindow);
 				}
 				else if (scr == TIE_SCORE)
 				{
 					printf("Tie!\n Nobody wins, How sad.");
-					labelTIE(chessWindow);
+					GameLabel(chessWindow, TIE_H);
 					endGamePlay(chessWindow);
 				}
 				else if (KingUnderThreat(pBoard, properties[4]))
 				{
 					printf("Check on %s King!", properties[4] == WHITE_PLAYER ? "White" : "Black");
-					labelCHECK(chessWindow);
+					GameLabel(chessWindow, CHECK_H);
+					//labelCHECK(chessWindow);
 				}
 
 				if (properties[0] == GAME_MODE)
 				{
 
 					/* Run minimax */
+					
+					GameLabel(chessWindow, GAME_THINKING_H);
+					if (SDL_Flip(chessWindow->self) != 0)
+					{
+						printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+						quit();
+						return 0;
+					}
+
 					if (properties[3] == BLACK_PLAYER)//if computer's color is white
 						scr = minimax_score(pBoard, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 					else
 						scr = minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+					
+					GameLabel(chessWindow, GAME_H);
+					if (SDL_Flip(chessWindow->self) != 0)
+					{
+						printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+						quit();
+						return 0;
+					}
+
 
 					/* Make the computer's move, (if there is one) */
 					printf("minimax score was: %d\n", scr);
@@ -305,19 +325,19 @@ int GUI_Main(board_t passedBoard)
 						if (scr == MATE_WIN_LOSE)
 						{
 							printf("Check Mate!\n %s Player Win", properties[4] == WHITE_PLAYER ? "Black" : "White");
-							labelMATE(chessWindow);
+							//labelMATE(chessWindow);
 							endGamePlay(chessWindow);
 						}
 						else if (scr == TIE_SCORE)
 						{
 							printf("Tie!\n Nobody wins, How sad.");
-							labelTIE(chessWindow);
+							///labelTIE(chessWindow);
 							endGamePlay(chessWindow);
 						}
 						else if (KingUnderThreat(pBoard, properties[4]))
 						{
 							printf("Check on %s King!", properties[4] == WHITE_PLAYER ? "White" : "Black");
-							labelCHECK(chessWindow);
+							//labelCHECK(chessWindow);
 						}
 
 						if (SDL_Flip(chessWindow->self) != 0)
