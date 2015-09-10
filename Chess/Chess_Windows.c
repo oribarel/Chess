@@ -212,7 +212,7 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 	createButton(ccb_LoadMenuCCBs + 5, btn_LoadMenuButtons + 5, slot_5, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '5');
 	createButton(ccb_LoadMenuCCBs + 6, btn_LoadMenuButtons + 6, slot_6, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '6');
 	createButton(ccb_LoadMenuCCBs + 7, btn_LoadMenuButtons + 7, slot_7, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '7');
-	createButton(ccb_LoadMenuCCBs + 8, btn_LoadMenuButtons + 8, loadButton, uploadPicture("loadGame.bmp"), nullFunction, LOAD_GAME_BUTTON);
+	createButton(ccb_LoadMenuCCBs + 8, btn_LoadMenuButtons + 8, loadButton, uploadPicture("loadGame.bmp"), LoadGame, LOAD_GAME_BUTTON);
 	/* Make the Panels*/
 	panelMaker(ccp_LoadMenuCCPs, pnl_LoadMenuPanels, returnsPanel, rgbRed);
 	panelMaker(ccp_LoadMenuCCPs + 1, pnl_LoadMenuPanels + 1, slotsPanel, rgbPurple);
@@ -602,7 +602,7 @@ btnFunc getGameFunctionOfCoord(Coord crd)
 			else if (stageInd == PROMOTE)
 			{
 
-				if (isThePromotedPiece(crd))
+				if (isThePromotedPiece(crd) && GetContentOfCoord(pBoard, crd) != BLACK_P && GetContentOfCoord(pBoard, crd) != WHITE_P)
 				{
 					return endPromotionStage;
 				}
@@ -644,7 +644,7 @@ btnFunc getGameFunctionOfCoord(Coord crd)
 				return (btnFunc)nullFunction;
 			}
 		}
-		else if (stageInd == PROMOTE)
+		else if (stageInd == PROMOTE && GetContentOfCoord(pBoard, crd) != BLACK_P && GetContentOfCoord(pBoard, crd) != WHITE_P)
 		{
 			if (isThePromotedPiece(crd))
 			{
@@ -1253,6 +1253,17 @@ int AI_Settings_updatePlayButton(Window *window)
 
 int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb)
 {
+	properties[0] = 1;
+	properties[2] = 1;
+	properties[3] = WHITE_PLAYER;
+	properties[4] = WHITE_PLAYER;
+	properties[5] = PVP_MODE;
+	/* TODO:
+	update button images:
+	player selection: white player, PVP
+	AI settings: white player, 1diff
+	*/
+	showMainMenu(NULL, ccb);
 	return 0;
 }
 
@@ -1264,27 +1275,35 @@ int GamePlayMenu_SaveGame(struct menu *menu, struct controlComponent *ccb)
 
 int GamePlayMenu_PromoteToggle(struct menu *menu, struct controlComponent *ccb)
 {
-	char toggleArray_w[5] = { WHITE_Q, WHITE_R, WHITE_B, WHITE_N, WHITE_P };
-	char toggleArray_b[5] = { BLACK_Q, BLACK_R, BLACK_B, BLACK_N, BLACK_P };
+	char toggleArray_w[4] = { WHITE_Q, WHITE_R, WHITE_B, WHITE_N };
+	char toggleArray_b[4] = { BLACK_Q, BLACK_R, BLACK_B, BLACK_N };
 	char currTool = GetContentOfCoord(pBoard, ccb->btn->crd);
-	int i = 0;
-	if (islower(currTool))
-	{
-		while (currTool != toggleArray_w[i])
-		{
-			i = mod(i + 1, 5);
-		}
-		setSlotInBoard(pBoard, ccb->btn->crd, toggleArray_w[mod(i + 1, 5)]);
-	}
+
+	if (currTool == WHITE_P)
+		currTool = WHITE_Q;
+	else if (currTool == BLACK_P)
+		currTool = BLACK_Q;
 	else
 	{
-		while (currTool != toggleArray_b[i++])
+		int i = 0;
+		if (islower(currTool))
 		{
-			i = mod(i + 1, 5);
+			while (currTool != toggleArray_w[i])
+			{
+				i = mod(i + 1, 4);
+			}
+			setSlotInBoard(pBoard, ccb->btn->crd, toggleArray_w[mod(i + 1, 4)]);
 		}
-		setSlotInBoard(pBoard, ccb->btn->crd, toggleArray_b[mod(i + 1, 5)]);
+		else
+		{
+			while (currTool != toggleArray_b[i++])
+			{
+				i = mod(i + 1, 4);
+			}
+			setSlotInBoard(pBoard, ccb->btn->crd, toggleArray_b[mod(i + 1, 4)]);
+		}
+		updateGUIBoard(pMenu_Game);
 	}
-	updateGUIBoard(pMenu_Game);
 	return 1;
 }
 
@@ -1302,98 +1321,6 @@ int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb)
 	SaveOrLoad_Menu_UpdateVis(menu);
 
 	return 1;
-}
-
-
-/* Sets the game from XML file */
-int LoadFromFile1(char* file_path, board_t board){
-	int i, j;
-	char str[51], curTag;
-	FILE *file = fopen(file_path, "r");
-	if (file == NULL)
-	{
-		printf("%s", "Wrong file name\n");
-		return 1;
-	}
-
-
-
-
-	//placing the file pointer on the first tag after <game> tag
-	for (i = 0; i < 5; i++)
-		fscanf(file, "%s", str);
-
-	if (*(str + 1) == 'n'){ //next turn
-		if (*(str + 11) == 'W')
-			properties[4] = WHITE_PLAYER;
-		else
-			properties[4] = BLACK_PLAYER;
-		//read next line
-		fscanf(file, "%s", str);
-	}
-
-	if (*(str + 1) == 'g'){ //game mode
-		properties[5] = *(str + 11) - '0';
-		//read next line
-		fscanf(file, "%s", str);
-	}
-	else
-		properties[5] = 1;
-
-
-	if (*(str + 1) == 'd'){ //difficulty (optional tag)
-		if (*(str + 12) == 'b')
-			properties[2] = 0;
-		else
-			properties[2] = *(str + 12) - '0';
-		//read next line
-		fscanf(file, "%s", str);
-	}
-	else
-		properties[2] = 1;
-
-
-	if (*(str + 1) == 'u'){ //user color (optional tag)
-		if (*(str + 12) == 'W')
-			properties[3] = WHITE_PLAYER;
-		else
-			properties[3] = BLACK_PLAYER;
-		//read next line
-		fscanf(file, "%s", str);
-	}
-	else
-		properties[3] = BLACK_PLAYER;
-
-
-	//reading board slots:
-	for (j = BOARD_SIZE - 1; j >= 0; j--){
-		fscanf(file, "%s", str);
-		for (i = 0; i < BOARD_SIZE; i++){
-			if (*(str + 7 + i) != '_')
-			{
-				board[i][j] = *(str + 7 + i);
-				//update kings' coordinates
-				if (*(str + 7 + i) == WHITE_K)
-				{
-					WhiteKing.i_coord = i;
-					WhiteKing.j_coord = j;
-				}
-				if (*(str + 7 + i) == BLACK_K)
-				{
-					BlackKing.i_coord = i;
-					BlackKing.j_coord = j;
-				}
-
-
-			}
-			else
-				board[i][j] = EMPTY;
-		}
-	}
-
-	fclose(file);
-	print_board(board);
-	return 0;
 }
 
 
@@ -1647,6 +1574,7 @@ int rightClicksHandler(Window *chessWindow, SDL_Event e)
 							if (playerTurnStage == PROMOTE)
 							{
 								GamePlayMenu_PromoteToggle(pMenu_Game, currChild);
+								//updateGUIBoard(menu);
 								updateGUIBoard_Vis(menu);
 								return 1;
 							}
@@ -1795,6 +1723,7 @@ int isValidBoardInitialization(board_t board)
 int showMainMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
 	properties[0] = SETTINGS_MODE;
+	init_board(pBoard);
 	showMenu(chessWindow, pMenu_Main);
 	return 0;
 }
@@ -1803,6 +1732,10 @@ int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCalled
 {
 	properties[0] = SETTINGS_MODE;
 	showMenu(chessWindow, pMenu_PlayerSelection);
+	updateGUIBoard(pMenu_PlayerSelection);
+	updateGUIBoard_Vis(pMenu_PlayerSelection);
+	playerSelectionMenu_updateContinueOrPlayButton(chessWindow);
+
 	return 0;
 }
 
@@ -1810,6 +1743,8 @@ int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis
 {
 	properties[0] = SETTINGS_MODE;
 	showMenu(chessWindow, pMenu_AI_settings);
+
+	AI_Settings_updatePlayButton(chessWindow);
 	return 0;
 }
 
@@ -1890,8 +1825,11 @@ int LoadGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunctio
 	LoadFromFile(filename, pBoard);
 
 	selectedSlot = '0';
+	properties[0] = GAME_MODE;
+	updateGUIBoard(pMenu_Game);
+	updateGUIBoard_Vis(chessWindow->shownMenu);
 	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
-
+	showGamePlayMenu(pMenu_Game, NULL);
 	return 1;
 }
 
