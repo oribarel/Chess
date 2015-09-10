@@ -273,8 +273,8 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	/* Button Rects */
 	SDL_Rect returnToMainMenuButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
 	SDL_Rect gameModeButton = createSDL_Rect(wGameModeSetting - 2 * wSide, hGameModeSetting / 2 - 2 * hSide, wSide, hSide);
-	SDL_Rect nextPlayerButton = createSDL_Rect(80, 80, wGameModeSetting / 2 - 40, hGameModeSetting / 2);
-	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (wGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect nextPlayerButton = createSDL_Rect(80, 80, wSide, hGameModeSetting / 2);
+	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (wGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting / 2);
 	
 	/* label rects */
 	SDL_Rect header = createSDL_Rect(wBoardSetting, 75, wGameModeSetting + wSide, 10);
@@ -347,7 +347,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	SDL_Rect difficultyButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
 	SDL_Rect playerColorButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide + (wTogglePanels*0.6));
 
-	SDL_Rect startGameButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect startGameButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hTogglePanels / 2);
 
 	/* label rects */
 	SDL_Rect header = createSDL_Rect(wBoardPanel, 75, wTogglePanels + wSide, 10);
@@ -1708,7 +1708,7 @@ int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
 
 }
 
-int GameLabel(Window *window, int thinking, int currentPlayer, int status)
+int GameLabel(Window *window, int thinking)
 {
 	Menu *menu = window->shownMenu;
 	ControlComponent *ccl_gameHeader = menu->header;

@@ -184,5 +184,5 @@ int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn);
 
 
 int endGamePlay(Window *window);
-int GameLabel(Window *window, int labelType);
+int GameLabel(Window *window, int thinking);
 #endif

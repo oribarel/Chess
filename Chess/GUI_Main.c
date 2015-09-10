@@ -20,8 +20,6 @@ properties[4] = WHITE_PLAYER //It is now white's\black's turn: WHITE_PLAYER for 
 properties[5] = 1;	//Default game mode is "two players mode"
 */
 
-
-
 board_t pBoard;
 Window window, *chessWindow = &window;
 
@@ -31,7 +29,6 @@ Menu menu_AI_settings, *pMenu_AI_settings = &menu_AI_settings;
 Menu menu_Game, *pMenu_Game = &menu_Game;
 Menu menu_Save, *pMenu_Save = &menu_Save;
 Menu menu_Load, *pMenu_Load = &menu_Load;
-//Menu *currMenu = NULL;
 
 /* Returns 0 on failure to init sdl video and 1 otherwise.*/
 int GUI_Main(board_t passedBoard)
@@ -67,9 +64,7 @@ int GUI_Main(board_t passedBoard)
 	Panel pnl_MainMenu, *pPnl_MainMenu = &pnl_MainMenu;
 
 	ControlComponent ccb_mainMenuCCBs[NUM_OF_MAIN_MENU_BUTTONS];
-
 	Button btn_mainMenuButtons[NUM_OF_MAIN_MENU_BUTTONS];
-
 
 
 
@@ -211,7 +206,7 @@ int GUI_Main(board_t passedBoard)
 	}
 
 	int lastCurrentPlayer = properties[4];
-	int scr,currKingUnderThreat;
+	int scr, currKingUnderThreat;
 	while (!properties[1])
 	{
 		SDL_Event e;
@@ -233,7 +228,7 @@ int GUI_Main(board_t passedBoard)
 				if (e.button.button == SDL_BUTTON_LEFT)
 					buttonPressHandler(chessWindow, e);
 				/* Right Click https://www.libsdl.org/release/SDL-1.2.15/docs/html/sdlmousebuttonevent.html */
-				else if (e.button.button == SDL_BUTTON_RIGHT) 
+				else if (e.button.button == SDL_BUTTON_RIGHT)
 					rightClicksHandler(chessWindow, e);
 			}
 
@@ -243,68 +238,61 @@ int GUI_Main(board_t passedBoard)
 				quit();
 				return 0;
 			}
-			
+
 			if ((properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage) == PROMOTE) //if current player promotes now
 				updateInfoLabels(0, 0, PROMOTE);
 
-			/* Enter here in PVP only when turn changes */
-			if (properties[0] == GAME_MODE && properties[5] == PVP_MODE && lastCurrentPlayer != properties[4])
-			{
-				lastCurrentPlayer = properties[4];
 
+			/* New Experiement*/
+			if (properties[0] == GAME_MODE)
+			{
 				scr = score(pBoard, properties[4]);
 				currKingUnderThreat = KingUnderThreat(pBoard, properties[4]);
 
 				updateInfoLabels(scr, currKingUnderThreat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);
-				
-				if (scr == MATE_WIN_LOSE)
+			}
+			/* End new Experiement */
+
+
+			/* PVP only when turn changes */
+			if (properties[0] == GAME_MODE && properties[5] == PVP_MODE && lastCurrentPlayer != properties[4])
+			{
+				lastCurrentPlayer = properties[4];
+
+				/*scr = score(pBoard, properties[4]);
+				currKingUnderThreat = KingUnderThreat(pBoard, properties[4]);
+
+				updateInfoLabels(scr, currKingUnderThreat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);*/
+
+				if (scr == MATE_WIN_LOSE || scr == TIE_SCORE)
 				{
-					printf("Check Mate!\n %s Player Win", properties[4] == WHITE_PLAYER ? "Black" : "White");
-					endGamePlay(chessWindow);
-				}
-				else if (scr == TIE_SCORE)
-				{
-					printf("Tie!\n Nobody wins, How sad.");
 					endGamePlay(chessWindow);
 				}
 				else if (KingUnderThreat(pBoard, properties[4]))
 				{
-					printf("Check on %s King!", properties[4] == WHITE_PLAYER ? "White" : "Black");
 				}
 			}
 
 
 
-			/* Handle Computer's Turn */
+			/* PVC computer turn */
 			if (properties[0] == GAME_MODE && properties[5] == PVC_MODE && properties[3] != properties[4])/* if in AI mode, in game state and it is the computer's turn */
 			{
 				computerMove = NULL;
-				scr = score(pBoard, properties[4]);
 
-				if (scr == MATE_WIN_LOSE)
+				if (scr == MATE_WIN_LOSE || scr == TIE_SCORE)
 				{
-					printf("Check Mate!\n %s Player Win", properties[4] == WHITE_PLAYER ? "Black" : "White");
-					GameLabel(chessWindow, properties[3] == WHITE_PLAYER ? CHECK_MATE_WHITE_H : CHECK_MATE_BLACK_H);
-					endGamePlay(chessWindow);
-				}
-				else if (scr == TIE_SCORE)
-				{
-					printf("Tie!\n Nobody wins, How sad.");
-					GameLabel(chessWindow, TIE_H);
 					endGamePlay(chessWindow);
 				}
 				else if (KingUnderThreat(pBoard, properties[4]))
 				{
-					printf("Check on %s King!", properties[4] == WHITE_PLAYER ? "White" : "Black");
-					GameLabel(chessWindow, CHECK_H);
-					//labelCHECK(chessWindow);
 				}
 
 				if (properties[0] == GAME_MODE)
 				{
 
 					/* Run minimax */
-					
+
 					GameLabel(chessWindow, GAME_THINKING_H);
 					if (SDL_Flip(chessWindow->self) != 0)
 					{
@@ -317,8 +305,9 @@ int GUI_Main(board_t passedBoard)
 						scr = minimax_score(pBoard, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 					else
 						scr = minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
-					
+
 					GameLabel(chessWindow, GAME_H);
+
 					if (SDL_Flip(chessWindow->self) != 0)
 					{
 						printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
@@ -353,23 +342,18 @@ int GUI_Main(board_t passedBoard)
 
 						scr = score(pBoard, properties[4]);
 
-						if (scr == MATE_WIN_LOSE)
+						if (scr == MATE_WIN_LOSE || scr == TIE_SCORE)
 						{
-							printf("Check Mate!\n %s Player Win", properties[4] == WHITE_PLAYER ? "Black" : "White");
-							//labelMATE(chessWindow);
 							endGamePlay(chessWindow);
 						}
-						else if (scr == TIE_SCORE)
-						{
-							printf("Tie!\n Nobody wins, How sad.");
-							///labelTIE(chessWindow);
-							endGamePlay(chessWindow);
-						}
+						
 						else if (KingUnderThreat(pBoard, properties[4]))
 						{
-							printf("Check on %s King!", properties[4] == WHITE_PLAYER ? "White" : "Black");
-							//labelCHECK(chessWindow);
 						}
+						
+						currKingUnderThreat = KingUnderThreat(pBoard, properties[4]);
+
+						updateInfoLabels(scr, currKingUnderThreat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);
 
 						if (SDL_Flip(chessWindow->self) != 0)
 						{
