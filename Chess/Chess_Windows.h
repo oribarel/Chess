@@ -103,7 +103,6 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 
 /* mainMenu */
 int LoadGame(Window *window, ControlComponent *);
-int quitGame(Window *window, ControlComponent *);
 int QuitGame(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 
 /* playerSelectionMenu */
@@ -172,7 +171,9 @@ btnFunc getGameFunctionOfCoord(Coord crd);
 /* Labels */
 int labelMaker(ControlComponent *ccl, Label *lbl, SDL_Rect rect, char *filename);
 
-
+/* Quit */
+int freeMenu(Menu *menu);
+int freePanel(ControlComponent *ccp);
 
 /* Misc */
 SDL_Rect create1024x768Rect();

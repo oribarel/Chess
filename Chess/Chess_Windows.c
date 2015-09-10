@@ -600,13 +600,13 @@ int updateGUIBoard_Vis(Menu *menu)
 
 
 			crd.i_coord = i; crd.j_coord = j;
-			SDL_FreeSurface(guiBoard[i][j].btn->pic); //TODO: be careful!
+			SDL_FreeSurface1(guiBoard[i][j].btn->pic); //TODO: be careful!
 			guiBoard[i][j].btn->pic = uploadPicture(getPictureName_tools(crd, getColor(pBoard, crd),
 				get_eToolFromType(GetContentOfCoord(pBoard, crd)), selectionStatus));
 
 			if (SDL_BlitSurface(guiBoard[i][j].btn->pic, NULL, chessWindow->self, &(guiBoard[i][j].rect)) != 0)
 			{
-				SDL_FreeSurface(guiBoard[i][j].btn->pic);
+				SDL_FreeSurface1(guiBoard[i][j].btn->pic);
 				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 				quit();
 				return 0;
@@ -868,7 +868,8 @@ int changeHighlightedTool(struct menu *menu, struct controlComponent *ccb)
 	}
 	cMove *newMoves = movesByPieceType(pBoard, ccb->btn->crd);
 	highlightMovesList(menu, ccb->btn->crd, newMoves);
-
+	freeMovesList(newMoves);
+	
 	/* update gui board (and vis) */
 	updateGUIBoard(menu);
 	return 1;
@@ -946,7 +947,7 @@ int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *c
 	if (tool != EMPTY)
 		player = (islower(tool) ? WHITE_PLAYER : BLACK_PLAYER);
 
-	SDL_FreeSurface(ccb->btn->pic);
+	SDL_FreeSurface1(ccb->btn->pic);
 	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type, NON_SEL));
 
 	if (playerSelectionMenu_updateContinueOrPlayButton(chessWindow) == 0)
@@ -957,7 +958,7 @@ int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *c
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -973,19 +974,19 @@ int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *ccb)
 	{
 		/* Change to PVC mode: */
 		*gameMode = PVC_MODE;
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		ccb->btn->pic = uploadPicture("PVC.bmp");
 	}
 	else
 	{
 		/* Change to PVP mode: */
 		*gameMode = PVP_MODE;
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		ccb->btn->pic = uploadPicture("PVP.bmp");
 	}
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -1010,7 +1011,7 @@ int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
 	if (!isValidBoardInitialization(pBoard))
 	{
 		ccb_continueOrPlay->btn->f = nullFunction;
-		SDL_FreeSurface(ccb_continueOrPlay->btn->pic);
+		SDL_FreeSurface1(ccb_continueOrPlay->btn->pic);
 		ccb_continueOrPlay->btn->pic = uploadPicture(properties[5] == PVP_MODE ? "StartGameInactive.bmp" : "AI_SettingsInactive.bmp");
 	}
 	else
@@ -1018,20 +1019,20 @@ int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
 		if (properties[5] == PVP_MODE)
 		{
 			ccb_continueOrPlay->btn->f = showGamePlayMenu;
-			SDL_FreeSurface(ccb_continueOrPlay->btn->pic);
+			SDL_FreeSurface1(ccb_continueOrPlay->btn->pic);
 			ccb_continueOrPlay->btn->pic = uploadPicture("StartGame.bmp");
 		}
 		else
 		{
 			ccb_continueOrPlay->btn->f = showAI_SettingsMenu;
-			SDL_FreeSurface(ccb_continueOrPlay->btn->pic);
+			SDL_FreeSurface1(ccb_continueOrPlay->btn->pic);
 			ccb_continueOrPlay->btn->pic = uploadPicture("AI_Settings.bmp");
 		}
 	}
 
 	if (SDL_BlitSurface(ccb_continueOrPlay->btn->pic, NULL, window->self, &(ccb_continueOrPlay->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb_continueOrPlay->btn->pic);
+		SDL_FreeSurface1(ccb_continueOrPlay->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -1047,7 +1048,7 @@ int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *cc
 		properties[4] = BLACK_PLAYER;
 		whitePlayerTurnStage = WAITING;
 		blackPlayerTurnStage = NONE_SELECTED;
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		ccb->btn->pic = uploadPicture("NextPlayerBlack.bmp");
 	}
 	else
@@ -1056,12 +1057,12 @@ int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *cc
 		properties[4] = WHITE_PLAYER;
 		whitePlayerTurnStage = NONE_SELECTED;
 		blackPlayerTurnStage = WAITING;
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		ccb->btn->pic = uploadPicture("NextPlayerWhite.bmp");
 	}
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -1074,12 +1075,12 @@ int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *cc
 int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
 {
 	properties[2] = mod(properties[2] + 1, 5);
-	SDL_FreeSurface(ccb->btn->pic);
+	SDL_FreeSurface1(ccb->btn->pic);
 	ccb->btn->pic = uploadPicture(getDifficultyPicName());
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -1092,19 +1093,19 @@ int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *ccb)
 	if (properties[3] == WHITE_PLAYER)
 	{
 		properties[3] = BLACK_PLAYER;
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		ccb->btn->pic = uploadPicture("PlayerIsBlack.bmp");
 	}
 	else
 	{
 		properties[3] = WHITE_PLAYER;
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		ccb->btn->pic = uploadPicture("PlayerIsWhite.bmp");
 	}
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -1140,7 +1141,7 @@ int AI_SettingsMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
 	if (tool != EMPTY)
 		player = (islower(tool) ? WHITE_PLAYER : BLACK_PLAYER);
 
-	SDL_FreeSurface(ccb->btn->pic);
+	SDL_FreeSurface1(ccb->btn->pic);
 	guiBoard[crd.i_coord][crd.j_coord].btn->pic = uploadPicture(getPictureName_tools(crd, player, type, NON_SEL));
 
 	if (AI_Settings_updatePlayButton(chessWindow) == 0)
@@ -1151,7 +1152,7 @@ int AI_SettingsMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -1173,19 +1174,19 @@ int AI_Settings_updatePlayButton(Window *window)
 	if (!isValidBoardInitialization(pBoard))
 	{
 		ccb_Play->btn->f = nullFunction;
-		SDL_FreeSurface(ccb_Play->btn->pic);
+		SDL_FreeSurface1(ccb_Play->btn->pic);
 		ccb_Play->btn->pic = uploadPicture("StartGameInactive.bmp");
 	}
 	else
 	{
 		ccb_Play->btn->f = showGamePlayMenu;
-		SDL_FreeSurface(ccb_Play->btn->pic);
+		SDL_FreeSurface1(ccb_Play->btn->pic);
 		ccb_Play->btn->pic = uploadPicture("StartGame.bmp"); //TODO: maybe unnecessary allocation too many times. also in twin function.
 	}
 
 	if (SDL_BlitSurface(ccb_Play->btn->pic, NULL, window->self, &(ccb_Play->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb_Play->btn->pic);
+		SDL_FreeSurface1(ccb_Play->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -1292,7 +1293,7 @@ int SaveOrLoad_Menu_UpdateVis(struct menu *menu)
 		ccbCurr->btn->pic = uploadPicture(i + '1' == selectedSlot ? "PressedGenericButton.bmp" : "UnpressedGenericButton.bmp");
 		if (SDL_BlitSurface(ccbCurr->btn->pic, NULL, chessWindow->self, &(ccbCurr->rect)) != 0)
 		{
-			SDL_FreeSurface(ccbCurr->btn->pic);
+			SDL_FreeSurface1(ccbCurr->btn->pic);
 			printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 			quit();
 			return 0;
@@ -1420,6 +1421,16 @@ int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 				BlackKing = crd;
 		}
 	}
+	if (properties[4] == WHITE_PLAYER)
+	{
+		whitePlayerTurnStage = NONE_SELECTED;
+		blackPlayerTurnStage = WAITING;
+	}
+	else
+	{
+		whitePlayerTurnStage = WAITING;
+		blackPlayerTurnStage = NONE_SELECTED;
+	}
 	int scr = score(pBoard, properties[4]);
 	int threat = KingUnderThreat(pBoard, properties[4]);
 	updateInfoLabels(scr, threat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);
@@ -1445,7 +1456,7 @@ int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 
 int QuitGame(struct menu *menu, struct controlComponent *ccb)
 {
-	/* shared with main menu and game play menu */
+	properties[1] = 1;
 	return 0;
 }
 
@@ -1643,26 +1654,26 @@ int isPressInsideButton(SDL_Event e, ControlComponent *ccb)
 
 int resetPlayerSelectionMenu()
 {
-	SDL_FreeSurface(pMenu_PlayerSelection->panel_2->pnl->children->btn->pic);
+	SDL_FreeSurface1(pMenu_PlayerSelection->panel_2->pnl->children->btn->pic);
 	pMenu_PlayerSelection->panel_2->pnl->children->btn->pic = uploadPicture("PVP.bmp");
 
-	SDL_FreeSurface(pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic);
+	SDL_FreeSurface1(pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic);
 	pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic = uploadPicture("NextPlayerWhite.bmp");
 
-	SDL_FreeSurface(pMenu_PlayerSelection->panel_3->pnl->children->btn->pic);
+	SDL_FreeSurface1(pMenu_PlayerSelection->panel_3->pnl->children->btn->pic);
 	pMenu_PlayerSelection->panel_3->pnl->children->btn->pic = uploadPicture("StartGame.bmp");
 	return 1;
 }
 
 int resetAISettingsMenu()
 {
-	SDL_FreeSurface(pMenu_AI_settings->panel_2->pnl->children->btn->pic);
+	SDL_FreeSurface1(pMenu_AI_settings->panel_2->pnl->children->btn->pic);
 	pMenu_AI_settings->panel_2->pnl->children->btn->pic = uploadPicture("1Diff.bmp");
 
-	SDL_FreeSurface(pMenu_AI_settings->panel_2->pnl->children->next->btn->pic);
+	SDL_FreeSurface1(pMenu_AI_settings->panel_2->pnl->children->next->btn->pic);
 	pMenu_AI_settings->panel_2->pnl->children->next->btn->pic = uploadPicture("PlayerIsWhite.bmp");
 
-	SDL_FreeSurface(pMenu_AI_settings->panel_3->pnl->children->btn->pic);
+	SDL_FreeSurface1(pMenu_AI_settings->panel_3->pnl->children->btn->pic);
 	pMenu_AI_settings->panel_3->pnl->children->btn->pic = uploadPicture("StartGame.bmp");
 	return 1;
 }
@@ -1674,12 +1685,44 @@ int endGamePlay(Window *window)
 	return 1;
 }
 
+int freeMenu(Menu *menu)
+{
+	ControlComponent *ccl = menu->header;
+	if (ccl != NULL)
+		SDL_FreeSurface1(ccl->lbl->pic);
+
+	if (menu->panel_1 != NULL)
+		freePanel(menu->panel_1);
+	if (menu->panel_2 != NULL)
+		freePanel(menu->panel_2);
+	if (menu->panel_3 != NULL)
+		freePanel(menu->panel_3);
+	//freePanel(menu->panel_4);
+	return 1;
+}
+
+int freePanel(ControlComponent *ccp)
+{
+	ControlComponent *child = ccp->pnl->children;
+	while (child != NULL)
+	{
+		if (child->btn != NULL)
+			SDL_FreeSurface1(child->btn->pic);
+		else if (child->lbl != NULL)
+			SDL_FreeSurface1(child->lbl->pic);
+
+		child = child->next;
+	}
+	return 1;
+}
+
+
 int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
 {
 	/* The score must be calculated for current player */
 
-	SDL_FreeSurface(pMenu_Game->panel_2->pnl->children->lbl->pic);
-	SDL_FreeSurface(pMenu_Game->panel_2->pnl->children->next->lbl->pic);
+	SDL_FreeSurface1(pMenu_Game->panel_2->pnl->children->lbl->pic);
+	SDL_FreeSurface1(pMenu_Game->panel_2->pnl->children->next->lbl->pic);
 	if (scr == MATE_WIN_LOSE)
 	{
 		if (properties[4] == WHITE_PLAYER)
@@ -1732,7 +1775,7 @@ int GameLabel(Window *window, int thinking)
 	else if (thinking == GAME_THINKING_H)
 		filename = "GameHeaderThinking.bmp";
 
-	SDL_FreeSurface(lbl_gameHeader->pic);
+	SDL_FreeSurface1(lbl_gameHeader->pic);
 	lbl_gameHeader->pic = uploadPicture(filename);
 
 
@@ -1740,7 +1783,7 @@ int GameLabel(Window *window, int thinking)
 
 	if (SDL_BlitSurface(lbl_gameHeader->pic, NULL, chessWindow->self, &(ccl_gameHeader->rect)) != 0)
 	{
-		SDL_FreeSurface(lbl_gameHeader->pic);
+		SDL_FreeSurface1(lbl_gameHeader->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;

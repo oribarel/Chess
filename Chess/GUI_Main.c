@@ -220,7 +220,7 @@ int GUI_Main(board_t passedBoard)
 			{
 				/*freeCCTree(window->panelChild);
 				window->panelChild = NULL;
-				SDL_FreeSurface(window->self);
+				SDL_FreeSurface1(window->self);
 				free(window);
 				intQuit = 1;
 				break;*/
@@ -375,6 +375,26 @@ int GUI_Main(board_t passedBoard)
 			}
 		}
 	}
-	printf("ended");
+
+	/*
+	Here we free all of our resources (only pictures): 
+
+	Main Menu: 2 labels, 3 buttons.
+	Player Selection Menu: 4 buttons, 1 label
+	AI settings Menu: 5 buttons, 1 label
+	Game Menu: 3 buttons, 3 Labels
+	Board: 64 buttons
+	Save Menu: 10 buttons, (1 label)
+	Load Menu: 9 buttons, (1 label)
+	*/
+	freeMenu(pMenu_Main);
+	freeMenu(pMenu_PlayerSelection);
+	freeMenu(pMenu_AI_settings);
+	freeMenu(pMenu_Save);
+	freeMenu(pMenu_Load);
+	freeMenu(pMenu_Game);
+	freePanel(pCCP_Board);
+	printf("%d pictures not freed.\n", picAllocs);
+	printf("ended\n");
 	return 1;
 }

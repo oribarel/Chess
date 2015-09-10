@@ -9,6 +9,9 @@
 * ccl<Name> if they function as a Label										*
 *****************************************************************************/
 
+int picAllocs = 0; //TODO: remove
+
+
 int init_GUI(void)
 {
 	Window *s;
@@ -202,7 +205,7 @@ int drawButtonToPanel(ControlComponent *ccb)
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface(ccb->btn->pic);
+		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		quit();
 		return 0;
@@ -302,7 +305,7 @@ int drawLabelsOfPanel(ControlComponent *ccl)
 		{
 			if (SDL_BlitSurface(ccl->lbl->pic, NULL, chessWindow->self, &(ccl->rect)) != 0)
 			{
-				SDL_FreeSurface(ccl->lbl->pic);
+				SDL_FreeSurface1(ccl->lbl->pic);
 				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 				quit();
 				return 0;
@@ -353,45 +356,10 @@ int nullFunction(struct menu *pMenu, struct controlComponent *ccb)
 	return 0;
 }
 
-int freeCCTree(ControlComponent *cc)
-{
-	/* Case 1: No Tree */
-	if (cc == NULL)
-		return 1;
-
-	/* Case 2: */
-	/* Recursively free next ccTree */
-	if (cc->next != NULL)
-		freeCCTree(cc->next);
-
-	/* if cc is a ccp*/
-	else if (cc->pnl != NULL)
-	{
-		freeCCTree(cc->pnl->children);
-		free(cc->pnl);
-		free(cc);
-	}
-
-	/* if cc is a ccb */
-	else if (cc->btn != NULL)
-	{
-		SDL_FreeSurface(cc->btn->pic);
-		free(cc->btn);
-		free(cc);
-	}
-
-	/* if cc is a ccl */
-	else if (cc->lbl != NULL)
-	{
-		SDL_FreeSurface(cc->lbl->pic);
-		free(cc->lbl);
-		free(cc);
-	}
-	return 1;
-}
 
 SDL_Surface *uploadPicture(const char *path)
 {
+
 	SDL_Surface *pic = SDL_LoadBMP(path);
 	SDL_Surface *displayPic = SDL_DisplayFormat(pic);
 	if (displayPic == NULL)
@@ -399,6 +367,14 @@ SDL_Surface *uploadPicture(const char *path)
 		printf("ERROR: failed to convert image to new format: %s\n", SDL_GetError());
 		quit();
 	}
+	picAllocs++;
 	SDL_FreeSurface(pic);
 	return displayPic;
+}
+
+void SDL_FreeSurface1(SDL_Surface *surface)
+{
+	picAllocs--;
+	SDL_FreeSurface(surface);
+	return;
 }

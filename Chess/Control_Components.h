@@ -14,8 +14,7 @@
 
 /* externs*/
 
-
-
+extern int picAllocs;
 
 /* Structs */
 
@@ -131,7 +130,7 @@ int freeCCTree(ControlComponent *cc);
 
 SDL_Surface *uploadPicture(const char *path);
 
-
+void SDL_FreeSurface1(SDL_Surface *surface);
 
 #endif
 
