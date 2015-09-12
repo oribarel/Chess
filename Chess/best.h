@@ -22,8 +22,9 @@
 #define DARK	1
 
 
+
 int bestScore(board_t board, int player);
 eTool get_eToolFromType(char type);
 int Material(board_t board, int player);
-
+int GetBestDepth(board_t board, int player);
 #endif
