@@ -86,6 +86,29 @@ void print_board(board_t board)
 }
 
 
+/* Prints the board to command line*/
+/*void print_board(board_t board)
+{
+	int i, j;
+	if (board == NULL || properties[1])
+		return;
+	print_line();
+	for (j = BOARD_SIZE - 1; j >= 0; j--)
+	{
+		printf((j < 9 ? " %d" : "%d"), j + 1);
+		for (i = 0; i < BOARD_SIZE; i++){
+			printf("| %c ", board[i][j]);
+		}
+		printf("|\n");
+		print_line();
+	}
+	printf("   ");
+	for (j = 0; j < BOARD_SIZE; j++){
+		printf(" %c  ", (char)('a' + j));
+	}
+	printf("\n");
+}
+*/
 
 
 /*DCLR*/
@@ -1103,7 +1126,7 @@ cMove* KingMoves(board_t board, Coord coord)
 			(GetContentOfCoord(board, possibilities[i]) == EMPTY || DoesCrdContainsEnemy(board, possibilities[i], tool)))
 		{
 			if (safeToMoveKing(board, color, possibilities[i]))
-				AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]) != EMPTY, 0);
+				AddMove(&head, tool, coord, possibilities[i], GetContentOfCoord(board, possibilities[i]), 0);
 		}
 	}
 	return head;
@@ -1227,7 +1250,7 @@ int NotTooManyOfType(board_t board, char type)
 	case BLACK_N:
 	case WHITE_R:
 	case BLACK_R:
-		if (numberOfTools <= 2)
+		if (numberOfTools <= 2 ||DEBUG==1)
 			result = 1;
 		break;
 	case WHITE_Q:
@@ -1307,8 +1330,7 @@ int score(board_t board, int player)
 			return MATE_WIN_SCORE;//player won
 		else
 			return TIE_SCORE; //tie
-	if (DEBUG && score == MATE_WIN_LOSE
-		)
+	if (DEBUG && score == MATE_WIN_LOSE)
 	{
 		print_board(board);
 		printf("%d \n", score);
@@ -1391,7 +1413,7 @@ char ToolNameToChar(char *toolFullName)
 char* ToolCharToName(char toolChar)
 {
 	char c = tolower(toolChar);
-	switch (toolChar)
+	switch (c)
 	{
 	case 'b':
 		return BISHOP;
@@ -1529,9 +1551,9 @@ int Save(board_t board, char* file_name){
 	fprintf(f, XML_FIRST_LINE);
 	fprintf(f, "<game>\n");
 	if (properties[4] == WHITE_PLAYER)
-		fprintf(f, "\t<next_turn>%s</next_turn>\n", WHITE);
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", WHITE_CAP);
 	else
-		fprintf(f, "\t<next_turn>%s</next_turn>\n", BLACK);
+		fprintf(f, "\t<next_turn>%s</next_turn>\n", BLACK_CAP);
 	fprintf(f, "\t<game_mode>%d</game_mode>\n", properties[5]);
 
 
@@ -1541,9 +1563,9 @@ int Save(board_t board, char* file_name){
 		else
 			fprintf(f, "\t<difficulty>best/difficulty>\n");
 		if (properties[3] == WHITE_PLAYER)
-			fprintf(f, "\t<user_color>%s</user_color>\n", WHITE);
+			fprintf(f, "\t<user_color>%s</user_color>\n", WHITE_CAP);
 		else
-			fprintf(f, "\t<user_color>%s</user_color>\n", BLACK);
+			fprintf(f, "\t<user_color>%s</user_color>\n", BLACK_CAP);
 	}
 	else
 	{
@@ -1679,6 +1701,34 @@ void printMove(cMove *move)
 
 
 }
+
+
+/*FOR DEBUG ONLY!*/
+/*CONVD*/
+/*prints the route of the move*/
+void printMoveToFile(FILE *f,cMove *move)
+{
+	if (properties[1])
+		return;
+	
+	fprintf(f,"move <%c,%u> to ", (char)((move->src).i_coord) + 97, (move->src).j_coord + 1);
+
+	fprintf(f,"<%c,%u>", (char)((move->dst).i_coord) + 97, (move->dst).j_coord + 1);
+
+	//if promotion needed
+	if (move->promote)
+		fprintf(f," %s", ToolCharToName(move->promote));
+
+	//print end of line
+	fprintf(f,"\n");
+
+
+}
+
+
+
+
+
 
 /*CONVD*/
 /*prints an entire linked list of Moves*/

@@ -4,4 +4,7 @@
 #include "Console_Main.h"
 #include "GUI_Main.h"
 
+#define TEST_MODE 1
+
 #endif
+

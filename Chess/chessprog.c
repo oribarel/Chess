@@ -44,7 +44,11 @@ int main(int argc, char *argv[])
 
 	if (argc == 1)
 	{
-		Console_Main(board);
+		if (TEST_MODE)
+			Test(board);
+		else
+			Console_Main(board);
+
 	}
 	else if (argc == 2 && strncmp(argv[1], "console", 7) == 0)
 	{

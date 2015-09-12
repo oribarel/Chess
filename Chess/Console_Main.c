@@ -353,7 +353,7 @@ return score(board, player);
 
 
 
-#ifndef DAMKA
+
 /*DEBUG*/
 long random_at_most(long max) {
 	// Assumes 0 <= max <= RAND_MAX
@@ -376,34 +376,45 @@ long random_at_most(long max) {
 	// Truncated division is intentional
 	return x / bin_size;*/
 }
-#endif
 
-#ifndef DAMKA
+
+
 /*DEBUG: automatic random configuration generator*/
 board_t GenerateRandomConfiguration()
 {
+	//intialize board
+	board_t board = (board_t)calloc(BOARD_SIZE, sizeof(char*));
+	for (int i = 0; i < BOARD_SIZE; i++)
+		board[i] = (char*)calloc(BOARD_SIZE, sizeof(char));
+	for (int i = 0; i < BOARD_SIZE; i++)
+		for (int j = 0; j < BOARD_SIZE; j++)
+			board[i][j] = EMPTY;
+
+
+	//print_board(board);
+
 	//set random number of tools per player
-	int numberOfWhiteTools = random_at_most(MAX_NUMBER_OF_TOOLS_PER_PLAYER - 1) + 1, numberOfBlackTools = random_at_most(MAX_NUMBER_OF_TOOLS_PER_PLAYER - 1) + 1;
-	int numberOfTooleToSet = numberOfWhiteTools + numberOfBlackTools;
-	int places[(BOARD_SIZE*BOARD_SIZE + 1) / 2];
-	int numberOfFreePlaces = (BOARD_SIZE*BOARD_SIZE + 1) / 2;
+	int numberOfWhitePawns = random_at_most(BOARD_SIZE - 1) + 1, numberOfBlackPawns = random_at_most(BOARD_SIZE - 1) + 1;
+	int numberOfWhiteRooks = random_at_most(2 - 1) + 1, numberOfBlackRooks = random_at_most(2 - 1) + 1;
+	int numberOfWhiteBishops = random_at_most(2 - 1) + 1, numberOfBlackBishops = random_at_most(2 - 1) + 1;
+	int numberOfWhiteKnights = random_at_most(2 - 1) + 1, numberOfBlackKnights = random_at_most(2 - 1) + 1;
+	int numberOfTooleToSet = numberOfWhitePawns + numberOfBlackPawns + numberOfWhiteRooks + numberOfBlackRooks + numberOfWhiteBishops + numberOfBlackBishops + numberOfWhiteKnights + numberOfBlackKnights + 1 + 1 + 2;
+	int places[(BOARD_SIZE*BOARD_SIZE)];
+	int numberOfFreePlaces = BOARD_SIZE*BOARD_SIZE;
 	int index = 0;
-	board_t brd = NULL;
-	brd = createBoard();
+	board_t brd;
+	brd = board;
 	//initialize places array
 	for (int i = 0; i < BOARD_SIZE; i++)
-	for (int j = 0; j < BOARD_SIZE; j++)
-	{
-		if ((i + j) % 2 == 0)
+		for (int j = 0; j < BOARD_SIZE; j++)
 		{
 			places[index] = i * 10 + j;
 			index++;
 		}
-	}
 	assert(index == numberOfFreePlaces);
 
 	//set white tools:
-	for (int i = 0; i < numberOfWhiteTools; i++)
+	for (int i = 0; i < numberOfWhitePawns; i++)
 	{
 		int place = random_at_most(numberOfFreePlaces);
 		int x = places[place] % 10;
@@ -412,23 +423,209 @@ board_t GenerateRandomConfiguration()
 		//printf("%u\n", y);
 		//printf("%u\n\n\n", places[place]);
 		Coord crd;
-		int toolRand = random_at_most(5);
-		char tool = (toolRand == 0) ? WHITE_K : WHITE_M;
+		//int toolRand = random_at_most(5);
+		char tool = WHITE_P;
 		crd.i_coord = x;	crd.j_coord = y;
+		int toolRand = random_at_most(4);
+		if (y == 7)
+		{
+			if (toolRand == 0)
+				tool = WHITE_B;
+			else if (toolRand == 1)
+				tool = WHITE_N;
+			else if (toolRand == 2)
+				tool = WHITE_R;
+			else
+				tool = WHITE_Q;
+		}
 		setSlotInBoard(brd, crd, tool);
 		places[place] = places[numberOfFreePlaces - 1];
 		numberOfFreePlaces--;
 		numberOfTooleToSet--;
 
 	}
-	//set black tools:
-	for (int i = 0; i < numberOfBlackTools; i++)
+
+	for (int i = 0; i < numberOfWhiteRooks; i++)
 	{
 		int place = random_at_most(numberOfFreePlaces);
 		int x = places[place] % 10;
 		int y = places[place] / 10;
-		int toolRand = random_at_most(5);
-		char tool = (toolRand == 0) ? BLACK_K : BLACK_M;
+		char tool = WHITE_R;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+
+	for (int i = 0; i < numberOfWhiteBishops; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = WHITE_B;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+	for (int i = 0; i < numberOfWhiteKnights; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = WHITE_N;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+	for (int i = 0; i < 1; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = WHITE_Q;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+
+	for (int i = 0; i < 1; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = WHITE_K;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+
+
+
+
+	//set black tools:
+	for (int i = 0; i < numberOfBlackPawns; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		//printf("%u\n", x);
+		//printf("%u\n", y);
+		//printf("%u\n\n\n", places[place]);
+		Coord crd;
+		//int toolRand = random_at_most(5);
+		char tool = BLACK_P;
+		crd.i_coord = x;	crd.j_coord = y;
+		int toolRand = random_at_most(4);
+		if (y == 0)
+		{
+			if (toolRand == 0)
+				tool = BLACK_B;
+			else if (toolRand == 1)
+				tool = BLACK_N;
+			else if (toolRand == 2)
+				tool = BLACK_R;
+			else
+				tool = BLACK_Q;
+		}
+		setSlotInBoard(brd, crd, tool);
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+
+	}
+
+	for (int i = 0; i < numberOfBlackRooks; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = BLACK_R;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+
+	for (int i = 0; i < numberOfBlackBishops; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = BLACK_B;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+	for (int i = 0; i < numberOfBlackKnights; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = BLACK_N;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+	for (int i = 0; i < 1; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = BLACK_Q;
+		Coord crd;
+		crd.i_coord = x;	crd.j_coord = y;
+		setSlotInBoard(brd, crd, tool);
+		brd[x][y] = tool;
+		places[place] = places[numberOfFreePlaces - 1];
+		numberOfFreePlaces--;
+		numberOfTooleToSet--;
+	}
+
+
+	for (int i = 0; i < 1; i++)
+	{
+		int place = random_at_most(numberOfFreePlaces);
+		int x = places[place] % 10;
+		int y = places[place] / 10;
+		char tool = BLACK_K;
 		Coord crd;
 		crd.i_coord = x;	crd.j_coord = y;
 		setSlotInBoard(brd, crd, tool);
@@ -438,9 +635,14 @@ board_t GenerateRandomConfiguration()
 		numberOfTooleToSet--;
 	}
 	assert(numberOfTooleToSet == 0);
+
+	print_board(brd);
 	return brd;
+
+
+
 }
-#endif
+
 
 
 /*DEBUG*/
@@ -507,7 +709,7 @@ int Parse(char *line, board_t board)
 
 	if (properties[0])
 		/*Setting State*/
-	{		
+	{
 		char *token = strtok(line, " \n");
 		if (strcmp(token, cmmd1) == 0)
 			//game mode
@@ -548,7 +750,7 @@ int Parse(char *line, board_t board)
 
 
 			token = strtok(NULL, " ");
-			if (strcmp(token, BEST)==0)
+			if (strcmp(token, BEST) == 0)
 			{
 				properties[2] = BESTval;//0 stands for best
 				return 0;
@@ -678,7 +880,7 @@ int Parse(char *line, board_t board)
 				{
 					{
 						if (!properties[1])
-						printf(ILLEGAL_COMMAND);
+							printf(ILLEGAL_COMMAND);
 						return 0;
 					}
 				}
@@ -735,15 +937,33 @@ int Parse(char *line, board_t board)
 			//start
 		{
 			Coord tmpCrd;
-			if (CountToolsOfType(board, WHITE_K) < 1 || CountToolsOfType(board, BLACK_K) < 1)
+			if (CountToolsOfType(board, WHITE_K) != 1 || CountToolsOfType(board, BLACK_K) != 1)
 			{
 				if (!properties[1])
-					printf(WROND_BOARD_INITIALIZATION);				
+					printf(WROND_BOARD_INITIALIZATION);
 			}
 			else
 			{
 				properties[0] = 0;//change from setting state to game state				
 			}
+
+
+
+			/*checing check mate or tie before starting the game*/
+			int curScore = score(board, properties[4]);
+			if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
+			{
+				printWinner(-properties[4]);//print player wins;
+				properties[1] = 1;
+			}
+			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
+			{
+				printf(TIE);//print tie;
+				properties[1] = 1;
+			}
+			else if (KingUnderThreat(board, properties[4]))
+				printf(CHECK);
+
 
 			//update kings' coordinates
 			for (int j = BOARD_SIZE - 1; j >= 0; j--){
@@ -772,7 +992,7 @@ int Parse(char *line, board_t board)
 
 			return 0;
 
-							
+
 		}
 		if (!properties[1])
 			printf(ILLEGAL_COMMAND);
@@ -923,7 +1143,7 @@ int Parse(char *line, board_t board)
 
 			//print score
 			if (!properties[1])
-				printf("%d",score);
+				printf("%d", score);
 			properties[2] = tmpD;
 			return 0;
 		}
@@ -1071,11 +1291,11 @@ void graphicCoordToRealCoord(Coord *crd, char x_coor, int y_coor)
 
 
 /*DEBUG*/
-#ifndef DAMKA
-Move* chooseMoveRandonly(board_t brd)
+
+cMove* chooseMoveRandonly(board_t brd)
 {
 	int counter = 0;
-	Move *tmp = pMove;
+	cMove *tmp = pMove;
 	while (tmp != NULL)
 	{
 		counter++;
@@ -1092,7 +1312,6 @@ Move* chooseMoveRandonly(board_t brd)
 		tmp = tmp->next;
 	return tmp;
 }
-#endif
 
 
 /*prints to screen who the winner is*/
@@ -1114,9 +1333,9 @@ int Console_Main(board_t board)
 {
 
 	//srand(time(NULL));
-	
+
 	int parseResult = 0;
-	
+
 	/*char* board[BOARD_SIZE];
 	char row0[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
 	char row1[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
@@ -1179,7 +1398,7 @@ int Console_Main(board_t board)
 			}
 			else if (KingUnderThreat(board, -properties[4]))
 				printf(CHECK);
-			
+
 
 
 			//run MINIMAX
@@ -1193,7 +1412,7 @@ int Console_Main(board_t board)
 			{
 				if (!properties[1])
 					printf("Computer: move ");
-								printMove(computerMove);
+				printMove(computerMove);
 				makeMove(brd, computerMove);
 				free(computerMove);
 				//print board
@@ -1407,3 +1626,339 @@ int Console_Main(board_t board)
 	return 0;*/
 }
 
+
+
+int freeBoard(board_t brd)
+{
+	/*for (int i = 0; i < BOARD_SIZE; i++)
+		free(brd[i]);
+		free(brd);*/
+	return 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**************************************************************
+*************************** TEST ******************************
+**************************************************************/
+
+int Test()
+{
+
+	//srand(time(NULL));
+	srand(15);
+
+	int parseResult = 0;
+	int iterations = 50;
+	int printMode = 1;
+	int COMPUTER_COLOR = BLACK_PLAYER;
+	int record = 1;
+	properties[0] = 0;
+	//properties[3] = BLACK_PLAYER;	
+	//difficulty
+	properties[2] = 3;
+	properties[5] = 2;
+	properties[4] = WHITE_PLAYER;
+	int iterationToRecord = 41;
+
+
+	/**************************************************************
+	*************************** TEST ******************************
+	**************************************************************/
+
+
+
+	board_t brd; //= NULL; TODO: experiement
+	char *input = NULL;
+	cMove *computerMove = NULL;
+	cMove *allPossibleMoves = NULL, *tmp;
+
+	//init_board(brd);
+
+	if (DEBUG)
+		brd = GenerateRandomConfiguration();
+	/*if (DEBUG) //tests
+	{
+	for (int i = 1; i < 12; i++)
+	{
+	if (i==9)
+	brd = unitTest_movements(i);
+
+	}
+	}*/
+	//printf("%c\n\n", brd[0][0]);
+	print_board(brd);
+	FILE *f;
+	if (record)
+	{
+		f = fopen("RECORD RUN", "w");
+		fprintf(f, "clear\n");
+		//fprintf(f, "user_color black\n");
+		//fprintf(f, "user_color White\n");
+
+		fprintf(f, "game_mode 2\n");
+		fprintf(f, "difficulty 2\n");
+		/*for (int i = 0; i < BOARD_SIZE; i++)
+			for (int j = 0; j < BOARD_SIZE; j++)
+			if (brd[i][j] != EMPTY)
+			{
+			char x = 'a' + i;
+			int y = j + 1;
+			if (islower(brd[i][j]))
+			fprintf(f, "set <%c,%d> %s %s\n", x, y, WHITE, ToolCharToName(brd[i][j]));
+			else
+			fprintf(f, "set <%c,%d> %s %s\n", x, y, BLACK, ToolCharToName(brd[i][j]));
+			}
+			fprintf(f, "start\n");*/
+		/*char *s = (char*)calloc(20, sizeof(char));
+		char s2[16] = "chess1.xml\n";
+		for (int i = 0; i < 16; i++)
+			s[i] = s2[i];
+		Save(brd, s);*/
+	}
+
+
+
+	int curScore = 0;
+	int countMoves = 0;
+
+
+
+
+	/* One loop for both settings and game */
+	while (!properties[1] && iterations > 0)//while not quit
+	{
+		if (iterations == iterationToRecord&&countMoves == 0)
+		{
+			record = 1;
+			char *s = (char*)calloc(20, sizeof(char));
+			char s2[16] = "chess1.xml\n";
+			for (int i = 0; i < 16; i++)
+				s[i] = s2[i];
+			Save(brd, s);
+			Record(brd, f);
+		}
+		else
+			record = 0;
+		countMoves++;
+		if (countMoves == 30)
+		{
+			countMoves = 0;
+			properties[4] = COMPUTER_COLOR;
+			freeBoard(brd);
+			brd = GenerateRandomConfiguration();
+			iterations--;
+			SetDefaultProperties();
+			continue;
+		}
+		if (!properties[1] && properties[0])
+			printf(ENTER_SETTINGS);
+		printf("%u\n", iterations);
+		if (properties[5] == 2 && !properties[0] && (properties[4] != properties[3]))//if in AI mode, in game state and it is the computer's turn
+		{
+			curScore = score(brd, properties[4]);
+			computerMove = NULL;
+			if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
+			{
+				printWinner(-properties[4]);//print player wins;
+				freeBoard(brd);
+				brd = GenerateRandomConfiguration();
+				properties[4] = COMPUTER_COLOR;
+				iterations--;
+				countMoves = 0;
+				SetDefaultProperties();
+				continue;
+			}
+			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
+			{
+				printf(TIE);//print tie;
+				freeBoard(brd);
+				brd = GenerateRandomConfiguration();
+				properties[4] = COMPUTER_COLOR;
+				countMoves = 0;
+				iterations--;
+				SetDefaultProperties();
+				continue;
+			}
+			else if (KingUnderThreat(brd, properties[4]))
+				printf(CHECK);
+			/**************************************************************
+			*************************** TEST ******************************
+			**************************************************************/
+
+
+			//run MINIMAX
+			if (properties[3] == BLACK_PLAYER)//if computer's color is white
+				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+			else
+				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+
+			if (computerMove == NULL)
+			{
+				printf("computerMove==NULL\n");
+				print_board(brd);
+			}
+
+			//print computer's move
+			if (computerMove != NULL)
+			{
+				if (!properties[1])
+					printf("Computer: move ");
+				printMove(computerMove);
+				makeMove(brd, computerMove);
+				free(computerMove);
+				//print board
+				print_board(brd);
+			}
+
+
+			//change player
+
+			//properties[4] = -properties[4];
+		}
+		else
+		{
+			curScore = score(brd, properties[4]);
+			if ((curScore == MATE_WIN_LOSE))//if no legal move for the player (player lost - MATE!)
+			{
+				printWinner(-properties[4]);//print computer wins;
+				freeBoard(brd);
+				brd = GenerateRandomConfiguration();
+				properties[4] = COMPUTER_COLOR;
+				countMoves = 0;
+				iterations--;
+				SetDefaultProperties();
+				continue;
+
+			}
+			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and (tie)
+			{
+				printf(TIE);//print tie;
+				freeBoard(brd);
+				brd = GenerateRandomConfiguration();
+				properties[4] = COMPUTER_COLOR;
+				countMoves = 0;
+				iterations--;
+				SetDefaultProperties();
+				continue;
+			}
+			else if (KingUnderThreat(brd, properties[4]))
+				printf(CHECK);
+			//continue;
+
+			if (properties[3] == WHITE_PLAYER)//if player is white
+				allPossibleMoves = getMoves(brd, WHITE_PLAYER);
+			else //if player is black
+				allPossibleMoves = getMoves(brd, BLACK_PLAYER);
+			pMove = allPossibleMoves;
+
+			if (pMove != NULL)
+				computerMove = chooseMoveRandonly(brd);
+			else
+			{
+				curScore = score(brd, properties[4]);
+				if ((curScore == MATE_WIN_LOSE))//if no legal move for the player (player lost - MATE!)
+				{
+					printWinner(-properties[4]);//print computer wins;
+					brd = GenerateRandomConfiguration();
+					properties[4] = COMPUTER_COLOR;
+					countMoves = 0;
+					iterations--;
+					SetDefaultProperties();
+					continue;
+
+				}
+				exit(1);
+			}
+
+			makeMove(brd, computerMove);
+			if (printMode)
+			{
+				printf("player: move ");
+				printMove(computerMove);
+				if (record)
+					printMoveToFile(f, computerMove);
+				print_board(brd);
+			}
+			tmp = allPossibleMoves;
+			while (allPossibleMoves != NULL)
+			{
+				allPossibleMoves = allPossibleMoves->next;
+				free(tmp);
+				tmp = allPossibleMoves;
+			}
+		}
+		properties[4] = -properties[4];
+	}
+
+
+
+	//printf(ENTER_YOUR_MOVE);
+
+
+	if (record)
+	{
+		fprintf(f, "quit\n");
+		fclose(f);
+	}
+
+	return 0;
+}
+
+
+
+
+int Record(board_t brd, FILE *f)
+{
+	for (int i = 0; i < BOARD_SIZE; i++)
+		for (int j = 0; j < BOARD_SIZE; j++)
+			if (brd[i][j] != EMPTY)
+			{
+				char x = 'a' + i;
+				int y = j + 1;
+				if (islower(brd[i][j]))
+					fprintf(f, "set <%c,%d> %s %s\n", x, y, WHITE, ToolCharToName(brd[i][j]));
+				else
+					fprintf(f, "set <%c,%d> %s %s\n", x, y, BLACK, ToolCharToName(brd[i][j]));
+			}
+	fprintf(f, "start\n");
+	return 0;
+}
+
+int SetDefaultProperties()
+{
+	properties[4] = WHITE_PLAYER;
+	return 0;
+}

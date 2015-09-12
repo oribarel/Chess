@@ -160,7 +160,7 @@ int checkDangerZoneForKingUnderThreat(board_t board, int player)
 	Coord kingCrd, *dangerZone;
 	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
 	dangerZone = WHITE_PLAYER == player ? WhiteKingDangerZone : BlackKingDangerZone;
-	for (int i = 0; i < BOARD_SIZE*BOARD_SIZE && isInBoard(dangerZone[i]); i++)
+	for (int i = 0; i < BOARD_SIZE*BOARD_SIZE && isInBoard(dangerZone[i]) ; i++)
 	{
 
 		if (isAttacking(board, dangerZone[i], kingCrd))
@@ -177,9 +177,10 @@ int bestScore(board_t board, int player)
 	int ally, enemy, playerBlocked = 1, opponentBlocked = 1;
 	int CheckOnPlayer;
 
-	int scr = 0, canMove;
+
 
 	/* Check for win or tie situations: */
+	/* Since getMoves doesn't provide any moves that leave the king at CHECK, if there aren't any moves, it is MATE */
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
 	{
 		crd.i_coord = (int)mod(k, BOARD_SIZE);
@@ -188,34 +189,18 @@ int bestScore(board_t board, int player)
 		enemy = IsEnemy(GetContentOfCoord(board, crd), player);
 		if (GetContentOfCoord(board, crd) != EMPTY)
 		{
-			canMove = canMoveThisTool(board, crd);
-			if (ally > 0 && canMove == 1)
+			if (ally > 0 && canMoveThisTool(board, crd) == 1)
 				playerBlocked = 0;
-			if (enemy > 0 && canMove == 1)
+			if (enemy > 0 && canMoveThisTool(board, crd) == 1)
 				opponentBlocked = 0;
 		}
-
 	}
-
-	if (playerBlocked == 1)
-	{
-		if (KingUnderThreat(board, player))
-			return MATE_WIN_LOSE;//player lost
-		else
-			return TIE_SCORE; //tie
-	}
-	if (opponentBlocked == 1)
-	{
-		if (KingUnderThreat(board, -player))
-			return MATE_WIN_SCORE;//player won
-		else
-			return TIE_SCORE; //tie
-	}
-	/*if (DEBUG && score == MATE_WIN_LOSE)
-	{
-		print_board(board);
-		printf("%d \n", score);
-	}*/
+	if (playerBlocked && !opponentBlocked)
+		return -1000000;
+	else if (playerBlocked && opponentBlocked)
+		return -999999;
+	else if (opponentBlocked)
+		return 1000000;
 
 	/* this is the first pass: set up pawnRow, piecesScoreValue, and pawnsScoreValue. */
 	for (int i = 0; i < 10; ++i)

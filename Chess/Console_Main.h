@@ -94,8 +94,8 @@ void setBoard(board_t board, char *config);
 //int makeMove(board_t board, Move *move);
 //int imax(int a, int b);
 //int imin(int a, int b);
-//long random_at_most(long max);
-//board_t GenerateRandomConfiguration();
+long random_at_most(long max);
+board_t GenerateRandomConfiguration();
 //char *configuration(int num);
 //board_t unitTest_movements(int i);
 int Parse(char *line, board_t board);
@@ -108,13 +108,16 @@ void graphicCoordToRealCoord(Coord *crd, char x_coor, int y_coor);
 //const char* getPlayerColor();
 //const char* getComputerColor();
 //char getGenericTool(int isComputer);
-//Move* chooseMoveRandonly(board_t brd);
+cMove* chooseMoveRandonly(board_t brd);
 //char getCorrespondingKing(char type);
 int printWinner(int computerWins);
 //int Save(board_t board, char* file_name);
 //void quit(board_t brd, int freeBoard);
 //int getColor(board_t board, Coord coord);
 int quit(void);
-
+int Test();
+int freeBoard(board_t brd);
+int Record(board_t brd, FILE *f);
+int SetDefaultProperties();
 
 #endif  

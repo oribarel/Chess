@@ -59,6 +59,9 @@
 #define WHITE "white"
 #define BLACK "black"
 
+#define WHITE_CAP "White"
+#define BLACK_CAP "Black"
+
 #define WHITE_PLAYER 1
 #define NO_PLAYER 0
 #define BLACK_PLAYER -1
@@ -107,7 +110,7 @@ extern Coord WhiteKingDangerZone[BOARD_SIZE * 2];
 extern Coord BlackKingDangerZone[BOARD_SIZE * 2];
 
 
-void print_board(char **);
+void print_board(board_t board);
 void init_board(board_t board);
 void init_rowsE(board_t board);
 void init_rowP(board_t board, int player);
@@ -168,6 +171,7 @@ void printMove(cMove *move);
 void printMovesList(cMove *move);
 int freeMovesList(cMove *move);
 Coord GenerateCoord(int x, int y);
+void printMoveToFile(FILE *f, cMove *move);
 
 #endif
 
