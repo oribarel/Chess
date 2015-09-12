@@ -267,7 +267,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	return 1;
 }
 
-int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons)
+int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons, ControlComponent *ccl, Label *lbl)
 { /* This menu has a 'return to game', a 'quit', 'save' and 7 slots buttons. */
 
 	int wSide = 12;
@@ -284,27 +284,33 @@ int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *
 
 	SDL_Rect returnToMainMenu = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
 	SDL_Rect returnToGameButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting / 2 + hSide);
-	SDL_Rect slot_1 = createSDL_Rect(200, 75, 412, 100);
-	SDL_Rect slot_2 = createSDL_Rect(200, 75, 412, 185);
-	SDL_Rect slot_3 = createSDL_Rect(200, 75, 412, 270);
-	SDL_Rect slot_4 = createSDL_Rect(200, 75, 412, 355);
-	SDL_Rect slot_5 = createSDL_Rect(200, 75, 412, 440);
-	SDL_Rect slot_6 = createSDL_Rect(200, 75, 412, 525);
-	SDL_Rect slot_7 = createSDL_Rect(200, 75, 412, 610);
+	
+
+	SDL_Rect slot_1 = createSDL_Rect(200, 55, 0, 250 + hSide);
+	SDL_Rect slot_2 = createSDL_Rect(200, 55, 0, 313 + hSide);
+	SDL_Rect slot_3 = createSDL_Rect(200, 55, 0, 376 + hSide);
+	SDL_Rect slot_4 = createSDL_Rect(200, 55, 0, 439 + hSide);
+	SDL_Rect slot_5 = createSDL_Rect(200, 55, 0, 502 + hSide);
+	SDL_Rect slot_6 = createSDL_Rect(200, 55, 0, 565 + hSide);
+	SDL_Rect slot_7 = createSDL_Rect(200, 55, 0, 628 + hSide);
 	SDL_Rect saveButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+
+	/* label rects */
+	SDL_Rect header = createSDL_Rect(wBoardSetting, 75, 196, 10 - hSide);// wGameModeSetting + wSide, 10);
+	SDL_Rect welcome = createSDL_Rect(768, 576, 240 - wGameModeSetting - wSide, 130 - hSide);
 
 
 	createMenu(pMenu_Save, Rect1024x768, rgbMenuBlue, SAVE_MENU);
 
 	/* Make the buttons */
 	createButton(ccb_SaveMenuCCBs, btn_SaveMenuButtons, returnToMainMenu, uploadPicture("ReturnToMainMenu.bmp"), SaveMenu_ResetGameAndShowMainMenu, BACK_TO_MAIN_MENU_BUTTON);
-	createButton(ccb_SaveMenuCCBs + 1, btn_SaveMenuButtons + 1, slot_1, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '1');
-	createButton(ccb_SaveMenuCCBs + 2, btn_SaveMenuButtons + 2, slot_2, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '2');
-	createButton(ccb_SaveMenuCCBs + 3, btn_SaveMenuButtons + 3, slot_3, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '3');
-	createButton(ccb_SaveMenuCCBs + 4, btn_SaveMenuButtons + 4, slot_4, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '4');
-	createButton(ccb_SaveMenuCCBs + 5, btn_SaveMenuButtons + 5, slot_5, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '5');
-	createButton(ccb_SaveMenuCCBs + 6, btn_SaveMenuButtons + 6, slot_6, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '6');
-	createButton(ccb_SaveMenuCCBs + 7, btn_SaveMenuButtons + 7, slot_7, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '7');
+	createButton(ccb_SaveMenuCCBs + 1, btn_SaveMenuButtons + 1, slot_1, uploadPicture("slot1.bmp"), SaveMenu_selectSlot, '1');
+	createButton(ccb_SaveMenuCCBs + 2, btn_SaveMenuButtons + 2, slot_2, uploadPicture("slot2.bmp"), SaveMenu_selectSlot, '2');
+	createButton(ccb_SaveMenuCCBs + 3, btn_SaveMenuButtons + 3, slot_3, uploadPicture("slot3.bmp"), SaveMenu_selectSlot, '3');
+	createButton(ccb_SaveMenuCCBs + 4, btn_SaveMenuButtons + 4, slot_4, uploadPicture("slot4.bmp"), SaveMenu_selectSlot, '4');
+	createButton(ccb_SaveMenuCCBs + 5, btn_SaveMenuButtons + 5, slot_5, uploadPicture("slot5.bmp"), SaveMenu_selectSlot, '5');
+	createButton(ccb_SaveMenuCCBs + 6, btn_SaveMenuButtons + 6, slot_6, uploadPicture("slot6.bmp"), SaveMenu_selectSlot, '6');
+	createButton(ccb_SaveMenuCCBs + 7, btn_SaveMenuButtons + 7, slot_7, uploadPicture("slot7.bmp"), SaveMenu_selectSlot, '7');
 	createButton(ccb_SaveMenuCCBs + 8, btn_SaveMenuButtons + 8, saveButton, uploadPicture("saveGame.bmp"), SaveMenu_saveGameSlot, SAVE_GAME_BUTTON);
 	createButton(ccb_SaveMenuCCBs + 9, btn_SaveMenuButtons + 9, returnToGameButton, uploadPicture("ReturnToGame.bmp"), SaveMenu_ResetSaveMenuAndShowGamePlayMenu, BACK_TO_GAME);
 
@@ -313,15 +319,22 @@ int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *
 	panelMaker(ccp_SaveMenuCCPs + 1, pnl_SaveMenuPanels + 1, slotsPanel, rgbMenuBlue);
 
 	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs);
-	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 1);
-	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 2);
-	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 3);
-	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 4);
-	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 5);
-	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 6);
-	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 7);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 1);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 2);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 3);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 4);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 5);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 6);
+	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 7);
 	addButtonToPanel(ccp_SaveMenuCCPs + 1, ccb_SaveMenuCCBs + 8);
 	addButtonToPanel(ccp_SaveMenuCCPs, ccb_SaveMenuCCBs + 9);
+
+	/* Make the labels */
+	labelMaker(ccl, lbl, header, "SaveMenuHeader.bmp");
+	labelMaker(ccl + 1, lbl + 1, welcome, "welcome.bmp");
+	addLabelToPanel(ccp_SaveMenuCCPs + 1, ccl);
+	addLabelToPanel(ccp_SaveMenuCCPs + 1, ccl + 1);
+
 
 	/* Add the Panels To the Menu*/
 	addPanelToMenu(pMenu_Save, ccp_SaveMenuCCPs, 1);
@@ -395,7 +408,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 	return 1;
 }
 
-int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons)
+int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons, ControlComponent *ccl, Label *lbl)
 {
 	/* This menu has a 'return to game', a 'quit', 'save' and 7 slots buttons. */
 
@@ -408,46 +421,58 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 
 	/* Rects */
 	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
-	SDL_Rect returnsPanel = createSDL_Rect(wGameModeSetting, hGameModeSetting, wSide, 9);
-	SDL_Rect slotsPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
+	SDL_Rect buttonsPanel = createSDL_Rect(wGameModeSetting, hGameModeSetting, wSide, 9);
+	SDL_Rect labelsPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
 
 	SDL_Rect returnToMainMenu = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
 	//SDL_Rect returnToGameButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting / 2 + hSide);
-	SDL_Rect slot_1 = createSDL_Rect(200, 75, 412, 100);
-	SDL_Rect slot_2 = createSDL_Rect(200, 75, 412, 185);
-	SDL_Rect slot_3 = createSDL_Rect(200, 75, 412, 270);
-	SDL_Rect slot_4 = createSDL_Rect(200, 75, 412, 355);
-	SDL_Rect slot_5 = createSDL_Rect(200, 75, 412, 440);
-	SDL_Rect slot_6 = createSDL_Rect(200, 75, 412, 525);
-	SDL_Rect slot_7 = createSDL_Rect(200, 75, 412, 610);
-	SDL_Rect loadButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect slot_1 = createSDL_Rect(200, 55, 0, 250 + hSide);		//200, 75, 412, 100);
+	SDL_Rect slot_2 = createSDL_Rect(200, 55, 0, 313 + hSide);		//200, 75, 412, 185);
+	SDL_Rect slot_3 = createSDL_Rect(200, 55, 0, 376 + hSide);		//200, 75, 412, 270);
+	SDL_Rect slot_4 = createSDL_Rect(200, 55, 0, 439 + hSide);		//200, 75, 412, 355);
+	SDL_Rect slot_5 = createSDL_Rect(200, 55, 0, 502 + hSide);		//200, 75, 412, 440);
+	SDL_Rect slot_6 = createSDL_Rect(200, 55, 0, 565 + hSide);		//200, 75, 412, 525);
+	SDL_Rect slot_7 = createSDL_Rect(200, 55, 0, 628 + hSide);		//200, 75, 412, 610);
+	SDL_Rect loadButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting / 2 + hSide); //createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
+
+	/* label rects */
+	SDL_Rect header = createSDL_Rect(wBoardSetting, 75, 0, 10 - hSide);// wGameModeSetting + wSide, 10);
+	SDL_Rect welcome = createSDL_Rect(768, 576, 240 - wGameModeSetting - wSide, 130 - hSide);
 
 
-	createMenu(pMenu_Load, Rect1024x768, rgbMenuBlue, SAVE_MENU);
+	createMenu(pMenu_Load, Rect1024x768, rgbMenuBlue, LOAD_MENU);
 
 	/* Make the buttons */
 	createButton(ccb_LoadMenuCCBs, btn_LoadMenuButtons, returnToMainMenu, uploadPicture("ReturnToMainMenu.bmp"), LoadMenu_Reset_LoadMenu_And_ShowMainMenu, BACK_TO_MAIN_MENU_BUTTON);
-	createButton(ccb_LoadMenuCCBs + 1, btn_LoadMenuButtons + 1, slot_1, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '1');
-	createButton(ccb_LoadMenuCCBs + 2, btn_LoadMenuButtons + 2, slot_2, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '2');
-	createButton(ccb_LoadMenuCCBs + 3, btn_LoadMenuButtons + 3, slot_3, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '3');
-	createButton(ccb_LoadMenuCCBs + 4, btn_LoadMenuButtons + 4, slot_4, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '4');
-	createButton(ccb_LoadMenuCCBs + 5, btn_LoadMenuButtons + 5, slot_5, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '5');
-	createButton(ccb_LoadMenuCCBs + 6, btn_LoadMenuButtons + 6, slot_6, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '6');
-	createButton(ccb_LoadMenuCCBs + 7, btn_LoadMenuButtons + 7, slot_7, uploadPicture("UnpressedGenericButton.bmp"), SaveMenu_selectSlot, '7');
+	createButton(ccb_LoadMenuCCBs + 1, btn_LoadMenuButtons + 1, slot_1, uploadPicture("slot1.bmp"), SaveMenu_selectSlot, '1');
+	createButton(ccb_LoadMenuCCBs + 2, btn_LoadMenuButtons + 2, slot_2, uploadPicture("slot2.bmp"), SaveMenu_selectSlot, '2');
+	createButton(ccb_LoadMenuCCBs + 3, btn_LoadMenuButtons + 3, slot_3, uploadPicture("slot3.bmp"), SaveMenu_selectSlot, '3');
+	createButton(ccb_LoadMenuCCBs + 4, btn_LoadMenuButtons + 4, slot_4, uploadPicture("slot4.bmp"), SaveMenu_selectSlot, '4');
+	createButton(ccb_LoadMenuCCBs + 5, btn_LoadMenuButtons + 5, slot_5, uploadPicture("slot5.bmp"), SaveMenu_selectSlot, '5');
+	createButton(ccb_LoadMenuCCBs + 6, btn_LoadMenuButtons + 6, slot_6, uploadPicture("slot6.bmp"), SaveMenu_selectSlot, '6');
+	createButton(ccb_LoadMenuCCBs + 7, btn_LoadMenuButtons + 7, slot_7, uploadPicture("slot7.bmp"), SaveMenu_selectSlot, '7');
 	createButton(ccb_LoadMenuCCBs + 8, btn_LoadMenuButtons + 8, loadButton, uploadPicture("loadGame.bmp"), LoadGame, LOAD_GAME_BUTTON);
+	
 	/* Make the Panels*/
-	panelMaker(ccp_LoadMenuCCPs, pnl_LoadMenuPanels, returnsPanel, rgbRed);
-	panelMaker(ccp_LoadMenuCCPs + 1, pnl_LoadMenuPanels + 1, slotsPanel, rgbMenuBlue);
+	panelMaker(ccp_LoadMenuCCPs, pnl_LoadMenuPanels, buttonsPanel, rgbRed);
+	panelMaker(ccp_LoadMenuCCPs + 1, pnl_LoadMenuPanels + 1, labelsPanel, rgbMenuBlue);
 
 	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 1);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 2);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 3);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 4);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 5);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 6);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 7);
-	addButtonToPanel(ccp_LoadMenuCCPs + 1, ccb_LoadMenuCCBs + 8);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 1);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 2);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 3);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 4);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 5);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 6);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 7);
+	addButtonToPanel(ccp_LoadMenuCCPs, ccb_LoadMenuCCBs + 8);
+
+	/* Make the labels */
+	labelMaker(ccl, lbl, header, "LoadMenuHeader.bmp");
+	labelMaker(ccl+1, lbl+1, welcome, "welcome.bmp");
+	addLabelToPanel(ccp_LoadMenuCCPs+1, ccl);
+	addLabelToPanel(ccp_LoadMenuCCPs+1, ccl + 1);
+
 
 	/* Add the Panels To the Menu*/
 	addPanelToMenu(pMenu_Load, ccp_LoadMenuCCPs, 1);
@@ -1287,10 +1312,17 @@ int SaveMenu_selectSlot(struct menu *menu, struct controlComponent *ccb)
 int SaveOrLoad_Menu_UpdateVis(struct menu *menu)
 {
 	/* Update Save Or Load Menu Vis */
-	ControlComponent *ccbCurr = menu->panel_2->pnl->children;
+	char filenameUnpressed[12] = "slotX.bmp \0";
+	char filenamePressed[13] = "slotXP.bmp \0";
+	ControlComponent *ccbCurr = menu->panel_1->pnl->children->next;
+
 	for (int i = 0; i < 7; i++)
 	{
-		ccbCurr->btn->pic = uploadPicture(i + '1' == selectedSlot ? "PressedGenericButton.bmp" : "UnpressedGenericButton.bmp");
+		if (ccbCurr->btn->pic != NULL)
+			SDL_FreeSurface1(ccbCurr->btn->pic);
+		*(filenameUnpressed + 4) = i + '1';
+		*(filenamePressed + 4) = i + '1';
+		ccbCurr->btn->pic = uploadPicture(i + '1' == selectedSlot ? filenamePressed : filenameUnpressed);
 		if (SDL_BlitSurface(ccbCurr->btn->pic, NULL, chessWindow->self, &(ccbCurr->rect)) != 0)
 		{
 			SDL_FreeSurface1(ccbCurr->btn->pic);
@@ -1321,6 +1353,7 @@ int SaveMenu_ResetSaveMenuAndShowGamePlayMenu(struct menu *menu, struct controlC
 {
 	selectedSlot = '0';
 	SaveOrLoad_Menu_UpdateVis(menu);
+	properties[0] = GAME_MODE;
 	showGamePlayMenu(menu, ccb);
 	return 1;
 }
@@ -1329,7 +1362,11 @@ int SaveMenu_ResetSaveMenuAndShowGamePlayMenu(struct menu *menu, struct controlC
 
 int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlComponent *ccb)
 {
-	//TODO: Reset all of this menu's data ( selected slot... ) and then:
+	/* new and might be wrong */
+	selectedSlot = '0';
+	SaveOrLoad_Menu_UpdateVis(menu);
+	properties[0] = GAME_MODE;
+	/* end new */
 	showMainMenu(menu, ccb);
 	return 1;
 }
@@ -1441,14 +1478,14 @@ int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 
 int showSaveGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
-	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
+	properties[0] = SETTINGS_MODE;
 	showMenu(chessWindow, pMenu_Save);
 	return 0;
 }
 
 int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
-	//properties[0] = XXXXXX_MODE; //TODO: should this line even be here, and what mode?
+	properties[0] = SETTINGS_MODE;
 	showMenu(chessWindow, pMenu_Load);
 	return 0;
 }

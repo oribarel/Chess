@@ -136,7 +136,8 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccb_SaveMenuCCBs[NUM_OF_SAVE_MENU_BUTTONS];
 	Button btn_SaveMenuButtons[NUM_OF_SAVE_MENU_BUTTONS];
 
-
+	ControlComponent ccl_saveMenuCCLs[2];
+	Label lbl_saveMenuLabels[2];
 
 
 	/* Load Menu  CCPs, PNLs, BTNs */
@@ -146,7 +147,8 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccb_LoadMenuCCBs[NUM_OF_LOAD_MENU_BUTTONS];
 	Button btn_LoadMenuButtons[NUM_OF_LOAD_MENU_BUTTONS];
 
-
+	ControlComponent ccl_loadMenuCCLs[2];
+	Label lbl_loadMenuLabels[2];
 
 	/* Pass the board */
 	pBoard = passedBoard;
@@ -180,7 +182,6 @@ int GUI_Main(board_t passedBoard)
 	guiBoard[7] = guiBoard_col7;
 
 
-
 	/* Create the window */
 	createWindow(chessWindow);
 
@@ -189,9 +190,8 @@ int GUI_Main(board_t passedBoard)
 	createPlayerSelectionMenu(pMenu_PlayerSelection, ccp_PlayerSelectionMenuCCPs, pnl_PlayerSelectionMenuPanels, ccb_PlayerSelectionMenuCCBs, btn_PlayerSelectionMenuButtons, &ccl_PlayerSelectionMenuHeader, &lbl_PlayerSelectionMenuHeader);
 	createAI_SettingsMenu(pMenu_AI_settings, ccp_AI_SettingsMenuCCPs, pnl_AI_SettingsMenuPanels, ccb_AI_SettingsCCBs, btn_AI_SettingsButtons, &ccl_AI_settingsHeader, &lbl_AI_settingsHeader);
 	createGameMenu(pMenu_Game, ccp_GamePlayMenuCCPs, pnl_GamePlayMenuPanels, ccb_GamePlayMenuCCBs, btnb_GamePlayMenuButtons, ccl_gamePlayCCLs, lbl_gamePlayLabels);
-	createSaveMenu(pMenu_Save, ccp_SaveMenuCCPs, pnl_SaveMenuPanels, ccb_SaveMenuCCBs, btn_SaveMenuButtons);
-	createLoadMenu(pMenu_Load, ccp_LoadMenuCCPs, pnl_LoadMenuPanels, ccb_LoadMenuCCBs, btn_LoadMenuButtons);
-
+	createSaveMenu(pMenu_Save, ccp_SaveMenuCCPs, pnl_SaveMenuPanels, ccb_SaveMenuCCBs, btn_SaveMenuButtons, ccl_saveMenuCCLs, lbl_saveMenuLabels);
+	createLoadMenu(pMenu_Load, ccp_LoadMenuCCPs, pnl_LoadMenuPanels, ccb_LoadMenuCCBs, btn_LoadMenuButtons, ccl_loadMenuCCLs, lbl_loadMenuLabels);
 
 	createGUIBoard(guiBoard, pCCP_Board, btn_BoardPanelButtons, pBoard);
 	addPanelToMenu(pMenu_PlayerSelection, pCCP_Board, 4);
