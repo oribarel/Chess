@@ -155,7 +155,7 @@ eTool get_eToolFromType(char type)
 }
 
 /*return 1 if the king of the given player is under threat*/
-int checkDangerZoneForKingUnderThreat(board_t board, int player)
+/*int checkDangerZoneForKingUnderThreat(board_t board, int player)
 {
 	Coord kingCrd, *dangerZone;
 	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
@@ -167,7 +167,7 @@ int checkDangerZoneForKingUnderThreat(board_t board, int player)
 			return 1;
 	}
 	return 0;
-}
+}*/
 
 int bestScore(board_t board, int player)
 {
@@ -679,4 +679,81 @@ int getColorInLightOrDark(board_t board, Coord crd)
 		return LIGHT;
 	else
 		return DARK;
+}
+
+int GetBestDepth(board_t board, int player)
+{
+	int numberOfWhitePawns = 0, numberOfBlackPawns = 0;
+	int numberOfWhiteRooks = 0, numberOfBlackRooks = 0;
+	int numberOfWhiteBishops = 0, numberOfBlackBishops = 0;
+	int numberOfWhiteKnights = 0, numberOfBlackKnights = 0;
+	int numberOfWhiteQueens = 0, numberOfBlackQueens = 0;
+	int pawnMaxMoves = 3, knightMaxMoves = 8, bishopMaxMoves = 13, rookMaxMoves = 14, queenMaxMoves = 27, kingMaxMoves = 8;
+	int movesCnt = 1;
+	int numberOfWhiteMoves = numberOfWhitePawns * pawnMaxMoves
+		+ numberOfWhiteRooks * rookMaxMoves + numberOfWhiteBishops * bishopMaxMoves +
+		numberOfWhiteKnights * knightMaxMoves + numberOfWhiteQueens*queenMaxMoves +kingMaxMoves;
+	int numberOfBlackMoves = numberOfBlackPawns * pawnMaxMoves
+		+ numberOfBlackRooks * rookMaxMoves + numberOfBlackBishops * bishopMaxMoves +
+		numberOfBlackKnights * knightMaxMoves + numberOfBlackQueens*queenMaxMoves + kingMaxMoves;
+	char c;
+	int depth = 1;
+	int numberOfPlayerMoves = player == WHITE_PLAYER ? numberOfWhiteMoves : numberOfBlackMoves;
+	int numberOfOpponentMoves = player == WHITE_PLAYER ? numberOfBlackMoves : numberOfWhiteMoves;
+
+	//counter number of tools of each type
+	for (int i = 0; i < BOARD_SIZE; i++)
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			c = board[i][j];
+			switch (c)
+			{
+			case BLACK_P:
+				numberOfBlackPawns++;
+				break;
+			case BLACK_B:
+				numberOfBlackBishops++;
+				break;
+			case BLACK_N:
+				numberOfBlackKnights++;
+				break;
+			case BLACK_R:
+				numberOfBlackRooks++;
+				break;
+			case BLACK_Q:
+				numberOfBlackQueens++;
+				break;
+			case BLACK_K:
+				break;
+			case WHITE_P:
+				numberOfWhitePawns++;
+				break;
+			case WHITE_B:
+				numberOfWhiteBishops++;
+				break;
+			case WHITE_N:
+				numberOfWhiteKnights++;
+				break;
+			case WHITE_R:
+				numberOfWhiteRooks++;
+				break;
+			case WHITE_Q:
+				numberOfWhiteQueens++;
+				break;
+			case WHITE_K:
+				break;
+			default:
+				break;
+			}
+		}
+
+	while (movesCnt < BEST_BOARDS_NUM)
+	{
+		if (depth % 2 == 1)
+			movesCnt *= numberOfPlayerMoves;
+		else
+			movesCnt *= numberOfOpponentMoves;
+		depth++;
+	}
+	return --depth;
 }
