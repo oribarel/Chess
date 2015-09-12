@@ -984,8 +984,8 @@ int Parse(char *line, board_t board)
 			}
 
 			//update danger zone
-			UpdateDangerZone(board, WHITE_PLAYER);
-			UpdateDangerZone(board, BLACK_PLAYER);
+			/*UpdateDangerZone(board, WHITE_PLAYER);
+			UpdateDangerZone(board, BLACK_PLAYER);*/
 
 			if (DEBUG)
 				print_board(board);

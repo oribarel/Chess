@@ -89,24 +89,24 @@ void print_board(board_t board)
 /* Prints the board to command line*/
 /*void print_board(board_t board)
 {
-	int i, j;
-	if (board == NULL || properties[1])
-		return;
-	print_line();
-	for (j = BOARD_SIZE - 1; j >= 0; j--)
-	{
-		printf((j < 9 ? " %d" : "%d"), j + 1);
-		for (i = 0; i < BOARD_SIZE; i++){
-			printf("| %c ", board[i][j]);
-		}
-		printf("|\n");
-		print_line();
-	}
-	printf("   ");
-	for (j = 0; j < BOARD_SIZE; j++){
-		printf(" %c  ", (char)('a' + j));
-	}
-	printf("\n");
+int i, j;
+if (board == NULL || properties[1])
+return;
+print_line();
+for (j = BOARD_SIZE - 1; j >= 0; j--)
+{
+printf((j < 9 ? " %d" : "%d"), j + 1);
+for (i = 0; i < BOARD_SIZE; i++){
+printf("| %c ", board[i][j]);
+}
+printf("|\n");
+print_line();
+}
+printf("   ");
+for (j = 0; j < BOARD_SIZE; j++){
+printf(" %c  ", (char)('a' + j));
+}
+printf("\n");
 }
 */
 
@@ -467,137 +467,137 @@ cMove *AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int
 	return *head;
 }
 
+///*Not to be used*/
+//int addToDangerZone(int playerColor, Coord crd)
+//{
+//	if (playerColor == WHITE_PLAYER)
+//	{
+//		WhiteKingDangerZone[gameInfo[0]] = crd;
+//		gameInfo[0]++;
+//	}
+//	else
+//	{
+//		BlackKingDangerZone[gameInfo[1]] = crd;
+//		gameInfo[1]++;
+//	}
+//	return 0;
+//}
+///*Not to be used*/
+//int ResetDangerZone(int playerColor)
+//{
+//	int j;
+//	Coord *dangerZone = playerColor == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
+//	if (playerColor == WHITE_PLAYER)
+//		j = 0;
+//	else
+//		j = 1;
+//	for (int i = 0; i < gameInfo[j]; i++)
+//	{
+//		dangerZone[i].i_coord = 0;
+//		dangerZone[i].j_coord = 0;
+//	}
+//	gameInfo[j] = 0;
+//	return 0;
+//}
 /*Not to be used*/
-int addToDangerZone(int playerColor, Coord crd)
-{
-	if (playerColor == WHITE_PLAYER)
-	{
-		WhiteKingDangerZone[gameInfo[0]] = crd;
-		gameInfo[0]++;
-	}
-	else
-	{
-		BlackKingDangerZone[gameInfo[1]] = crd;
-		gameInfo[1]++;
-	}
-	return 0;
-}
-/*Not to be used*/
-int ResetDangerZone(int playerColor)
-{
-	int j;
-	Coord *dangerZone = playerColor == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
-	if (playerColor == WHITE_PLAYER)
-		j = 0;
-	else
-		j = 1;
-	for (int i = 0; i < gameInfo[j]; i++)
-	{
-		dangerZone[i].i_coord = 0;
-		dangerZone[i].j_coord = 0;
-	}
-	gameInfo[j] = 0;
-	return 0;
-}
-/*Not to be used*/
-int UpdateDangerZone(board_t board, int playerColor)
-{
-	Coord KingCrd = (playerColor == WHITE_PLAYER) ? WhiteKing : BlackKing;
-	Coord tmp = KingCrd, possibilities[8];
-	int d = playerColor == WHITE_PLAYER ? 1 : -1;
-	ResetDangerZone(playerColor);
-	gameInfo[playerColor == WHITE_PLAYER ? 0 : 1] = 0;
-
-	//pawns
-	tmp = offsetCoord(KingCrd, -1, d);
-	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
-		GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
-		addToDangerZone(playerColor, tmp);
-
-	tmp = offsetCoord(KingCrd, 1, d);
-	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
-		GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
-		addToDangerZone(playerColor, tmp);
-
-	//knights
-	possibilities[0] = offsetCoord(KingCrd, 1, 2);
-	possibilities[1] = offsetCoord(KingCrd, 2, 1);
-	possibilities[2] = offsetCoord(KingCrd, 2, -1);
-	possibilities[3] = offsetCoord(KingCrd, 1, -2);
-	possibilities[4] = offsetCoord(KingCrd, -1, -2);
-	possibilities[5] = offsetCoord(KingCrd, -2, -1);
-	possibilities[6] = offsetCoord(KingCrd, -2, 1);
-	possibilities[7] = offsetCoord(KingCrd, -1, 2);
-
-	for (int i = 0; i < 8; i++)
-	{
-		if (isInBoard(possibilities[i]) &&
-			GetContentOfCoord(board, possibilities[i]) == generateTool(generateEnemyColor(playerColor), Knight))
-			addToDangerZone(playerColor, possibilities[i]);
-	}
-
-	//rooks
-	for (int h = -1; h < 2; h += 2)
-	{
-		tmp = KingCrd;
-		while (isInBoard(tmp))
-		{
-			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
-				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
-				addToDangerZone(playerColor, tmp);
-			tmp = offsetCoord(tmp, h, 0);
-		}
-	}
-
-	for (int v = -1; v < 2; v += 2)
-	{
-		tmp = KingCrd;
-		while (isInBoard(tmp))
-		{
-			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
-				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
-				addToDangerZone(playerColor, tmp);
-			tmp = offsetCoord(tmp, 0, v);
-		}
-	}
-
-	//Bishops
-	for (int h = -1; h < 2; h += 2)
-	{
-		for (int v = -1; v < 2; v += 2)
-		{
-			tmp = offsetCoord(KingCrd, h, v);
-			while (isInBoard(tmp))
-			{
-				if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Bishop) ||
-					GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
-					addToDangerZone(playerColor, tmp);
-				tmp = offsetCoord(tmp, h, v);
-			}
-		}
-	}
-
-	//king
-
-
-	possibilities[0] = offsetCoord(KingCrd, 1, 1);
-	possibilities[1] = offsetCoord(KingCrd, 0, 1);
-	possibilities[2] = offsetCoord(KingCrd, 1, 0);
-	possibilities[3] = offsetCoord(KingCrd, 1, -1);
-	possibilities[4] = offsetCoord(KingCrd, 0, -1);
-	possibilities[5] = offsetCoord(KingCrd, -1, -1);
-	possibilities[6] = offsetCoord(KingCrd, -1, 0);
-	possibilities[7] = offsetCoord(KingCrd, -1, 1);
-
-	for (int i = 0; i < 8; i++)
-	{
-		if (isInBoard(possibilities[i]) &&
-			GetContentOfCoord(board, possibilities[i]) == generateTool(generateEnemyColor(playerColor), King))
-			addToDangerZone(playerColor, possibilities[i]);
-	}
-
-	return 0;
-}
+//int UpdateDangerZone(board_t board, int playerColor)
+//{
+//	Coord KingCrd = (playerColor == WHITE_PLAYER) ? WhiteKing : BlackKing;
+//	Coord tmp = KingCrd, possibilities[8];
+//	int d = playerColor == WHITE_PLAYER ? 1 : -1;
+//	ResetDangerZone(playerColor);
+//	gameInfo[playerColor == WHITE_PLAYER ? 0 : 1] = 0;
+//
+//	//pawns
+//	tmp = offsetCoord(KingCrd, -1, d);
+//	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
+//		GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
+//		addToDangerZone(playerColor, tmp);
+//
+//	tmp = offsetCoord(KingCrd, 1, d);
+//	if (isInBoard(tmp) && (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Pawn) ||
+//		GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen)))
+//		addToDangerZone(playerColor, tmp);
+//
+//	//knights
+//	possibilities[0] = offsetCoord(KingCrd, 1, 2);
+//	possibilities[1] = offsetCoord(KingCrd, 2, 1);
+//	possibilities[2] = offsetCoord(KingCrd, 2, -1);
+//	possibilities[3] = offsetCoord(KingCrd, 1, -2);
+//	possibilities[4] = offsetCoord(KingCrd, -1, -2);
+//	possibilities[5] = offsetCoord(KingCrd, -2, -1);
+//	possibilities[6] = offsetCoord(KingCrd, -2, 1);
+//	possibilities[7] = offsetCoord(KingCrd, -1, 2);
+//
+//	for (int i = 0; i < 8; i++)
+//	{
+//		if (isInBoard(possibilities[i]) &&
+//			GetContentOfCoord(board, possibilities[i]) == generateTool(generateEnemyColor(playerColor), Knight))
+//			addToDangerZone(playerColor, possibilities[i]);
+//	}
+//
+//	//rooks
+//	for (int h = -1; h < 2; h += 2)
+//	{
+//		tmp = KingCrd;
+//		while (isInBoard(tmp))
+//		{
+//			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
+//				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
+//				addToDangerZone(playerColor, tmp);
+//			tmp = offsetCoord(tmp, h, 0);
+//		}
+//	}
+//
+//	for (int v = -1; v < 2; v += 2)
+//	{
+//		tmp = KingCrd;
+//		while (isInBoard(tmp))
+//		{
+//			if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Rook) ||
+//				GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
+//				addToDangerZone(playerColor, tmp);
+//			tmp = offsetCoord(tmp, 0, v);
+//		}
+//	}
+//
+//	//Bishops
+//	for (int h = -1; h < 2; h += 2)
+//	{
+//		for (int v = -1; v < 2; v += 2)
+//		{
+//			tmp = offsetCoord(KingCrd, h, v);
+//			while (isInBoard(tmp))
+//			{
+//				if (GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Bishop) ||
+//					GetContentOfCoord(board, tmp) == generateTool(generateEnemyColor(playerColor), Queen))
+//					addToDangerZone(playerColor, tmp);
+//				tmp = offsetCoord(tmp, h, v);
+//			}
+//		}
+//	}
+//
+//	//king
+//
+//
+//	possibilities[0] = offsetCoord(KingCrd, 1, 1);
+//	possibilities[1] = offsetCoord(KingCrd, 0, 1);
+//	possibilities[2] = offsetCoord(KingCrd, 1, 0);
+//	possibilities[3] = offsetCoord(KingCrd, 1, -1);
+//	possibilities[4] = offsetCoord(KingCrd, 0, -1);
+//	possibilities[5] = offsetCoord(KingCrd, -1, -1);
+//	possibilities[6] = offsetCoord(KingCrd, -1, 0);
+//	possibilities[7] = offsetCoord(KingCrd, -1, 1);
+//
+//	for (int i = 0; i < 8; i++)
+//	{
+//		if (isInBoard(possibilities[i]) &&
+//			GetContentOfCoord(board, possibilities[i]) == generateTool(generateEnemyColor(playerColor), King))
+//			addToDangerZone(playerColor, possibilities[i]);
+//	}
+//
+//	return 0;
+//}
 
 
 int DoesCrdContainsEnemy(board_t board, Coord coord, char tool)
@@ -768,31 +768,31 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 
 /*returns 1 when moving src tool to dst coord will open king defences
 Not to be used when src tool is the King itself*/
-int openKingDefences2(board_t board, Coord src, Coord dst)
-{
-	int player = getColor(board, src);
-	char srcType = GetContentOfCoord(board, src);
-	char dstType = GetContentOfCoord(board, dst);
-	Coord *dangerZone, kingCrd;
-	int dangerZone_AmountOfPieces;
-	dangerZone = player == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
-	dangerZone_AmountOfPieces = player == WHITE_PLAYER ? gameInfo[0] : gameInfo[1];
-	kingCrd = player == WHITE_PLAYER ? WhiteKing : BlackKing;
-
-	setSlotInBoard(board, src, EMPTY);
-	setSlotInBoard(board, dst, srcType);
-
-	int result = 0;
-	for (int i = 0; i < dangerZone_AmountOfPieces; i++)
-	{
-		result |= isAttacking(board, dangerZone[i], kingCrd);
-	}
-
-	setSlotInBoard(board, src, srcType);
-	setSlotInBoard(board, dst, dstType);
-
-	return result;
-}
+//int openKingDefences2(board_t board, Coord src, Coord dst)
+//{
+//	int player = getColor(board, src);
+//	char srcType = GetContentOfCoord(board, src);
+//	char dstType = GetContentOfCoord(board, dst);
+//	Coord *dangerZone, kingCrd;
+//	int dangerZone_AmountOfPieces;
+//	dangerZone = player == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
+//	dangerZone_AmountOfPieces = player == WHITE_PLAYER ? gameInfo[0] : gameInfo[1];
+//	kingCrd = player == WHITE_PLAYER ? WhiteKing : BlackKing;
+//
+//	setSlotInBoard(board, src, EMPTY);
+//	setSlotInBoard(board, dst, srcType);
+//
+//	int result = 0;
+//	for (int i = 0; i < dangerZone_AmountOfPieces; i++)
+//	{
+//		result |= isAttacking(board, dangerZone[i], kingCrd);
+//	}
+//
+//	setSlotInBoard(board, src, srcType);
+//	setSlotInBoard(board, dst, dstType);
+//
+//	return result;
+//}
 
 /*Pre: dst coord is adjacent to KingCrd coord*/
 int safeToMoveKing(board_t board, int player, Coord dst)
@@ -809,8 +809,8 @@ int safeToMoveKing(board_t board, int player, Coord dst)
 
 	setSlotInBoard(board, kingCrd, generateTool(player, King));
 	setSlotInBoard(board, dst, dstType);
-	
-	return result;
+
+	return !result;
 }
 
 int openKingDefences(board_t board, Coord src, Coord dst)
@@ -818,12 +818,12 @@ int openKingDefences(board_t board, Coord src, Coord dst)
 	int player = getColor(board, src);
 	char srcType = GetContentOfCoord(board, src);
 	char dstType = GetContentOfCoord(board, dst);
-	
+
 	setSlotInBoard(board, src, EMPTY);
 	setSlotInBoard(board, dst, srcType);
 
 	int result = KingUnderThreat(board, player);
-	
+
 	setSlotInBoard(board, src, srcType);
 	setSlotInBoard(board, dst, dstType);
 
@@ -1289,10 +1289,10 @@ int CountToolsOfType(board_t board, char type)
 {
 	int counter = 0;
 	for (int i = 0; i < BOARD_SIZE; i++)
-		for (int j = 0; j < BOARD_SIZE; j++)
-			if (board[i][j] == type)
-				counter++;
-	
+	for (int j = 0; j < BOARD_SIZE; j++)
+	if (board[i][j] == type)
+		counter++;
+
 	return counter;
 }
 
@@ -1315,7 +1315,7 @@ int NotTooManyOfType(board_t board, char type)
 	case BLACK_N:
 	case WHITE_R:
 	case BLACK_R:
-		if (numberOfTools <= 2 ||DEBUG==1)
+		if (numberOfTools <= 2 || DEBUG == 1)
 			result = 1;
 		break;
 	case WHITE_Q:
@@ -1340,23 +1340,6 @@ Coord GenerateCoord(int x, int y)
 	return crd;
 }
 
-/*return 1 if the king of the given player is under threat*/
-int KingUnderThreat2(board_t board, int player)
-{
-	Coord kingCrd, tmpCrd;
-	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
-	for (int i = 0; i < BOARD_SIZE; i++)
-	{
-		for (int j = 0; j < BOARD_SIZE; j++)
-		{
-			tmpCrd = GenerateCoord(i, j);
-			if (isAttacking(board, tmpCrd, kingCrd))
-				return 1;
-		}
-	}
-	return 0;
-}
-
 /* the scoring function:
 See instructions for more details.*/
 int score(board_t board, int player)
@@ -1374,27 +1357,29 @@ int score(board_t board, int player)
 		score += (ally - enemy);
 		if (GetContentOfCoord(board, coord) != EMPTY)
 		{
-			canMove = canMoveThisTool(board, coord);
-			if (ally > 0 && canMove == 1)
-				playerBlocked = 0;
-			if (enemy > 0 && canMove == 1)
-				opponentBlocked = 0;
+			if (opponentBlocked || playerBlocked)
+			{
+				canMove = canMoveThisTool(board, coord);
+				if (ally > 0 && canMove == 1)
+					playerBlocked = 0;
+				if (enemy > 0 && canMove == 1)
+					opponentBlocked = 0;
+			}
 		}
-
 	}
 
 
 	/*TODO: consider what to do with this part*/
 	if (playerBlocked == 1)
-		if (KingUnderThreat(board, player))
-			return MATE_WIN_LOSE;//player lost
-		else
-			return TIE_SCORE; //tie
+	if (KingUnderThreat(board, player))
+		return MATE_WIN_LOSE;//player lost
+	else
+		return TIE_SCORE; //tie
 	if (opponentBlocked == 1)
-		if (KingUnderThreat(board, -player))
-			return MATE_WIN_SCORE;//player won
-		else
-			return TIE_SCORE; //tie
+	if (KingUnderThreat(board, -player))
+		return MATE_WIN_SCORE;//player won
+	else
+		return TIE_SCORE; //tie
 	if (DEBUG && score == MATE_WIN_LOSE)
 	{
 		print_board(board);
@@ -1771,21 +1756,21 @@ void printMove(cMove *move)
 /*FOR DEBUG ONLY!*/
 /*CONVD*/
 /*prints the route of the move*/
-void printMoveToFile(FILE *f,cMove *move)
+void printMoveToFile(FILE *f, cMove *move)
 {
 	if (properties[1])
 		return;
-	
-	fprintf(f,"move <%c,%u> to ", (char)((move->src).i_coord) + 97, (move->src).j_coord + 1);
 
-	fprintf(f,"<%c,%u>", (char)((move->dst).i_coord) + 97, (move->dst).j_coord + 1);
+	fprintf(f, "move <%c,%u> to ", (char)((move->src).i_coord) + 97, (move->src).j_coord + 1);
+
+	fprintf(f, "<%c,%u>", (char)((move->dst).i_coord) + 97, (move->dst).j_coord + 1);
 
 	//if promotion needed
 	if (move->promote)
-		fprintf(f," %s", ToolCharToName(move->promote));
+		fprintf(f, " %s", ToolCharToName(move->promote));
 
 	//print end of line
-	fprintf(f,"\n");
+	fprintf(f, "\n");
 
 
 }

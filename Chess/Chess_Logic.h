@@ -106,8 +106,8 @@ typedef enum Tool
 extern int properties[6];
 extern Coord WhiteKing;
 extern Coord BlackKing;
-extern Coord WhiteKingDangerZone[BOARD_SIZE * 2];
-extern Coord BlackKingDangerZone[BOARD_SIZE * 2];
+//extern Coord WhiteKingDangerZone[BOARD_SIZE * 2];
+//extern Coord BlackKingDangerZone[BOARD_SIZE * 2];
 
 
 void print_board(board_t board);
@@ -126,9 +126,9 @@ void setSlotInBoard(board_t board, Coord slot, char ch);
 int IsAlly(char tool, int myColor);
 Coord offsetCoord(Coord coord, int i_offset, int j_offset);
 cMove *AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int promote);
-int addToDangerZone(int playerColor, Coord crd);
-int ResetDangerZone(int playerColor);
-int UpdateDangerZone(board_t board, int playerColor);
+//int addToDangerZone(int playerColor, Coord crd);
+//int ResetDangerZone(int playerColor);
+//int UpdateDangerZone(board_t board, int playerColor);
 int DoesCrdContainsEnemy(board_t board, Coord coord, char tool);
 int getColor(board_t board, Coord coord);
 int getType(board_t board, Coord crd);

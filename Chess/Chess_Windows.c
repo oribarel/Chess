@@ -1393,8 +1393,8 @@ int LoadGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunctio
 		whitePlayerTurnStage = WAITING;
 		blackPlayerTurnStage = NONE_SELECTED;
 	}
-	UpdateDangerZone(pBoard, WHITE_PLAYER);
-	UpdateDangerZone(pBoard, BLACK_PLAYER);
+	/*UpdateDangerZone(pBoard, WHITE_PLAYER);
+	UpdateDangerZone(pBoard, BLACK_PLAYER);*/
 	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
 
 
