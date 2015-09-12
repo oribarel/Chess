@@ -28,8 +28,8 @@ int gameInfo[6] = { 0, 0, 0, 0, 0, 0 };
 Coord WhiteKing = { -1, -1 };
 Coord BlackKing = { -1, -1 };
 
-Coord WhiteKingDangerZone[BOARD_SIZE * 2] = { 0 };
-Coord BlackKingDangerZone[BOARD_SIZE * 2] = { 0 };
+//Coord WhiteKingDangerZone[BOARD_SIZE * 2] = { 0 };
+//Coord BlackKingDangerZone[BOARD_SIZE * 2] = { 0 };
 
 
 
@@ -359,8 +359,8 @@ void setSlotInBoard(board_t board, Coord slot, char ch)
 
 		}
 	}
-	UpdateDangerZone(board, WHITE_PLAYER);
-	UpdateDangerZone(board, BLACK_PLAYER);
+	/*UpdateDangerZone(board, WHITE_PLAYER);
+	UpdateDangerZone(board, BLACK_PLAYER);*/
 }
 
 
@@ -467,6 +467,7 @@ cMove *AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int
 	return *head;
 }
 
+/*Not to be used*/
 int addToDangerZone(int playerColor, Coord crd)
 {
 	if (playerColor == WHITE_PLAYER)
@@ -481,7 +482,7 @@ int addToDangerZone(int playerColor, Coord crd)
 	}
 	return 0;
 }
-
+/*Not to be used*/
 int ResetDangerZone(int playerColor)
 {
 	int j;
@@ -498,7 +499,7 @@ int ResetDangerZone(int playerColor)
 	gameInfo[j] = 0;
 	return 0;
 }
-
+/*Not to be used*/
 int UpdateDangerZone(board_t board, int playerColor)
 {
 	Coord KingCrd = (playerColor == WHITE_PLAYER) ? WhiteKing : BlackKing;
@@ -660,6 +661,8 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 {
 	int h, v;
 	Coord tmp;
+	if (!isInBoard(attacker))
+		return 0;
 	if (getColor(board, attacker) == getColor(board, victim) || GetContentOfCoord(board, attacker) == EMPTY)
 	{
 		return 0;
@@ -765,7 +768,7 @@ int isAttacking(board_t board, Coord attacker, Coord victim)
 
 /*returns 1 when moving src tool to dst coord will open king defences
 Not to be used when src tool is the King itself*/
-int openKingDefences(board_t board, Coord src, Coord dst)
+int openKingDefences2(board_t board, Coord src, Coord dst)
 {
 	int player = getColor(board, src);
 	char srcType = GetContentOfCoord(board, src);
@@ -795,33 +798,95 @@ int openKingDefences(board_t board, Coord src, Coord dst)
 int safeToMoveKing(board_t board, int player, Coord dst)
 {
 	char dstType = GetContentOfCoord(board, dst);
-	Coord *dangerZone, kingCrd;
-	int dangerZone_AmountOfPieces;
+	Coord  kingCrd;
 
 	kingCrd = player == WHITE_PLAYER ? WhiteKing : BlackKing;
 
 	setSlotInBoard(board, kingCrd, EMPTY);
 	setSlotInBoard(board, dst, generateTool(player, King));
 
-
-
-	//UpdateDangerZone(board, player);
-	dangerZone = player == WHITE_PLAYER ? WhiteKingDangerZone : BlackKingDangerZone;
-	dangerZone_AmountOfPieces = player == WHITE_PLAYER ? gameInfo[0] : gameInfo[1];
-
-	int result = 1;
-	for (int i = 0; i < dangerZone_AmountOfPieces; i++)
-	{
-		result &= !isAttacking(board, dangerZone[i], dst);
-	}
+	int result = KingUnderThreat(board, player);
 
 	setSlotInBoard(board, kingCrd, generateTool(player, King));
 	setSlotInBoard(board, dst, dstType);
-	//UpdateDangerZone(board, player);
+	
+	return result;
+}
+
+int openKingDefences(board_t board, Coord src, Coord dst)
+{
+	int player = getColor(board, src);
+	char srcType = GetContentOfCoord(board, src);
+	char dstType = GetContentOfCoord(board, dst);
+	
+	setSlotInBoard(board, src, EMPTY);
+	setSlotInBoard(board, dst, srcType);
+
+	int result = KingUnderThreat(board, player);
+	
+	setSlotInBoard(board, src, srcType);
+	setSlotInBoard(board, dst, dstType);
 
 	return result;
 }
 
+int KingUnderThreat(board_t board, int player)
+{
+	Coord kingCrd, checkedCoord;
+	int result = 0;
+	kingCrd = player == WHITE_PLAYER ? WhiteKing : BlackKing;
+	/* Check all possible coords that may attack the king: */
+
+	/*Its row: */
+	for (int i = 0; i < BOARD_SIZE && result == 0; i++)
+	{
+		if (i == kingCrd.i_coord)
+			continue;
+		checkedCoord.i_coord = i; checkedCoord.j_coord = kingCrd.j_coord;
+		result |= isAttacking(board, checkedCoord, kingCrd);
+	}
+	if (result == 1)
+		return 1;
+
+	/* Its Column */
+	for (int j = 0; j < BOARD_SIZE && result == 0; j++)
+	{
+		if (j == kingCrd.j_coord)
+			continue;
+		checkedCoord.i_coord = kingCrd.i_coord; checkedCoord.j_coord = j;
+		result |= isAttacking(board, checkedCoord, kingCrd);
+	}
+	if (result == 1)
+		return 1;
+
+	/* Its four diagonal directions*/
+	for (int h = -1; h < 2; h += 2)
+	{
+		for (int v = -1; v < 2; v += 2)
+		{
+			checkedCoord = offsetCoord(kingCrd, h, v);
+			while (isInBoard(checkedCoord) && result == 0)
+			{
+				result |= isAttacking(board, checkedCoord, kingCrd);
+				checkedCoord = offsetCoord(checkedCoord, h, v);
+			}
+			if (result == 1)
+				return 1;
+		}
+	}
+
+	/* Its surrounding knights */
+	result |= isAttacking(board, offsetCoord(kingCrd, 1, 2), kingCrd);
+	result |= isAttacking(board, offsetCoord(kingCrd, 2, 1), kingCrd);
+	result |= isAttacking(board, offsetCoord(kingCrd, 2, -1), kingCrd);
+	result |= isAttacking(board, offsetCoord(kingCrd, 1, -2), kingCrd);
+	result |= isAttacking(board, offsetCoord(kingCrd, -1, -2), kingCrd);
+	result |= isAttacking(board, offsetCoord(kingCrd, -2, -1), kingCrd);
+	result |= isAttacking(board, offsetCoord(kingCrd, -2, 1), kingCrd);
+	result |= isAttacking(board, offsetCoord(kingCrd, -1, 2), kingCrd);
+
+	return result;
+}
 
 cMove* PawnMoves(board_t board, Coord coord)
 {
@@ -1276,7 +1341,7 @@ Coord GenerateCoord(int x, int y)
 }
 
 /*return 1 if the king of the given player is under threat*/
-int KingUnderThreat(board_t board, int player)
+int KingUnderThreat2(board_t board, int player)
 {
 	Coord kingCrd, tmpCrd;
 	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
