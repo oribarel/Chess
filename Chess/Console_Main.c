@@ -917,7 +917,6 @@ int Parse(char *line, board_t board)
 			//quit
 		{
 			properties[1] = 1;
-			_CrtDumpMemoryLeaks();
 			return 0;
 		}
 		else if (strcmp(token, cmmd11) == 0)
