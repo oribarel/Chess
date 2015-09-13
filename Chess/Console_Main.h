@@ -15,7 +15,7 @@
 #define WRONG_MINIMAX_DEPTH "Wrong value for minimax depth. The value should be between 1 to 4\n"
 #define WRONG_POSITION "Invalid position on the board\n"
 #define NO_PIECE "Setting this piece creates an invalid board\n"  
-#define WROND_BOARD_INITIALIZATION "Wrong board initialization\n"
+#define WRONG_BOARD_INITIALIZATION "Wrong board initialization\n"
 #define WHT_ENTER_YOUR_MOVE "White player - enter your move:\n"
 #define BLK_ENTER_YOUR_MOVE "Black player - enter your move:\n"
 #define	WHT_MATE_DCLR "Mate! White player wins the game\n"
@@ -36,7 +36,7 @@
 
 
 #define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;) // TODO: check this
-#define BEST "best"
+#define BEST "best\n"
 
 
 
@@ -63,7 +63,7 @@ int Console_Main(board_t board);
 int mod(int, int);
 char *getLine(void);
 void *myalloc(int a, int b);
-void print_line();
+
 //board_t createBoard(void);
 //void copyBoard(board_t, board_t);
 //void printMove(cMove *move);

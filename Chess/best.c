@@ -690,16 +690,12 @@ int GetBestDepth(board_t board, int player)
 	int numberOfWhiteQueens = 0, numberOfBlackQueens = 0;
 	int pawnMaxMoves = 3, knightMaxMoves = 8, bishopMaxMoves = 13, rookMaxMoves = 14, queenMaxMoves = 27, kingMaxMoves = 8;
 	int movesCnt = 1;
-	int numberOfWhiteMoves = numberOfWhitePawns * pawnMaxMoves
-		+ numberOfWhiteRooks * rookMaxMoves + numberOfWhiteBishops * bishopMaxMoves +
-		numberOfWhiteKnights * knightMaxMoves + numberOfWhiteQueens*queenMaxMoves +kingMaxMoves;
-	int numberOfBlackMoves = numberOfBlackPawns * pawnMaxMoves
-		+ numberOfBlackRooks * rookMaxMoves + numberOfBlackBishops * bishopMaxMoves +
-		numberOfBlackKnights * knightMaxMoves + numberOfBlackQueens*queenMaxMoves + kingMaxMoves;
+	int numberOfWhiteMoves;
+	int numberOfBlackMoves;
 	char c;
 	int depth = 1;
-	int numberOfPlayerMoves = player == WHITE_PLAYER ? numberOfWhiteMoves : numberOfBlackMoves;
-	int numberOfOpponentMoves = player == WHITE_PLAYER ? numberOfBlackMoves : numberOfWhiteMoves;
+	int numberOfPlayerMoves;
+	int numberOfOpponentMoves;
 
 	//counter number of tools of each type
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -747,6 +743,16 @@ int GetBestDepth(board_t board, int player)
 			}
 		}
 
+
+	numberOfWhiteMoves = numberOfWhitePawns * pawnMaxMoves
+		+ numberOfWhiteRooks * rookMaxMoves + numberOfWhiteBishops * bishopMaxMoves +
+		numberOfWhiteKnights * knightMaxMoves + numberOfWhiteQueens*queenMaxMoves + kingMaxMoves;
+	numberOfBlackMoves = numberOfBlackPawns * pawnMaxMoves
+		+ numberOfBlackRooks * rookMaxMoves + numberOfBlackBishops * bishopMaxMoves +
+		numberOfBlackKnights * knightMaxMoves + numberOfBlackQueens*queenMaxMoves + kingMaxMoves;
+	numberOfPlayerMoves = player == WHITE_PLAYER ? numberOfWhiteMoves : numberOfBlackMoves;
+	numberOfOpponentMoves = player == WHITE_PLAYER ? numberOfBlackMoves : numberOfWhiteMoves;
+
 	while (movesCnt < BEST_BOARDS_NUM)
 	{
 		if (depth % 2 == 1)
@@ -755,5 +761,17 @@ int GetBestDepth(board_t board, int player)
 			movesCnt *= numberOfOpponentMoves;
 		depth++;
 	}
+	if (DEBUG)
+		printf("best depth is: %d", depth - 1);
 	return --depth;
+
+}
+
+
+int getDepth(board_t board, int player)
+{
+	if (properties[2] == 0)
+		return GetBestDepth(board, player);
+	else
+		return properties[2];
 }

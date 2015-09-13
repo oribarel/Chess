@@ -7,16 +7,26 @@ int mini_num = 0;
 pay attention: this function only returns integers. the argument bestMove
 is an address to a pointer that exists outside of minimax_score, and when obtaining the information about
 which move is truely optimal (due to depth restrictions) the content of the address is set to the address of that said move. */
-int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int boardsCounter)
+int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int best)
 {
 	cMove *movesList, *tmp;
 	int bestValue, val;
 	if (depth == 0)//base case
 	{
 		if (minOrMax == 1)// 1 for maximizing player
-			return score(board, player);
+		{
+			if (best == 0)
+				return score(board, player);
+			else
+				return bestScore(board, player);
+		}
 		else
-			return score(board, -player);
+		{
+			if (best == 0)
+				return score(board, -player);
+			else
+				return bestScore(board, -player);
+		}
 	}
 	if (minOrMax == 1)// 1 for maximizing player
 	{
@@ -29,7 +39,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 		{
 			int bestUpdated = 0;
 			//compute score and return board to its original state
-			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
+			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, best);
 			if (depth == properties[2] && val >= bestValue) //if depth == minimax_depth
 			{
 				if (val == bestValue)
@@ -70,7 +80,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 		{
 			int bestUpdated = 0;
 			//compute score and return board to its original state
-			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, boardsCounter);
+			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, best);
 			if (depth == properties[2] && val <= bestValue) //if depth == minimax_depth
 			{
 				if (val == bestValue)

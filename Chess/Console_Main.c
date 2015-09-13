@@ -115,20 +115,7 @@ char *getLine(void)
 	return linep;
 }
 
-/*NO NEED FOR CONV*/
-/*Print a seperation line in the board*/
-void print_line()
-{
-	int i;
-	if (properties[1])
-		return;
-	printf("  |");
-	for (i = 1; i < BOARD_SIZE * 4; i++)
-	{
-		printf("-");
-	}
-	printf("|\n");
-}
+
 
 
 
@@ -940,7 +927,7 @@ int Parse(char *line, board_t board)
 			if (CountToolsOfType(board, WHITE_K) != 1 || CountToolsOfType(board, BLACK_K) != 1)
 			{
 				if (!properties[1])
-					printf(WROND_BOARD_INITIALIZATION);
+					printf(WRONG_BOARD_INITIALIZATION);
 			}
 			else
 			{
@@ -1092,6 +1079,7 @@ int Parse(char *line, board_t board)
 			//get_best_moves
 		{
 			int maxScore = MIN_VALUE;
+			int best = 0;
 
 			//parsing the depth d
 			int d, tmpD = properties[2];
@@ -1099,13 +1087,16 @@ int Parse(char *line, board_t board)
 			token = strtok(NULL, "&");
 			currentPosition = token;
 			if (currentPosition[0] == 'b')
-				d = BESTval;
+			{
+				best = 1;
+				d = GetBestDepth(board, properties[4]);
+			}
 			else
 				d = currentPosition[0] - '0';
 
 			//get  best moves by pMove
 			properties[2] = d;
-			minimax_score(board, properties[4], d, 1, &pMove, MIN_VALUE, MAX_VALUE, 0);
+			minimax_score(board, properties[4], d, 1, &pMove, MIN_VALUE, MAX_VALUE, best);
 
 			//print moves
 			printMovesList(pMove);
@@ -1402,11 +1393,19 @@ int Console_Main(board_t board)
 
 
 			//run MINIMAX
+			int oldDepth = properties[2];
+			int best = oldDepth == 0 ? 1 : 0;
 			if (properties[3] == BLACK_PLAYER)//if computer's color is white
-				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+			{
+				properties[2] = getDepth(brd, WHITE_PLAYER);
+				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, best);
+			}
 			else
-				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
-
+			{
+				properties[2] = getDepth(brd, BLACK_PLAYER);
+				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, best);
+			}
+			properties[2] = oldDepth;
 			//print computer's move
 			if (computerMove != NULL)
 			{
@@ -1678,17 +1677,17 @@ int Test()
 {
 
 	//srand(time(NULL));
-	srand(15);
+	srand(25);
 
 	int parseResult = 0;
-	int iterations = 50;
+	int iterations = 2;
 	int printMode = 1;
 	int COMPUTER_COLOR = BLACK_PLAYER;
 	int record = 1;
 	properties[0] = 0;
 	//properties[3] = BLACK_PLAYER;	
 	//difficulty
-	properties[2] = 3;
+	properties[2] = 0;
 	properties[5] = 2;
 	properties[4] = WHITE_PLAYER;
 	int iterationToRecord = 41;
@@ -1820,10 +1819,19 @@ int Test()
 
 
 			//run MINIMAX
+			int oldDepth = properties[2];
+			int best = oldDepth == 0 ? 1 : 0;
 			if (properties[3] == BLACK_PLAYER)//if computer's color is white
-				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+			{
+				properties[2] = getDepth(brd, WHITE_PLAYER);
+				minimax_score(brd, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, best);
+			}
 			else
-				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
+			{
+				properties[2] = getDepth(brd, BLACK_PLAYER);
+				minimax_score(brd, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, best);
+			}
+			properties[2] = oldDepth;
 
 			if (computerMove == NULL)
 			{

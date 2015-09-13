@@ -189,7 +189,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	labelMaker(ccl, lbl, header, "PlayerSelectionHeader.bmp");
 
 	/* Add the label to the Menu */
-	playerSelectionMenu->header = ccl;
+	playerSelectionMenu->header = (ControlComponent *)ccl;
 
 	/* Highlighted Squares  <--- this happens *here* only for sake of multi-functionality */
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
@@ -262,7 +262,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	labelMaker(ccl, lbl, header, "AISettingsHeader.bmp");
 
 	/* Add the label to the Menu */
-	AI_SettingsMenu->header = ccl;
+	AI_SettingsMenu->header = (ControlComponent *) ccl;
 
 	return 1;
 }
@@ -404,7 +404,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 
 	/* Add the header to the Menu */
-	GamePlayMenu->header = ccl;
+	GamePlayMenu->header = (ControlComponent *) ccl;
 	return 1;
 }
 
@@ -517,7 +517,7 @@ int showMenu(Window *window, Menu *menu)
 	}
 	if (menu->header != NULL)
 	{
-		if (drawLabelsOfPanel(menu->header) == 0)
+		if (drawLabelsOfPanel((ControlComponent *) menu->header) == 0)
 			return 0;
 	}
 
@@ -836,6 +836,8 @@ int endPromotionStage(struct menu *menu, struct controlComponent *ccb)
 {
 	advanceTurnStage(0);
 	updateGUIBoard(menu);
+
+	return 1;
 }
 
 int advanceTurnStage(int promotiveSituation)
@@ -1371,7 +1373,7 @@ int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlCo
 	return 1;
 }
 
-int LoadGame(Window *window, ControlComponent *buttonWhichPressCalledThisFunction)
+int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunction)
 {
 	if (selectedSlot == '0')
 		return 0;
@@ -1724,7 +1726,7 @@ int endGamePlay(Window *window)
 
 int freeMenu(Menu *menu)
 {
-	ControlComponent *ccl = menu->header;
+	ControlComponent *ccl = (ControlComponent *) menu->header;
 	if (ccl != NULL)
 		SDL_FreeSurface1(ccl->lbl->pic);
 
@@ -1794,13 +1796,14 @@ int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
 		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_makeMove.bmp");
 	}
 	drawLabelsOfPanel(pMenu_Game->panel_2->pnl->children);
-
+	
+	return 1;
 }
 
 int GameLabel(Window *window, int thinking)
 {
 	Menu *menu = window->shownMenu;
-	ControlComponent *ccl_gameHeader = menu->header;
+	ControlComponent *ccl_gameHeader = (ControlComponent*) menu->header;
 	Label *lbl_gameHeader = ccl_gameHeader->lbl;
 
 	ControlComponent *ccl_info = menu->panel_2->pnl->children;

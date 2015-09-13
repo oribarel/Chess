@@ -313,6 +313,7 @@ int drawLabelsOfPanel(ControlComponent *ccl)
 		}
 		ccl = ccl->next;
 	}
+	return 1;
 }
 
 //returns 0 on failure and 1 on success.

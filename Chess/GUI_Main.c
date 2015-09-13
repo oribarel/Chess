@@ -304,11 +304,21 @@ int GUI_Main(board_t passedBoard)
 						return 0;
 					}
 
-					if (properties[3] == BLACK_PLAYER)//if computer's color is white
-						scr = minimax_score(pBoard, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
-					else
-						scr = minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, 0);
 
+					int oldDepth = properties[2];
+					int best = oldDepth == 0 ? 1 : 0;
+
+					if (properties[3] == BLACK_PLAYER)//if computer's color is white
+					{
+						properties[2] = getDepth(pBoard, WHITE_PLAYER);
+						scr = minimax_score(pBoard, WHITE_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, best);
+					}
+					else
+					{
+						properties[2] = getDepth(pBoard, BLACK_PLAYER);
+						scr = minimax_score(pBoard, BLACK_PLAYER, properties[2], 1, &computerMove, MIN_VALUE, MAX_VALUE, best);
+					}
+					properties[2] = oldDepth;
 					GameLabel(chessWindow, GAME_H);
 
 					if (SDL_Flip(chessWindow->self) != 0)

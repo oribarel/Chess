@@ -607,7 +607,7 @@ int DoesCrdContainsEnemy(board_t board, Coord coord, char tool)
 		return 0;
 	if (islower(tool))
 	{
-		if (iswlower(c))
+		if (islower(c))
 			return 0;
 		else
 			return 1;
@@ -1643,7 +1643,7 @@ int Save(board_t board, char* file_name){
 
 int LoadFromFile(char* file_path, board_t board){
 	int i, j;
-	char str[51], curTag;
+	char str[51];
 	FILE *file = fopen(file_path, "r");
 	if (file == NULL)
 	{
@@ -1789,4 +1789,20 @@ void printMovesList(cMove *move)
 		printMove(move);
 		move = move->next;
 	}
+}
+
+
+/*NO NEED FOR CONV*/
+/*Print a seperation line in the board*/
+void print_line()
+{
+	int i;
+	if (properties[1])
+		return;
+	printf("  |");
+	for (i = 1; i < BOARD_SIZE * 4; i++)
+	{
+		printf("-");
+	}
+	printf("|\n");
 }

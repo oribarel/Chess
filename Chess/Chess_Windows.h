@@ -102,7 +102,7 @@ int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *
 int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons, ControlComponent *ccl, Label *lbl);
 
 /* mainMenu */
-int LoadGame(Window *window, ControlComponent *);
+int LoadGame(struct menu *menu, ControlComponent *);
 int QuitGame(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 
 /* playerSelectionMenu */

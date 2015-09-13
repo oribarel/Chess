@@ -65,7 +65,7 @@ typedef struct menu
 	struct controlComponent *panel_3;
 	struct controlComponent *panel_4;
 	
-	struct ControlComponent *header;
+	struct controlComponent *header;
 	
 	struct rgb rgb_triplet;
 	

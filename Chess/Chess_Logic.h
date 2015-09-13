@@ -1,15 +1,13 @@
 #ifndef CHESS_LOGIC_H
 #define CHESS_LOGIC_H
 
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
 
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>     /* assert */
-#include <time.h>
+//#include <time.h>
 #include <ctype.h>
 
 
@@ -68,7 +66,7 @@
 
 #define BOARD_SIZE 8
 
-#define BEST_BOARDS_NUM 1000000
+#define BEST_BOARDS_NUM 10000000
 
 #define XML_FIRST_LINE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 #define WRONG_FILE_NAME "Wrong file name\n"
@@ -172,6 +170,6 @@ void printMovesList(cMove *move);
 int freeMovesList(cMove *move);
 Coord GenerateCoord(int x, int y);
 void printMoveToFile(FILE *f, cMove *move);
-
+void print_line();
 #endif
 
