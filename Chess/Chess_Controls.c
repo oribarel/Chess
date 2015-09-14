@@ -88,7 +88,7 @@ SDL_Rect createSDL_RectForBoardSquare(Coord crd)
 	SDL_Rect rect;
 	rect.w = SQUARE_SIDE;
 	rect.h = SQUARE_SIDE;
-	rect.x = 80+crd.i_coord * 80;
+	rect.x = 80 + crd.i_coord * 80;
 	rect.y = 640 - 80 * (crd.j_coord);
 	return rect;
 }

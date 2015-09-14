@@ -15,6 +15,7 @@ typedef ControlComponent **board_g;
 #define GAME_PLAY_MENU			3
 #define SAVE_MENU				4
 #define LOAD_MENU				5
+#define HINT_MENU				6
 
 #define SETTINGS_MODE 1
 #define GAME_MODE 0
@@ -40,6 +41,8 @@ typedef ControlComponent **board_g;
 
 #define END_GAME_AND_RETURN_TO_MAIN_MENU_BUTTON		'e'
 #define SAVE_GAME_BUTTON							'S'
+#define HINT_MENU_BUTTON							'h'
+#define SHOW_HINT_BUTTON							'H'
 
 #define SQUARE_BUTTON								'a'
 
@@ -56,6 +59,8 @@ typedef ControlComponent **board_g;
 #define CHECK_MATE_WHITE_H 4
 #define CHECK_MATE_BLACK_H 5
 #define TIE_H 6
+#define HINT_THINKING_H 7
+#define HINT_H 8
 
 
 extern ControlComponent *guiBoard[BOARD_SIZE];
@@ -82,6 +87,7 @@ extern Menu *pMenu_AI_settings;
 extern Menu *pMenu_Game;
 extern Menu *pMenu_Save;
 extern Menu *pMenu_Load;
+extern Menu *pMenu_Hint;
 
 //extern Menu *currMenu;
 
@@ -100,6 +106,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 int createGameMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl);
 int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons, ControlComponent *ccl, Label *lbl);
 int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons, ControlComponent *ccl, Label *lbl);
+int createHintMenu(Menu *pMenu_Hint, ControlComponent *ccp_HintMenuCCPs, Panel *pnl_HintMenuPanels, ControlComponent *ccb_HintMenuCCBs, Button *btn_HintMenuButtons, ControlComponent *ccl, Label *lbl);
 
 /* mainMenu */
 int LoadGame(struct menu *menu, ControlComponent *);
@@ -129,7 +136,12 @@ int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlCo
 /* GamePlayMenu */
 int GamePlayMenu_SaveGame(struct menu *menu, struct controlComponent *ccb);
 int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb);
+int ShowHintMenu(struct menu *menu, struct controlComponent *ccb);
 
+/* Hint Menu */
+int HintMenu_ShowHint(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
+int HintMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb);
+int HintMenu_showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
 
 /* Game Play Functions */
 int pawnHighlight(struct menu *menu, struct controlComponent *ccb);
@@ -162,7 +174,7 @@ int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
 
 /* GUI Board */
 int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color);
-int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *btn_BoardPanelButtons, board_t board);
+int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *btn_BoardPanelButtons, board_t board, ControlComponent *ccl, Label *lbl);
 int updateGUIBoard(Menu *menu);
 int updateGUIBoard_Vis(Menu *menu);
 btnFunc getGameFunctionOfCoord(Coord crd);
@@ -182,7 +194,7 @@ int isOfPlayer(int player, char tool);
 int isThePromotedPiece(Coord crd);
 int setPromoteSquare(Coord crd, int promotiveSituation);
 int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn);
-
+const char *getHintPicName(void);
 
 int endGamePlay(Window *window);
 int GameLabel(Window *window, int thinking);

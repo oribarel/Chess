@@ -21,7 +21,6 @@ properties[4] = WHITE_PLAYER //It is now white's\black's turn: WHITE_PLAYER for 
 properties[5] = 1;	//Default game mode is "two players mode"
 */
 
-static int newgamepress = 0;
 
 /* Logic Board */
 board_t pBoard = NULL; //Comes from chessprog main
@@ -60,6 +59,8 @@ Coord src, dest;
 /* Save/Load Game */
 char selectedSlot = '0';
 
+/* Hint Menu */
+int hintLevel = 1;
 
 /* Methods */
 
@@ -93,15 +94,14 @@ int labelMaker(ControlComponent *ccl, Label *lbl, SDL_Rect rect, char *filename)
 
 int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl)
 {
-
 	/* Rects */
-	SDL_Rect Rect1024x768 = create1024x768Rect(); //createSDL_Rect(SCREEN_W, SCREEN_W, 0, 0);
+	SDL_Rect Rect1024x768 = create1024x768Rect();
 	SDL_Rect newGameRect = createSDL_Rect(200, 75, 20, 430);
 	SDL_Rect loadGameRect = createSDL_Rect(200, 75, 20, 530);
 	SDL_Rect quitGameRect = createSDL_Rect(200, 75, 20, 630);
 
 	/* label rects */
-	SDL_Rect welcome = createSDL_Rect(768, 576,240, 130);
+	SDL_Rect welcome = createSDL_Rect(768, 576, 240, 130);
 	SDL_Rect logo = createSDL_Rect(240, 282, 0, 130);
 
 	createMenu(mainMenu, Rect1024x768, rgbMenuBlue, MAIN_MENU);
@@ -126,8 +126,11 @@ int createMainMenu(Menu *mainMenu, ControlComponent *ccps, Panel *panel, Control
 	labelMaker(ccl + 1, lbl + 1, logo, "logo.bmp");
 	addLabelToPanel(ccps, ccl);
 	addLabelToPanel(ccps, ccl + 1);
-	
-	return 1;
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
 
 int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl)
@@ -156,7 +159,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	SDL_Rect gameModeButton = createSDL_Rect(wGameModeSetting - 2 * wSide, hGameModeSetting / 2 - 2 * hSide, wSide, hSide);
 	SDL_Rect nextPlayerButton = createSDL_Rect(80, 80, wSide, hGameModeSetting / 2);
 	SDL_Rect ContinueOrPlayButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (wGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting / 2);
-	
+
 	/* label rects */
 	SDL_Rect header = createSDL_Rect(wBoardSetting, 75, wGameModeSetting + wSide, 10);
 
@@ -200,7 +203,12 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	Coord crd;
 	crd.i_coord = -1; crd.j_coord = -1;
 	promoteSquare = crd;
-	return 1;
+
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
 
 int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl)
@@ -219,7 +227,6 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	SDL_Rect returnsPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9);
 	SDL_Rect togglesPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 250);
 	SDL_Rect playPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 500);
-	//SDL_Rect boardPanel = createSDL_Rect(wBoardPanel, hBoardPanel, wSide + wTogglePanels, hSide); //wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide
 
 	/* Button Rects*/
 	SDL_Rect backToMainMenuButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
@@ -262,10 +269,15 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	labelMaker(ccl, lbl, header, "AISettingsHeader.bmp");
 
 	/* Add the label to the Menu */
-	AI_SettingsMenu->header = (ControlComponent *) ccl;
+	AI_SettingsMenu->header = (ControlComponent *)ccl;
 
-	return 1;
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
+
 
 int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *pnl_SaveMenuPanels, ControlComponent *ccb_SaveMenuCCBs, Button *btn_SaveMenuButtons, ControlComponent *ccl, Label *lbl)
 { /* This menu has a 'return to game', a 'quit', 'save' and 7 slots buttons. */
@@ -284,7 +296,7 @@ int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *
 
 	SDL_Rect returnToMainMenu = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
 	SDL_Rect returnToGameButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hGameModeSetting / 2 + hSide);
-	
+
 
 	SDL_Rect slot_1 = createSDL_Rect(200, 55, 0, 250 + hSide);
 	SDL_Rect slot_2 = createSDL_Rect(200, 55, 0, 313 + hSide);
@@ -311,6 +323,7 @@ int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *
 	createButton(ccb_SaveMenuCCBs + 5, btn_SaveMenuButtons + 5, slot_5, uploadPicture("slot5.bmp"), SaveMenu_selectSlot, '5');
 	createButton(ccb_SaveMenuCCBs + 6, btn_SaveMenuButtons + 6, slot_6, uploadPicture("slot6.bmp"), SaveMenu_selectSlot, '6');
 	createButton(ccb_SaveMenuCCBs + 7, btn_SaveMenuButtons + 7, slot_7, uploadPicture("slot7.bmp"), SaveMenu_selectSlot, '7');
+	/* In case we want to add more slots, need to insert extra lines (such as the lines above) for the extra slots here*/
 	createButton(ccb_SaveMenuCCBs + 8, btn_SaveMenuButtons + 8, saveButton, uploadPicture("saveGame.bmp"), SaveMenu_saveGameSlot, SAVE_GAME_BUTTON);
 	createButton(ccb_SaveMenuCCBs + 9, btn_SaveMenuButtons + 9, returnToGameButton, uploadPicture("ReturnToGame.bmp"), SaveMenu_ResetSaveMenuAndShowGamePlayMenu, BACK_TO_GAME);
 
@@ -342,7 +355,11 @@ int createSaveMenu(Menu *pMenu_Save, ControlComponent *ccp_SaveMenuCCPs, Panel *
 	addPanelToMenu(pMenu_Save, NULL, 3);
 	addPanelToMenu(pMenu_Save, NULL, 4);
 
-	return 1;
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
 
 int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, ControlComponent *ccbs, Button *btns, ControlComponent *ccl, Label *lbl)
@@ -365,6 +382,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 	/* Button Rects*/
 	SDL_Rect backToMainMenuButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect goToHintMenu = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide + (wTogglePanels*0.6));
 	SDL_Rect saveGameButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
 	SDL_Rect quitButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide + (wTogglePanels*0.6));
 
@@ -379,6 +397,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 	createButton(ccbs, btns, backToMainMenuButton, uploadPicture("ReturnToMainMenu.bmp"), GamePlayMenu_endGameAndShowMainMenu, END_GAME_AND_RETURN_TO_MAIN_MENU_BUTTON);
 	createButton(ccbs + 1, btns + 1, quitButton, uploadPicture("QuitGameButton_inGame.bmp"), QuitGame, QUIT_GAME_BUTTON);
 	createButton(ccbs + 2, btns + 2, saveGameButton, uploadPicture("saveGame.bmp"), GamePlayMenu_SaveGame, SAVE_GAME_BUTTON);
+	createButton(ccbs + 3, btns + 3, goToHintMenu, uploadPicture("Hint.bmp"), ShowHintMenu, HINT_MENU_BUTTON);
 
 	/* Make the Panels*/
 	panelMaker(ccps, panel, returnsPanel, rgbRed);
@@ -388,6 +407,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 	addButtonToPanel(ccps, ccbs);
 	addButtonToPanel(ccps + 2, ccbs + 1);
 	addButtonToPanel(ccps + 2, ccbs + 2);
+	addButtonToPanel(ccps, ccbs + 3);
 
 	/* Add the Panels To the Menu*/
 	addPanelToMenu(GamePlayMenu, ccps, 1);
@@ -404,8 +424,13 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 
 
 	/* Add the header to the Menu */
-	GamePlayMenu->header = (ControlComponent *) ccl;
-	return 1;
+	GamePlayMenu->header = (ControlComponent *)ccl;
+
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
 
 int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *pnl_LoadMenuPanels, ControlComponent *ccb_LoadMenuCCBs, Button *btn_LoadMenuButtons, ControlComponent *ccl, Label *lbl)
@@ -451,8 +476,9 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 	createButton(ccb_LoadMenuCCBs + 5, btn_LoadMenuButtons + 5, slot_5, uploadPicture("slot5.bmp"), SaveMenu_selectSlot, '5');
 	createButton(ccb_LoadMenuCCBs + 6, btn_LoadMenuButtons + 6, slot_6, uploadPicture("slot6.bmp"), SaveMenu_selectSlot, '6');
 	createButton(ccb_LoadMenuCCBs + 7, btn_LoadMenuButtons + 7, slot_7, uploadPicture("slot7.bmp"), SaveMenu_selectSlot, '7');
+	/* In case we want to add more slots, need to insert extra lines (such as the lines above) for the extra slots here*/
 	createButton(ccb_LoadMenuCCBs + 8, btn_LoadMenuButtons + 8, loadButton, uploadPicture("loadGame.bmp"), LoadGame, LOAD_GAME_BUTTON);
-	
+
 	/* Make the Panels*/
 	panelMaker(ccp_LoadMenuCCPs, pnl_LoadMenuPanels, buttonsPanel, rgbRed);
 	panelMaker(ccp_LoadMenuCCPs + 1, pnl_LoadMenuPanels + 1, labelsPanel, rgbMenuBlue);
@@ -469,9 +495,9 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 
 	/* Make the labels */
 	labelMaker(ccl, lbl, header, "LoadMenuHeader.bmp");
-	labelMaker(ccl+1, lbl+1, welcome, "welcome.bmp");
-	addLabelToPanel(ccp_LoadMenuCCPs+1, ccl);
-	addLabelToPanel(ccp_LoadMenuCCPs+1, ccl + 1);
+	labelMaker(ccl + 1, lbl + 1, welcome, "welcome.bmp");
+	addLabelToPanel(ccp_LoadMenuCCPs + 1, ccl);
+	addLabelToPanel(ccp_LoadMenuCCPs + 1, ccl + 1);
 
 
 	/* Add the Panels To the Menu*/
@@ -480,7 +506,77 @@ int createLoadMenu(Menu *pMenu_Load, ControlComponent *ccp_LoadMenuCCPs, Panel *
 	addPanelToMenu(pMenu_Load, NULL, 3);
 	addPanelToMenu(pMenu_Load, NULL, 4);
 
-	return 1;
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
+}
+
+
+int createHintMenu(Menu *pMenu_Hint, ControlComponent *ccp_HintMenuCCPs, Panel *pnl_HintMenuPanels, ControlComponent *ccb_HintMenuCCBs, Button *btn_HintMenuButtons, ControlComponent *ccl, Label *lbl)
+{
+	int wSide = 12;
+	int hSide = 9;
+	int wBoardPanel = 800;
+	int hBoardPanel = 750;
+	int wTogglePanels = SCREEN_W - wBoardPanel - 2 * wSide;
+	int hTogglePanels = (SCREEN_H - 2 * hSide) / 3;
+
+	/* Screen Rect */
+	SDL_Rect Rect1024x768 = create1024x768Rect();
+
+	/* Panel Rects */
+	SDL_Rect returnsPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9);
+	SDL_Rect emptyPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 250);
+	SDL_Rect showPanel = createSDL_Rect(wTogglePanels, 250, wSide, 9 + 500);
+
+
+	/* Button Rects*/
+	SDL_Rect backToGameButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
+
+	SDL_Rect levelToggleButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide);
+	SDL_Rect showButton = createSDL_Rect(wTogglePanels - 2 * wSide, (wTogglePanels - 4 * hSide) / 2, wSide, hSide + (wTogglePanels*0.6));
+
+	/* label rects */
+	SDL_Rect header = createSDL_Rect(wBoardPanel, 75, wTogglePanels + wSide, 10);
+	//SDL_Rect infoRect_top = createSDL_Rect(wTogglePanels - 2 * wSide, hTogglePanels / 2 - 2 * hSide, wSide, 0);
+	//SDL_Rect infoRect_bottom = createSDL_Rect(wTogglePanels - 2 * wSide, hTogglePanels / 2 - 2 * hSide, wSide, hTogglePanels / 2);
+
+	createMenu(pMenu_Hint, Rect1024x768, rgbMenuBlue, HINT_MENU);
+
+	/* Make the buttons */
+	createButton(ccb_HintMenuCCBs, btn_HintMenuButtons, backToGameButton, uploadPicture("ReturnToGame.bmp"), HintMenu_showGamePlayMenu, BACK_TO_GAME);
+	createButton(ccb_HintMenuCCBs + 1, btn_HintMenuButtons + 1, levelToggleButton, uploadPicture("1Diff.bmp"), HintMenu_toggleDifficulty, AI_DIFF_TOGGLE_BUTTON);
+	createButton(ccb_HintMenuCCBs + 2, btn_HintMenuButtons + 2, showButton, uploadPicture("ShowHint.bmp"), HintMenu_ShowHint, SHOW_HINT_BUTTON);
+
+
+	/* Make the Panels*/
+	panelMaker(ccp_HintMenuCCPs, pnl_HintMenuPanels, returnsPanel, rgbRed);
+	panelMaker(ccp_HintMenuCCPs + 1, pnl_HintMenuPanels + 1, emptyPanel, rgbOrange);
+	panelMaker(ccp_HintMenuCCPs + 2, pnl_HintMenuPanels + 2, showPanel, rgbGreen);
+
+	addButtonToPanel(ccp_HintMenuCCPs, ccb_HintMenuCCBs);
+	addButtonToPanel(ccp_HintMenuCCPs + 2, ccb_HintMenuCCBs + 1);
+	addButtonToPanel(ccp_HintMenuCCPs + 2, ccb_HintMenuCCBs + 2);
+
+	/* Add the Panels To the Menu*/
+	addPanelToMenu(pMenu_Hint, ccp_HintMenuCCPs, 1);
+	addPanelToMenu(pMenu_Hint, ccp_HintMenuCCPs + 1, 2);
+	addPanelToMenu(pMenu_Hint, ccp_HintMenuCCPs + 2, 3);
+
+	/* Make the labels */
+	labelMaker(ccl, lbl, header, "HintHeader.bmp");
+
+	/* Add the header to the Menu */
+	pMenu_Hint->header = (ControlComponent *)ccl;
+
+
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
 
 
@@ -488,9 +584,7 @@ int showMenu(Window *window, Menu *menu)
 {
 	addMenuToWindow(chessWindow, menu);
 
-
-
-	if (menu->identifier == PLAYER_SELECTION_MENU || menu->identifier == AI_SETTINGS_MENU || menu->identifier == GAME_PLAY_MENU)
+	if (menu->identifier == PLAYER_SELECTION_MENU || menu->identifier == AI_SETTINGS_MENU || menu->identifier == GAME_PLAY_MENU || menu->identifier == HINT_MENU)
 	{
 		updateGUIBoard(menu);
 	}
@@ -512,12 +606,12 @@ int showMenu(Window *window, Menu *menu)
 	}
 	if (menu->panel_4 != NULL)
 	{
-		if (drawPanelToMenu(menu->panel_4) == 0 || drawButtonsOfPanel(menu->panel_4) == 0)
+		if (drawPanelToMenu(menu->panel_4) == 0 || drawLabelsOfPanel(menu->panel_4->pnl->children) == 0 || drawButtonsOfPanel(menu->panel_4) == 0)
 			return 0;
 	}
 	if (menu->header != NULL)
 	{
-		if (drawLabelsOfPanel((ControlComponent *) menu->header) == 0)
+		if (drawLabelsOfPanel((ControlComponent *)menu->header) == 0)
 			return 0;
 	}
 
@@ -532,7 +626,7 @@ int showMenu(Window *window, Menu *menu)
 
 
 
-int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *btn_BoardPanelButtons, board_t board)
+int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *btn_BoardPanelButtons, board_t board, ControlComponent *ccl, Label *lbl)
 {
 	/* This also adds each of the squares to the panel! */
 
@@ -540,6 +634,9 @@ int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *b
 	eTool type;
 	int player;
 	btnFunc toolFunc;
+
+	labelMaker(ccl, lbl, createSDL_Rect(680, 680, 40, 80), "Indices.bmp");
+	addLabelToPanel(ccp_BoardSetting, ccl);
 
 	for (int i = 0; i < BOARD_SIZE; i++)
 	{
@@ -559,7 +656,11 @@ int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *b
 			createSquareByToolType(ccp_BoardSetting, &(guiBoard[crd.i_coord][crd.j_coord]), (btn_BoardPanelButtons + i*BOARD_SIZE + j), crd, type, player, toolFunc);
 		}
 	}
-	return 1;
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
 
 int updateGUIBoard(Menu *menu)
@@ -633,7 +734,7 @@ int updateGUIBoard_Vis(Menu *menu)
 			{
 				SDL_FreeSurface1(guiBoard[i][j].btn->pic);
 				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-				quit();
+				terminateProgram();
 				return 0;
 			}
 		}
@@ -769,7 +870,11 @@ int pawnHighlight(struct menu *menu, struct controlComponent *ccb)
 	highlightMovesList(menu, crd, moves);
 	freeMovesList(moves);
 	updateGUIBoard(menu);
-	return 1;
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
 }
 
 int knightHighlight(struct menu *menu, struct controlComponent *ccb)
@@ -781,7 +886,11 @@ int knightHighlight(struct menu *menu, struct controlComponent *ccb)
 	highlightMovesList(menu, crd, moves);
 	freeMovesList(moves);
 	updateGUIBoard(menu);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int bishopHighlight(struct menu *menu, struct controlComponent *ccb)
@@ -793,7 +902,11 @@ int bishopHighlight(struct menu *menu, struct controlComponent *ccb)
 	highlightMovesList(menu, crd, moves);
 	freeMovesList(moves);
 	updateGUIBoard(menu);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int rookHighlight(struct menu *menu, struct controlComponent *ccb)
@@ -805,7 +918,11 @@ int rookHighlight(struct menu *menu, struct controlComponent *ccb)
 	highlightMovesList(menu, crd, moves);
 	freeMovesList(moves);
 	updateGUIBoard(menu);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int queenHighlight(struct menu *menu, struct controlComponent *ccb)
@@ -817,7 +934,11 @@ int queenHighlight(struct menu *menu, struct controlComponent *ccb)
 	highlightMovesList(menu, crd, moves);
 	freeMovesList(moves);
 	updateGUIBoard(menu);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int kingHighlight(struct menu *menu, struct controlComponent *ccb)
@@ -829,7 +950,11 @@ int kingHighlight(struct menu *menu, struct controlComponent *ccb)
 	highlightMovesList(menu, crd, moves);
 	freeMovesList(moves);
 	updateGUIBoard(menu);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int endPromotionStage(struct menu *menu, struct controlComponent *ccb)
@@ -896,10 +1021,14 @@ int changeHighlightedTool(struct menu *menu, struct controlComponent *ccb)
 	cMove *newMoves = movesByPieceType(pBoard, ccb->btn->crd);
 	highlightMovesList(menu, ccb->btn->crd, newMoves);
 	freeMovesList(newMoves);
-	
+
 	/* update gui board (and vis) */
 	updateGUIBoard(menu);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int setPromoteSquare(Coord crd, int promotiveSituation)
@@ -907,7 +1036,7 @@ int setPromoteSquare(Coord crd, int promotiveSituation)
 	Coord tmp;
 	if (promotiveSituation)
 	{
-		promoteSquare = crd;//ccb->btn->crd;
+		promoteSquare = crd;
 	}
 	else
 	{
@@ -941,7 +1070,11 @@ int gui_makeMove(struct menu *menu, struct controlComponent *ccb)
 	/* Update GUIBoard */
 	updateGUIBoard(menu);
 	updateGUIBoard_Vis(menu);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 
@@ -979,7 +1112,7 @@ int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *c
 
 	if (playerSelectionMenu_updateContinueOrPlayButton(chessWindow) == 0)
 	{
-		quit();
+		terminateProgram();
 		return 0;
 	}
 
@@ -987,11 +1120,14 @@ int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *c
 	{
 		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 
-	return 1;
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *ccb)
@@ -1015,7 +1151,7 @@ int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *ccb)
 	{
 		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 	if (playerSelectionMenu_updateContinueOrPlayButton(chessWindow) == 0)
@@ -1026,7 +1162,7 @@ int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *ccb)
 
 int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
 {
-	/* updates this button's function and picture (not global gam`eMode) */
+	/* updates this button's function and picture (not global gameMode) */
 	if (pMenu_PlayerSelection == NULL)
 	{
 		return 0;
@@ -1061,7 +1197,7 @@ int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
 	{
 		SDL_FreeSurface1(ccb_continueOrPlay->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 	return 1;
@@ -1091,10 +1227,14 @@ int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *cc
 	{
 		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 
@@ -1109,10 +1249,14 @@ int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
 	{
 		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *ccb)
@@ -1134,10 +1278,14 @@ int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *ccb)
 	{
 		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int AI_SettingsMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
@@ -1173,7 +1321,7 @@ int AI_SettingsMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
 
 	if (AI_Settings_updatePlayButton(chessWindow) == 0)
 	{
-		quit();
+		terminateProgram();
 		return 0;
 	}
 
@@ -1181,11 +1329,15 @@ int AI_SettingsMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
 	{
 		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int AI_Settings_updatePlayButton(Window *window)
@@ -1215,12 +1367,15 @@ int AI_Settings_updatePlayButton(Window *window)
 	{
 		SDL_FreeSurface1(ccb_Play->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
-	return 1;
-}
 
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
+}
 
 
 int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb)
@@ -1284,7 +1439,6 @@ int GamePlayMenu_PromoteToggle(struct menu *menu, struct controlComponent *ccb)
 }
 
 
-
 int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb)
 {
 	if (selectedSlot == '0')
@@ -1329,7 +1483,7 @@ int SaveOrLoad_Menu_UpdateVis(struct menu *menu)
 		{
 			SDL_FreeSurface1(ccbCurr->btn->pic);
 			printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-			quit();
+			terminateProgram();
 			return 0;
 		}
 
@@ -1338,10 +1492,14 @@ int SaveOrLoad_Menu_UpdateVis(struct menu *menu)
 	if (SDL_Flip(chessWindow->self) != 0)
 	{
 		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int SaveMenu_ResetGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb)
@@ -1361,16 +1519,17 @@ int SaveMenu_ResetSaveMenuAndShowGamePlayMenu(struct menu *menu, struct controlC
 }
 
 
-
 int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlComponent *ccb)
 {
-	/* new and might be wrong */
 	selectedSlot = '0';
 	SaveOrLoad_Menu_UpdateVis(menu);
 	properties[0] = GAME_MODE;
-	/* end new */
 	showMainMenu(menu, ccb);
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunction)
@@ -1395,18 +1554,19 @@ int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunc
 		whitePlayerTurnStage = WAITING;
 		blackPlayerTurnStage = NONE_SELECTED;
 	}
-	/*UpdateDangerZone(pBoard, WHITE_PLAYER);
-	UpdateDangerZone(pBoard, BLACK_PLAYER);*/
-	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
 
+	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
 
 	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
 	updateGUIBoard(pMenu_Game);
 	updateGUIBoard_Vis(chessWindow->shownMenu);
 	showGamePlayMenu(pMenu_Game, NULL);
-	return 1;
-}
 
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
+}
 
 
 int showMainMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
@@ -1432,8 +1592,138 @@ int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCalled
 	updateGUIBoard_Vis(pMenu_PlayerSelection);
 	playerSelectionMenu_updateContinueOrPlayButton(chessWindow);
 
-	return 0;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
+
+
+int ShowHintMenu(struct menu *menu, struct controlComponent *ccb)
+{
+	if (properties[5] == PVC_MODE)
+	{
+		/* in PVC mode the toggle button for hint level is disabled */
+		SDL_FreeSurface(pMenu_Hint->panel_3->pnl->children->btn->pic);
+		pMenu_Hint->panel_3->pnl->children->btn->pic = uploadPicture("disabledHintToggle.bmp");
+	}
+	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
+	showMenu(chessWindow, pMenu_Hint);
+	updateGUIBoard_Vis(pMenu_Hint);
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
+}
+
+int HintMenu_showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+	showGamePlayMenu(menu, buttonWhichPressCalledThis);
+	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
+	resetHighlights();
+	updateGUIBoard(pMenu_Game);
+	updateGUIBoard_Vis(pMenu_Game);
+	if (SDL_Flip(chessWindow->self) != 0)
+	{
+		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+		terminateProgram();
+		return 0;
+	}
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
+}
+
+
+int HintMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
+{
+	if (properties[5] == PVC_MODE)
+		return 1;
+	hintLevel = mod(hintLevel + 1, 5);
+	SDL_FreeSurface1(ccb->btn->pic);
+	ccb->btn->pic = uploadPicture(getHintPicName());
+
+	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
+	{
+		SDL_FreeSurface1(ccb->btn->pic);
+		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
+		terminateProgram();
+		return 0;
+	}
+	updateGUIBoard_Vis(menu);
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
+}
+
+int HintMenu_ShowHint(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
+{
+
+	cMove *hintMove = NULL, hintMove_Copy, *pHintMove_Copy = &hintMove_Copy;
+	int scr = 0;
+
+	if (properties[5] == PVC_MODE)
+		hintLevel = properties[2];
+
+	// run minimax
+	GameLabel(chessWindow, HINT_THINKING_H); //TODO: need to change to hintLabel
+	if (SDL_Flip(chessWindow->self) != 0)
+	{
+		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+		terminateProgram();
+		return 0;
+	}
+	int oldHintLevel = hintLevel;
+	int oldProperties_2 = properties[2];
+	int best = oldHintLevel == 0 ? 1 : 0;
+
+	properties[2] = hintLevel;
+	if (properties[4] == WHITE_PLAYER)//if player's color is white
+	{
+		if (best)
+		{
+			hintLevel = GetBestDepth(pBoard, WHITE_PLAYER);
+			properties[2] = hintLevel;
+		}
+		scr = minimax_score(pBoard, WHITE_PLAYER, hintLevel, 1, &hintMove, MIN_VALUE, MAX_VALUE, best);
+	}
+	else
+	{
+		if (best)
+		{
+			hintLevel = GetBestDepth(pBoard, BLACK_PLAYER);
+			properties[2] = hintLevel;
+		}
+		scr = minimax_score(pBoard, BLACK_PLAYER, hintLevel, 1, &hintMove, MIN_VALUE, MAX_VALUE, best);
+	}
+	hintLevel = oldHintLevel;
+	properties[2] = oldProperties_2;
+	GameLabel(chessWindow, HINT_H);
+
+	if (SDL_Flip(chessWindow->self) != 0)
+	{
+		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
+		terminateProgram();
+		return 0;
+	}
+
+	*pHintMove_Copy = *hintMove;
+	pHintMove_Copy->next = NULL;
+	freeMovesList(hintMove);
+	highlightMovesList(pMenu_Hint, pHintMove_Copy->src, pHintMove_Copy);
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
+}
+
 
 int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
@@ -1441,7 +1731,11 @@ int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis
 	showMenu(chessWindow, pMenu_AI_settings);
 
 	AI_Settings_updatePlayButton(chessWindow);
-	return 0;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
@@ -1475,7 +1769,11 @@ int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 	updateInfoLabels(scr, threat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);
 
 	showMenu(chessWindow, pMenu_Game);
-	return 0;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int showSaveGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
@@ -1493,9 +1791,11 @@ int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 }
 
 
+
+
 int QuitGame(struct menu *menu, struct controlComponent *ccb)
 {
-	properties[1] = 1;
+	terminateProgram();
 	return 0;
 }
 
@@ -1581,37 +1881,6 @@ int buttonPressHandler(Window *window, SDL_Event e)
 		}
 	}
 	return 0;
-
-	//int pressNeeded = 1;
-	//while (currChild != NULL)
-	//{
-	//	if (currChild->pnl != NULL) //if the currChild is a ccp
-	//	{
-	//		tmpChild = currChild->pnl->children;
-	//		while (tmpChild != NULL)
-	//		{
-	//			if (tmpChild->btn != NULL)
-	//			{
-	//				pressNeeded = buttonPress(window, tmpChild, e);
-	//				if (pressNeeded == 1)
-	//				{
-	//					return 1;
-	//				}
-	//			}
-	//			tmpChild = tmpChild->next;
-	//		}
-	//	}
-	//	else if (currChild->btn != NULL) // if the currChild is a ccb
-	//	{
-	//		pressNeeded = buttonPress(window, currChild, e);
-	//		if (pressNeeded == 0)
-	//		{
-	//			return 1;
-	//		}
-	//	}
-	//	currChild = currChild->next;
-	//}
-
 }
 
 int rightClicksHandler(Window *chessWindow, SDL_Event e)
@@ -1652,7 +1921,6 @@ int rightClicksHandler(Window *chessWindow, SDL_Event e)
 							if (playerTurnStage == PROMOTE)
 							{
 								GamePlayMenu_PromoteToggle(pMenu_Game, currChild);
-								//updateGUIBoard(menu);
 								updateGUIBoard_Vis(menu);
 								return 1;
 							}
@@ -1664,12 +1932,16 @@ int rightClicksHandler(Window *chessWindow, SDL_Event e)
 			}
 		}
 	}
-	return 0;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int pressIfNeeded(Menu *menu, struct controlComponent *ccb, SDL_Event e)
 {
-/* Executes pressing of the button iff e indicates the button was pressed */
+	/* Executes pressing of the button iff e indicates the button was pressed */
 	if (isPressInsideButton(e, ccb))
 	{
 		ccb->btn->f(menu, ccb);
@@ -1689,8 +1961,6 @@ int isPressInsideButton(SDL_Event e, ControlComponent *ccb)
 		return 0;
 }
 
-
-
 int resetPlayerSelectionMenu()
 {
 	SDL_FreeSurface1(pMenu_PlayerSelection->panel_2->pnl->children->btn->pic);
@@ -1701,7 +1971,11 @@ int resetPlayerSelectionMenu()
 
 	SDL_FreeSurface1(pMenu_PlayerSelection->panel_3->pnl->children->btn->pic);
 	pMenu_PlayerSelection->panel_3->pnl->children->btn->pic = uploadPicture("StartGame.bmp");
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int resetAISettingsMenu()
@@ -1714,7 +1988,11 @@ int resetAISettingsMenu()
 
 	SDL_FreeSurface1(pMenu_AI_settings->panel_3->pnl->children->btn->pic);
 	pMenu_AI_settings->panel_3->pnl->children->btn->pic = uploadPicture("StartGame.bmp");
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 
@@ -1726,7 +2004,7 @@ int endGamePlay(Window *window)
 
 int freeMenu(Menu *menu)
 {
-	ControlComponent *ccl = (ControlComponent *) menu->header;
+	ControlComponent *ccl = (ControlComponent *)menu->header;
 	if (ccl != NULL)
 		SDL_FreeSurface1(ccl->lbl->pic);
 
@@ -1736,7 +2014,7 @@ int freeMenu(Menu *menu)
 		freePanel(menu->panel_2);
 	if (menu->panel_3 != NULL)
 		freePanel(menu->panel_3);
-	//freePanel(menu->panel_4);
+	
 	return 1;
 }
 
@@ -1796,14 +2074,18 @@ int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
 		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_makeMove.bmp");
 	}
 	drawLabelsOfPanel(pMenu_Game->panel_2->pnl->children);
-	
-	return 1;
+
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int GameLabel(Window *window, int thinking)
 {
 	Menu *menu = window->shownMenu;
-	ControlComponent *ccl_gameHeader = (ControlComponent*) menu->header;
+	ControlComponent *ccl_gameHeader = (ControlComponent*)menu->header;
 	Label *lbl_gameHeader = ccl_gameHeader->lbl;
 
 	ControlComponent *ccl_info = menu->panel_2->pnl->children;
@@ -1814,21 +2096,27 @@ int GameLabel(Window *window, int thinking)
 		filename = "GameHeader.bmp";
 	else if (thinking == GAME_THINKING_H)
 		filename = "GameHeaderThinking.bmp";
+	else if (thinking == HINT_THINKING_H)
+		filename = "HintHeaderThinking.bmp";
+	else if (thinking == HINT_H)
+		filename = "HintHeader.bmp";
 
 	SDL_FreeSurface1(lbl_gameHeader->pic);
 	lbl_gameHeader->pic = uploadPicture(filename);
-
-
 
 
 	if (SDL_BlitSurface(lbl_gameHeader->pic, NULL, chessWindow->self, &(ccl_gameHeader->rect)) != 0)
 	{
 		SDL_FreeSurface1(lbl_gameHeader->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
-	return 1;
+
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
@@ -1857,8 +2145,11 @@ int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
 		curr = curr->next;
 	}
 	updateGUIBoard_Vis(menu);
-	return 1;
 
+	if (properties[1] == 1)
+		return 0;
+	else
+		return 1;
 }
 
 
@@ -1932,6 +2223,23 @@ const char *getDifficultyPicName(void)
 		return "4Diff.bmp";
 }
 
+const char *getHintPicName(void)
+{
+	/* AI_Difficulty is between 0 and 4 inclusive */
+	if (hintLevel == 0)
+		return "BestDiff.bmp";
+	else if (hintLevel == 1)
+		return "1Diff.bmp";
+	else if (hintLevel == 2)
+		return "2Diff.bmp";
+	else if (hintLevel == 3)
+		return "3Diff.bmp";
+	else
+		return "4Diff.bmp";
+}
+
+
+
 eTool getInitialTypeOfCoord(Coord crd)
 {
 	/* Pre: coord is in board */
@@ -1973,4 +2281,20 @@ int isHighlighted(Coord crd)
 			return 1;
 	}
 	return 0;
+}
+
+int resetHighlights(void)
+{
+	int i = 0;
+	while (isInBoard(highlightedSquares[i]) && i < BOARD_SIZE * BOARD_SIZE)
+	{
+		highlightedSquares[i++] = GenerateCoord(-1, -1);
+	}
+	return 1;
+}
+
+int terminateProgram(void)
+{
+	properties[1] = 1;
+	return 1;
 }

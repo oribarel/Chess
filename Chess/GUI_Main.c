@@ -29,6 +29,7 @@ Menu menu_AI_settings, *pMenu_AI_settings = &menu_AI_settings;
 Menu menu_Game, *pMenu_Game = &menu_Game;
 Menu menu_Save, *pMenu_Save = &menu_Save;
 Menu menu_Load, *pMenu_Load = &menu_Load;
+Menu menu_Hint, *pMenu_Hint = &menu_Hint;
 
 /* Returns 0 on failure to init sdl video and 1 otherwise.*/
 int GUI_Main(board_t passedBoard)
@@ -124,17 +125,18 @@ int GUI_Main(board_t passedBoard)
 	SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
 	panelMaker(pCCP_Board, pPnl_Board, boardSettingPanel, rgbMenuBlue);
 
-	Button btn_BoardPanelButtons[BOARD_SIZE*BOARD_SIZE + 4]; // these are 64 buttons for the squares and 4 for the promoting purpose.
+	Button btn_BoardPanelButtons[BOARD_SIZE*BOARD_SIZE]; // these are 64 buttons for the squares.
 
-
+	ControlComponent ccl_BoardPanelCCLs[1];
+	Label lbl_BoardPanelLabels[1];
 
 
 	/* Save Menu  CCPs, PNLs, BTNs */
 	ControlComponent ccp_SaveMenuCCPs[NUM_OF_SAVE_MENU_PANELS];
 	Panel pnl_SaveMenuPanels[NUM_OF_SAVE_MENU_PANELS];
 
-	ControlComponent ccb_SaveMenuCCBs[NUM_OF_SAVE_MENU_BUTTONS];
-	Button btn_SaveMenuButtons[NUM_OF_SAVE_MENU_BUTTONS];
+	ControlComponent ccb_SaveMenuCCBs[NUM_OF_SAVE_MENU_BUTTONS + NUMBER_OF_SLOTS_FOR_LOAD_AND_SAVE];
+	Button btn_SaveMenuButtons[NUM_OF_SAVE_MENU_BUTTONS + NUMBER_OF_SLOTS_FOR_LOAD_AND_SAVE];
 
 	ControlComponent ccl_saveMenuCCLs[2];
 	Label lbl_saveMenuLabels[2];
@@ -144,11 +146,21 @@ int GUI_Main(board_t passedBoard)
 	ControlComponent ccp_LoadMenuCCPs[NUM_OF_LOAD_MENU_PANELS];
 	Panel pnl_LoadMenuPanels[NUM_OF_LOAD_MENU_PANELS];
 
-	ControlComponent ccb_LoadMenuCCBs[NUM_OF_LOAD_MENU_BUTTONS];
-	Button btn_LoadMenuButtons[NUM_OF_LOAD_MENU_BUTTONS];
+	ControlComponent ccb_LoadMenuCCBs[NUM_OF_LOAD_MENU_BUTTONS + NUMBER_OF_SLOTS_FOR_LOAD_AND_SAVE];
+	Button btn_LoadMenuButtons[NUM_OF_LOAD_MENU_BUTTONS + NUMBER_OF_SLOTS_FOR_LOAD_AND_SAVE];
 
 	ControlComponent ccl_loadMenuCCLs[2];
 	Label lbl_loadMenuLabels[2];
+
+	/* Hint Menu  CCPs, PNLs, BTNs */
+	ControlComponent ccp_HintMenuCCPs[4];
+	Panel pnl_HintMenuPanels[4];
+
+	ControlComponent ccb_HintMenuCCBs[3];
+	Button btn_HintMenuButtons[3];
+
+	ControlComponent ccl_HintMenuCCLs[1];
+	Label lbl_HintMenuLabels[1];
 
 	/* Pass the board */
 	pBoard = passedBoard;
@@ -192,11 +204,14 @@ int GUI_Main(board_t passedBoard)
 	createGameMenu(pMenu_Game, ccp_GamePlayMenuCCPs, pnl_GamePlayMenuPanels, ccb_GamePlayMenuCCBs, btnb_GamePlayMenuButtons, ccl_gamePlayCCLs, lbl_gamePlayLabels);
 	createSaveMenu(pMenu_Save, ccp_SaveMenuCCPs, pnl_SaveMenuPanels, ccb_SaveMenuCCBs, btn_SaveMenuButtons, ccl_saveMenuCCLs, lbl_saveMenuLabels);
 	createLoadMenu(pMenu_Load, ccp_LoadMenuCCPs, pnl_LoadMenuPanels, ccb_LoadMenuCCBs, btn_LoadMenuButtons, ccl_loadMenuCCLs, lbl_loadMenuLabels);
+	createHintMenu(pMenu_Hint, ccp_HintMenuCCPs, pnl_HintMenuPanels, ccb_HintMenuCCBs, btn_HintMenuButtons, ccl_HintMenuCCLs, lbl_HintMenuLabels);
 
-	createGUIBoard(guiBoard, pCCP_Board, btn_BoardPanelButtons, pBoard);
+
+	createGUIBoard(guiBoard, pCCP_Board, btn_BoardPanelButtons, pBoard,ccl_BoardPanelCCLs,lbl_BoardPanelLabels);
 	addPanelToMenu(pMenu_PlayerSelection, pCCP_Board, 4);
 	addPanelToMenu(pMenu_AI_settings, pCCP_Board, 4);
 	addPanelToMenu(pMenu_Game, pCCP_Board, 4);
+	addPanelToMenu(pMenu_Hint, pCCP_Board, 4);
 
 
 	/* Start */
@@ -247,7 +262,7 @@ int GUI_Main(board_t passedBoard)
 
 
 			/* New Experiement*/
-			if (properties[0] == GAME_MODE)
+			if (properties[0] == GAME_MODE && chessWindow->shownMenu->identifier == GAME_PLAY_MENU)
 			{
 				scr = score(pBoard, properties[4]);
 				currKingUnderThreat = KingUnderThreat(pBoard, properties[4]);
@@ -403,6 +418,7 @@ int GUI_Main(board_t passedBoard)
 	freeMenu(pMenu_Save);
 	freeMenu(pMenu_Load);
 	freeMenu(pMenu_Game);
+	freeMenu(pMenu_Hint);
 	freePanel(pCCP_Board);
 	printf("%d pictures not freed.\n", picAllocs);
 	printf("ended\n");

@@ -1611,7 +1611,7 @@ int Save(board_t board, char* file_name){
 		if (properties[2] != BESTval)
 			fprintf(f, "\t<difficulty>%d</difficulty>\n", properties[2]);
 		else
-			fprintf(f, "\t<difficulty>best/difficulty>\n");
+			fprintf(f, "\t<difficulty>best</difficulty>\n");
 		if (properties[3] == WHITE_PLAYER)
 			fprintf(f, "\t<user_color>%s</user_color>\n", WHITE_CAP);
 		else

@@ -105,8 +105,7 @@ int createWindow(Window *window);
 int createMenu(Menu *pMenu, SDL_Rect rect, RGB color, int identifier);
 int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Surface *pic, btnFunc f , char purpose);
 int createButton_square(ControlComponent *ccbParent, Button *button, SDL_Rect rect, SDL_Surface *pic, btnFunc f);
-ControlComponent *createLabel(SDL_Rect rect, SDL_Surface *pic);
-ControlComponent *createPanel(SDL_Rect rect, RGB rgb_triplet);
+
 RGB createRGB(int r, int g, int b);
 SDL_Rect createSDL_Rect(int w, int h, int x, int y);
 

@@ -22,12 +22,13 @@ int init_GUI(void)
 
 int createWindow(Window *pWindow)
 {
+	/* 1 on successful run, 0 if SDL failed */
 	SDL_WM_SetCaption("Chess", "Chess");
 	SDL_Surface *surface = SDL_SetVideoMode(SCREEN_W, SCREEN_H, 0, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	if (surface == NULL)
 	{
 		printf("ERROR: failed to set video mode: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 
@@ -70,20 +71,6 @@ int createButton(ControlComponent *ccbParent, Button *btn, SDL_Rect rect, SDL_Su
 	ccbParent->btn = btn;
 
 	return 1;
-
-	/*ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
-	if (comp == NULL)
-	{
-	printf("ERROR: standard function calloc has failed\n");
-	quit();
-	}
-	Button *btn = (Button *)calloc(1, sizeof(Button));
-
-	if (btn == NULL)
-	{
-	printf("ERROR: standard function calloc has failed\n");
-	quit();
-	}*/
 }
 
 
@@ -106,58 +93,6 @@ int createButton_square(ControlComponent *ccbParent, Button *button, SDL_Rect re
 	return 1;
 }
 
-ControlComponent *createLabel(SDL_Rect rect, SDL_Surface *pic)
-{
-	ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
-	if (comp == NULL)
-	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
-	Label *lbl = (Label *)calloc(1, sizeof(Label));
-	if (lbl == NULL)
-	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
-
-	lbl->pic = pic;
-
-	comp->next = NULL;
-	comp->lbl = lbl;
-	comp->pnl = NULL;
-	comp->rect = rect;
-	comp->btn = NULL;
-
-	return comp;
-}
-
-ControlComponent *createPanel(SDL_Rect rect, RGB rgb_triplet)
-{
-	ControlComponent *comp = (ControlComponent *)calloc(1, sizeof(ControlComponent));
-	if (comp == NULL)
-	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
-	Panel *pnl = (Panel *)calloc(1, sizeof(Panel));
-	if (pnl == NULL)
-	{
-		printf("ERROR: standard function calloc has failed\n");
-		quit();
-	}
-
-	pnl->rgb_triplet = rgb_triplet;
-	pnl->children = NULL;
-
-	comp->next = NULL;
-	comp->lbl = NULL;
-	comp->pnl = pnl;
-	comp->rect = rect;
-	comp->btn = NULL;
-
-	return comp;
-}
 
 int createMenu(Menu *pMenu, SDL_Rect rect, RGB color, int identifier)
 {
@@ -173,9 +108,10 @@ int createMenu(Menu *pMenu, SDL_Rect rect, RGB color, int identifier)
 	return 1;
 }
 
-//returns 0 on failure and 1 on success.
+
 int addMenuToWindow(Window *window, Menu *pMenu)
 {
+	/* 1 on successful run, 0 if SDL failed */
 	window->shownMenu = pMenu;
 	Uint32 color = getColorOfMenu(window, pMenu);
 
@@ -183,14 +119,15 @@ int addMenuToWindow(Window *window, Menu *pMenu)
 	if (DrawSuccess == -1)
 	{
 		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
+		terminateProgram();
 		return 0;
 	}
 	return 1;
 }
 
-/*Doesn't Draw, only adds */
 int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb)
 {
+	/*Doesn't Draw, only adds */
 	addControlToPanelList(ccp, ccb);
 
 	ccb->rect.x += ccp->rect.x;
@@ -199,19 +136,20 @@ int addButtonToPanel(ControlComponent *ccp, ControlComponent *ccb)
 	return 1;
 }
 
-/* Pre: has a pic */
+
 int drawButtonToPanel(ControlComponent *ccb)
 {
-
+	/* Pre: has a pic */
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
 		SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 	return 1;
 }
+
 int addControlToPanelList(ControlComponent *panelComponent, ControlComponent *toAdd)
 {
 	ControlComponent *last = getLastInPanelList(panelComponent);
@@ -222,9 +160,10 @@ int addControlToPanelList(ControlComponent *panelComponent, ControlComponent *to
 	return 1;
 }
 
-//returns 0 on failure and 1 on success.
+
 int addPanelToPanel(ControlComponent *ccpParent, ControlComponent *ccpChild, Window *window)
 {
+	/* 1 on successful run, 0 if SDL failed */
 	addControlToPanelList(ccpParent, ccpChild);
 	Uint32 color = getColorOfPanel(window, ccpChild);
 
@@ -234,15 +173,15 @@ int addPanelToPanel(ControlComponent *ccpParent, ControlComponent *ccpChild, Win
 	if (SDL_FillRect(window->self, &(ccpChild->rect), color) != 0)
 	{
 		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 	return 1;
 }
 
-//Doesn't Draw!. returns 0 on failure and 1 on success.
 int addPanelToMenu(Menu *menuParent, ControlComponent *ccp, int panelNum)
 {
+	//Doesn't Draw!. returns 0 on failure and 1 on success.
 	switch (panelNum)
 	{
 	case 1:
@@ -276,7 +215,7 @@ int drawPanelToMenu(ControlComponent *ccp)
 	if (SDL_FillRect(chessWindow->self, &(ccp->rect), color) != 0)
 	{
 		printf("ERROR: failed to draw rect: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 	return 1;
@@ -284,6 +223,7 @@ int drawPanelToMenu(ControlComponent *ccp)
 
 int drawButtonsOfPanel(ControlComponent *ccp)
 {
+	/* 1 on successful run, 0 if SDL failed */
 	ControlComponent *ccb = ccp->pnl->children;
 	while (ccb != NULL)
 	{
@@ -307,7 +247,7 @@ int drawLabelsOfPanel(ControlComponent *ccl)
 			{
 				SDL_FreeSurface1(ccl->lbl->pic);
 				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
-				quit();
+				terminateProgram();
 				return 0;
 			}
 		}
@@ -316,7 +256,7 @@ int drawLabelsOfPanel(ControlComponent *ccl)
 	return 1;
 }
 
-//returns 0 on failure and 1 on success.
+
 int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild)
 {
 
@@ -328,9 +268,9 @@ int addLabelToPanel(ControlComponent *ccpParent, ControlComponent *cclChild)
 	return 1;
 }
 
-/*Returns Last CC in the children list of ccpParent.*/
 ControlComponent *getLastInPanelList(ControlComponent* ccpParent)
 {
+	/*Returns Last CC in the children list of ccpParent.*/
 	ControlComponent *ccChild;
 	ccChild = ccpParent->pnl->children;
 	if (ccChild == NULL)
@@ -360,13 +300,12 @@ int nullFunction(struct menu *pMenu, struct controlComponent *ccb)
 
 SDL_Surface *uploadPicture(const char *path)
 {
-
 	SDL_Surface *pic = SDL_LoadBMP(path);
 	SDL_Surface *displayPic = SDL_DisplayFormat(pic);
 	if (displayPic == NULL)
 	{
 		printf("ERROR: failed to convert image to new format: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 	}
 	picAllocs++;
 	SDL_FreeSurface(pic);
