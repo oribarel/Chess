@@ -28,4 +28,12 @@ eTool get_eToolFromType(char type);
 int Material(board_t board, int player);
 int GetBestDepth(board_t board, int player);
 int getDepth(board_t board, int player);
+
+int getColorInLightOrDark(board_t board, Coord crd);
+int scoreWhiteKing(Coord crd);
+int scoreWhiteKingPawns(int column); 
+int scoreWhitePawns(Coord crd);
+int scoreBlackPawns(Coord crd);
+int scoreBlackKing(Coord crd);
+int scoreBlackKingPawns(int column);
 #endif
