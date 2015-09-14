@@ -14,9 +14,7 @@ int picAllocs = 0; //TODO: remove
 
 int init_GUI(void)
 {
-	Window *s;
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_Surface *screen;
 	return 0;
 }
 
@@ -317,4 +315,10 @@ void SDL_FreeSurface1(SDL_Surface *surface)
 	picAllocs--;
 	SDL_FreeSurface(surface);
 	return;
+}
+
+int terminateProgram(void)
+{
+	properties[1] = 1;
+	return 1;
 }

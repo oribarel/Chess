@@ -117,6 +117,7 @@ int playerSelectionMenu_toggleTool(Menu *menu, struct controlComponent *);
 int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *);
 int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *);
 int playerSelectionMenu_updateContinueOrPlayButton(Window *window);
+int resetPlayerSelectionMenu();
 
 /* AI_settingsMenu  */
 const char *getDifficultyPicName(void);
@@ -124,7 +125,7 @@ int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *);
 int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *);
 int AI_SettingsMenu_toggleTool(Menu *menu, struct controlComponent *ccb);
 int AI_Settings_updatePlayButton(Window *window);
-
+int resetAISettingsMenu();
 
 /* Save, Load Menus Functions */
 int SaveMenu_saveGameSlot(struct menu *menu, struct controlComponent *ccb);
@@ -132,6 +133,7 @@ int SaveMenu_selectSlot(struct menu *menu, struct controlComponent *ccb);
 int SaveMenu_ResetGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb);
 int SaveMenu_ResetSaveMenuAndShowGamePlayMenu(struct menu *menu, struct controlComponent *ccb);
 int LoadMenu_Reset_LoadMenu_And_ShowMainMenu(struct menu *menu, struct controlComponent *ccb);
+int SaveOrLoad_Menu_UpdateVis(struct menu *menu);
 
 /* GamePlayMenu */
 int GamePlayMenu_SaveGame(struct menu *menu, struct controlComponent *ccb);
@@ -171,6 +173,7 @@ int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCAlled
 int showAI_SettingsMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
 int showGamePlayMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
 int showLoadGameMenu(Menu *menu, ControlComponent *buttonWhichPressCAlledThis);
+int showSaveGameMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis);
 
 /* GUI Board */
 int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color);
@@ -178,7 +181,7 @@ int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *b
 int updateGUIBoard(Menu *menu);
 int updateGUIBoard_Vis(Menu *menu);
 btnFunc getGameFunctionOfCoord(Coord crd);
-
+btnFunc getHighlightFunctionOfTool(char tool);
 
 /* Labels */
 int labelMaker(ControlComponent *ccl, Label *lbl, SDL_Rect rect, char *filename);
@@ -195,7 +198,12 @@ int isThePromotedPiece(Coord crd);
 int setPromoteSquare(Coord crd, int promotiveSituation);
 int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn);
 const char *getHintPicName(void);
-
+eTool e_getInitialTypeOfCoord(Coord crd);
+int getInitialPlayerOfCoord(Coord crd);
 int endGamePlay(Window *window);
 int GameLabel(Window *window, int thinking);
+int isHighlighted(Coord crd);
+int resetHighlights(void);
+
+int isValidBoardInitialization(board_t board);
 #endif

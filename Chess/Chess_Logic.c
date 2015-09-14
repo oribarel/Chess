@@ -891,7 +891,8 @@ int KingUnderThreat(board_t board, int player)
 cMove* PawnMoves(board_t board, Coord coord)
 {
 	cMove *head = NULL;
-	int i = coord.i_coord, j = coord.j_coord;
+	//int i = coord.i_coord;
+	int j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord), tmpTool;
 	int color = islower(tool) ? 1 : -1;
 	Coord tmpCoord = coord;
@@ -953,7 +954,7 @@ cMove* PawnMoves(board_t board, Coord coord)
 
 cMove* BishopMoves(board_t board, Coord coord){
 	cMove *head = NULL;
-	int i = coord.i_coord, j = coord.j_coord;
+	//int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
 	int openDif = 0;
@@ -1045,7 +1046,7 @@ cMove* BishopMoves(board_t board, Coord coord){
 
 cMove* RookMoves(board_t board, Coord coord){
 	cMove *head = NULL;
-	int i = coord.i_coord, j = coord.j_coord;
+	//int i = coord.i_coord, j = coord.j_coord;
 	char tool = GetContentOfCoord(board, coord);
 	int color = islower(tool) ? 1 : -1;
 	int openDif = 0;
@@ -1146,7 +1147,7 @@ cMove* KnightMoves(board_t board, Coord coord)
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_N : BLACK_N;
 
-	Coord tmpCrd = coord, possibilities[8];
+	Coord /*tmpCrd = coord,*/ possibilities[8];
 	possibilities[0] = offsetCoord(coord, 1, 2);
 	possibilities[1] = offsetCoord(coord, 2, 1);
 	possibilities[2] = offsetCoord(coord, 2, -1);
@@ -1174,7 +1175,7 @@ cMove* KingMoves(board_t board, Coord coord)
 	int color = getColor(board, coord);
 	char tool = color == WHITE_PLAYER ? WHITE_K : BLACK_K;
 
-	Coord tmpCrd = coord, possibilities[8];
+	Coord /*tmpCrd = coord,*/ possibilities[8];
 	possibilities[0] = offsetCoord(coord, 0, 1);
 	possibilities[1] = offsetCoord(coord, 1, 1);
 	possibilities[2] = offsetCoord(coord, 1, 0);
@@ -1371,15 +1372,19 @@ int score(board_t board, int player)
 
 	/*TODO: consider what to do with this part*/
 	if (playerBlocked == 1)
-	if (KingUnderThreat(board, player))
-		return MATE_WIN_LOSE;//player lost
-	else
-		return TIE_SCORE; //tie
+	{
+		if (KingUnderThreat(board, player))
+			return MATE_WIN_LOSE;//player lost
+		else
+			return TIE_SCORE; //tie
+	}
 	if (opponentBlocked == 1)
-	if (KingUnderThreat(board, -player))
-		return MATE_WIN_SCORE;//player won
-	else
-		return TIE_SCORE; //tie
+	{
+		if (KingUnderThreat(board, -player))
+			return MATE_WIN_SCORE;//player won
+		else
+			return TIE_SCORE; //tie
+	}
 	if (DEBUG && score == MATE_WIN_LOSE)
 	{
 		print_board(board);
@@ -1412,13 +1417,10 @@ int isWhite(char type)
 
 
 
-
-
-
 /*changes the board so it describes the state created after the move is made.*/
 int makeMove(board_t board, cMove *move)
 {
-	char myColor = GetContentOfCoord(board, move->src);//TODO: consider delete this line
+	//char myColor = GetContentOfCoord(board, move->src);//TODO: consider delete this line
 	Coord crd = move->src;
 	setSlotInBoard(board, crd, EMPTY);
 	if (move->promote)

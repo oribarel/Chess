@@ -171,7 +171,7 @@ int GUI_Main(board_t passedBoard)
 
 	/* cMoves */
 	cMove *computerMove = NULL;
-	cMove *allPossibleMoves = NULL, *tmp;
+	//cMove *allPossibleMoves = NULL , *tmp;
 
 
 	/* Initialize SDL Video */

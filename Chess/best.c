@@ -175,8 +175,6 @@ int bestScore(board_t board, int player)
 	int column;
 	int score[2];  /* each side's score */
 	int ally, enemy, playerBlocked = 1, opponentBlocked = 1;
-	int CheckOnPlayer;
-
 
 
 	/* Check for win or tie situations: */
@@ -328,9 +326,6 @@ int Material(board_t board, int player)
 	int column;
 	int score[2];  /* each side's score */
 	int ally, enemy, playerBlocked = 1, opponentBlocked = 1;
-	int CheckOnPlayer;
-
-
 
 	/* Check for win or tie situations: */
 	/* Since getMoves doesn't provide any moves that leave the king at CHECK, if there aren't any moves, it is MATE */

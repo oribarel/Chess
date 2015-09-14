@@ -1077,7 +1077,7 @@ int Parse(char *line, board_t board)
 		else if (strcmp(token, cmmd14) == 0)
 			//get_best_moves
 		{
-			int maxScore = MIN_VALUE;
+			//int maxScore = MIN_VALUE;
 			int best = 0;
 
 			//parsing the depth d
@@ -1163,9 +1163,9 @@ cMove* isLegalMove(char *token, board_t board, cMove *allPossibleMoves)
 	char *currentPosition = token;
 	char x_coor, i_coor;
 	int y_coor, j_coor;
-	int promoteNeeded = 0;
+	//int promoteNeeded = 0;
 	int promoteTo = 0;
-	char tool;
+	//char tool;
 	Coord source, dest;
 	int difference;
 	cMove* tmp = NULL;
@@ -1347,7 +1347,7 @@ int Console_Main(board_t board)
 	board_t brd = board; //= NULL; TODO: experiement
 	char *input = NULL;
 	cMove *computerMove = NULL;
-	cMove *allPossibleMoves = NULL, *tmp;
+	//cMove *allPossibleMoves = NULL, *tmp;
 
 	init_board(brd);
 
@@ -1678,7 +1678,7 @@ int Test()
 	//srand(time(NULL));
 	srand(25);
 
-	int parseResult = 0;
+	//int parseResult = 0;
 	int iterations = 2;
 	int printMode = 1;
 	int COMPUTER_COLOR = BLACK_PLAYER;
@@ -1699,7 +1699,7 @@ int Test()
 
 
 	board_t brd; //= NULL; TODO: experiement
-	char *input = NULL;
+	//char *input = NULL;
 	cMove *computerMove = NULL;
 	cMove *allPossibleMoves = NULL, *tmp;
 

@@ -139,7 +139,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	int wSide = 12;
 	int hSide = 9;
 	int wBoardSetting = 800;
-	int hBoardSetting = 750;
+	//int hBoardSetting = 750;
 	int wGameModeSetting = SCREEN_W - wBoardSetting - 2 * wSide;
 	int hGameModeSetting = (SCREEN_H - 2 * hSide) / 3;
 
@@ -152,7 +152,7 @@ int createPlayerSelectionMenu(Menu *playerSelectionMenu, ControlComponent *ccps,
 	SDL_Rect returnsPanel = createSDL_Rect(wGameModeSetting, hGameModeSetting, wSide, 9);
 	SDL_Rect togglesPanel = createSDL_Rect(wGameModeSetting, 250, wSide, 9 + 250);
 	SDL_Rect continueOrPlayPanel = createSDL_Rect(wGameModeSetting, 250, wSide, 9 + 500);
-	SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
+	//SDL_Rect boardSettingPanel = createSDL_Rect(wBoardSetting, hBoardSetting, wSide + wGameModeSetting, hSide);
 
 	/* Button Rects */
 	SDL_Rect returnToMainMenuButton = createSDL_Rect(wGameModeSetting - 2 * wSide, (hGameModeSetting - 4 * hSide) / 2, wSide, hSide);
@@ -216,7 +216,7 @@ int createAI_SettingsMenu(Menu *AI_SettingsMenu, ControlComponent *ccps, Panel *
 	int wSide = 12;
 	int hSide = 9;
 	int wBoardPanel = 800;
-	int hBoardPanel = 750;
+	//int hBoardPanel = 750;
 	int wTogglePanels = SCREEN_W - wBoardPanel - 2 * wSide;
 	int hTogglePanels = (SCREEN_H - 2 * hSide) / 3;
 
@@ -367,7 +367,7 @@ int createGameMenu(Menu *GamePlayMenu, ControlComponent *ccps, Panel *panel, Con
 	int wSide = 12;
 	int hSide = 9;
 	int wBoardPanel = 800;
-	int hBoardPanel = 750;
+	//int hBoardPanel = 750;
 	int wTogglePanels = SCREEN_W - wBoardPanel - 2 * wSide;
 	int hTogglePanels = (SCREEN_H - 2 * hSide) / 3;
 
@@ -519,9 +519,9 @@ int createHintMenu(Menu *pMenu_Hint, ControlComponent *ccp_HintMenuCCPs, Panel *
 	int wSide = 12;
 	int hSide = 9;
 	int wBoardPanel = 800;
-	int hBoardPanel = 750;
+	//int hBoardPanel = 750;
 	int wTogglePanels = SCREEN_W - wBoardPanel - 2 * wSide;
-	int hTogglePanels = (SCREEN_H - 2 * hSide) / 3;
+	//int hTogglePanels = (SCREEN_H - 2 * hSide) / 3;
 
 	/* Screen Rect */
 	SDL_Rect Rect1024x768 = create1024x768Rect();
@@ -650,7 +650,7 @@ int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *b
 			ccb->pnl = NULL;
 			ccb->rect = createSDL_RectForBoardSquare(crd);
 
-			type = getInitialTypeOfCoord(crd);
+			type = e_getInitialTypeOfCoord(crd);
 			player = getInitialPlayerOfCoord(crd);
 			toolFunc = playerSelectionMenu_toggleTool;
 			createSquareByToolType(ccp_BoardSetting, &(guiBoard[crd.i_coord][crd.j_coord]), (btn_BoardPanelButtons + i*BOARD_SIZE + j), crd, type, player, toolFunc);
@@ -666,10 +666,8 @@ int createGUIBoard(board_g gBoard, ControlComponent *ccp_BoardSetting, Button *b
 int updateGUIBoard(Menu *menu)
 {
 	/* updates the function of the GUIBoard */
-	ControlComponent *ccb;
 	Coord crd;
-	eTool type;
-	int player, identfier = menu->identifier;
+	int identfier = menu->identifier;
 	btnFunc toolFunc;
 
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -762,11 +760,11 @@ btnFunc getGameFunctionOfCoord(Coord crd)
 			{
 				if (isOfPlayer(properties[4], tool))
 				{
-					return (btnFunc)getHighlightFunctionOfTool(tool);
+					return getHighlightFunctionOfTool(tool);
 				}
 				else
 				{
-					return (btnFunc)nullFunction;
+					return nullFunction;
 				}
 			}
 			else if (stageInd == HIGHLIGHTED)
@@ -800,18 +798,18 @@ btnFunc getGameFunctionOfCoord(Coord crd)
 	}
 	else //case PVP mode
 	{
-		int player = properties[4], waiter = generateEnemyColor(player);
+		//int player = properties[4], waiter = generateEnemyColor(player);
 		stageInd = (properties[4] == WHITE_PLAYER) ? whitePlayerTurnStage : blackPlayerTurnStage;
 
 		if (stageInd == NONE_SELECTED)
 		{
 			if (isOfPlayer(properties[4], tool))
 			{
-				return (btnFunc)getHighlightFunctionOfTool(tool);
+				return getHighlightFunctionOfTool(tool);
 			}
 			else
 			{
-				return (btnFunc)nullFunction;
+				return nullFunction;
 			}
 		}
 		else if (stageInd == HIGHLIGHTED)
@@ -1049,7 +1047,6 @@ int setPromoteSquare(Coord crd, int promotiveSituation)
 int gui_makeMove(struct menu *menu, struct controlComponent *ccb)
 {
 	/* Update pBoard */
-	Coord crd;
 	char movedToolType = GetContentOfCoord(pBoard, selectedTool);
 	setSlotInBoard(pBoard, ccb->btn->crd, movedToolType); //moves the tool to the new square
 	setSlotInBoard(pBoard, selectedTool, EMPTY); //empties the square it was at before
@@ -1666,7 +1663,7 @@ int HintMenu_ShowHint(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
 
 	cMove *hintMove = NULL, hintMove_Copy, *pHintMove_Copy = &hintMove_Copy;
-	int scr = 0;
+	//int scr;
 
 	if (properties[5] == PVC_MODE)
 		hintLevel = properties[2];
@@ -1691,7 +1688,7 @@ int HintMenu_ShowHint(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 			hintLevel = GetBestDepth(pBoard, WHITE_PLAYER);
 			properties[2] = hintLevel;
 		}
-		scr = minimax_score(pBoard, WHITE_PLAYER, hintLevel, 1, &hintMove, MIN_VALUE, MAX_VALUE, best);
+		/*scr = */minimax_score(pBoard, WHITE_PLAYER, hintLevel, 1, &hintMove, MIN_VALUE, MAX_VALUE, best);
 	}
 	else
 	{
@@ -1700,7 +1697,7 @@ int HintMenu_ShowHint(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 			hintLevel = GetBestDepth(pBoard, BLACK_PLAYER);
 			properties[2] = hintLevel;
 		}
-		scr = minimax_score(pBoard, BLACK_PLAYER, hintLevel, 1, &hintMove, MIN_VALUE, MAX_VALUE, best);
+		/*scr = */minimax_score(pBoard, BLACK_PLAYER, hintLevel, 1, &hintMove, MIN_VALUE, MAX_VALUE, best);
 	}
 	hintLevel = oldHintLevel;
 	properties[2] = oldProperties_2;
@@ -2014,7 +2011,7 @@ int freeMenu(Menu *menu)
 		freePanel(menu->panel_2);
 	if (menu->panel_3 != NULL)
 		freePanel(menu->panel_3);
-	
+
 	return 1;
 }
 
@@ -2088,8 +2085,8 @@ int GameLabel(Window *window, int thinking)
 	ControlComponent *ccl_gameHeader = (ControlComponent*)menu->header;
 	Label *lbl_gameHeader = ccl_gameHeader->lbl;
 
-	ControlComponent *ccl_info = menu->panel_2->pnl->children;
-	Label *lbl_infoTurn;
+	//ControlComponent *ccl_info = menu->panel_2->pnl->children;
+	//Label *lbl_infoTurn;
 
 	char *filename;
 	if (thinking == GAME_H)
@@ -2157,7 +2154,7 @@ int highlightMovesList(Menu *menu, Coord crd, cMove *moves)
 
 int isOfPlayer(int player, char tool)
 {
-	if (player == WHITE_PLAYER && islower(tool) || player == BLACK_PLAYER && isupper(tool))
+	if ((player == WHITE_PLAYER && islower(tool)) || (player == BLACK_PLAYER && isupper(tool)))
 		return 1;
 	return 0;
 }
@@ -2240,7 +2237,7 @@ const char *getHintPicName(void)
 
 
 
-eTool getInitialTypeOfCoord(Coord crd)
+eTool e_getInitialTypeOfCoord(Coord crd)
 {
 	/* Pre: coord is in board */
 	if (crd.j_coord > 1 && crd.j_coord < 6)
@@ -2290,11 +2287,5 @@ int resetHighlights(void)
 	{
 		highlightedSquares[i++] = GenerateCoord(-1, -1);
 	}
-	return 1;
-}
-
-int terminateProgram(void)
-{
-	properties[1] = 1;
 	return 1;
 }
