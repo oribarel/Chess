@@ -321,7 +321,7 @@ int GUI_Main(board_t passedBoard)
 
 
 					int oldDepth = properties[2];
-					int best = oldDepth == 0 ? 1 : 0;
+					int best = (oldDepth == 0);
 
 					if (properties[3] == BLACK_PLAYER)//if computer's color is white
 					{

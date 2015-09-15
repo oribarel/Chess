@@ -1599,6 +1599,8 @@ int showPlayerSelectionMenu(Menu *menu, ControlComponent *buttonWhichPressCalled
 
 int ShowHintMenu(struct menu *menu, struct controlComponent *ccb)
 {
+	if (properties[0] == SETTINGS_MODE)
+		return 1;
 	if (properties[5] == PVC_MODE)
 	{
 		/* in PVC mode the toggle button for hint level is disabled */
@@ -2037,39 +2039,50 @@ int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
 
 	SDL_FreeSurface1(pMenu_Game->panel_2->pnl->children->lbl->pic);
 	SDL_FreeSurface1(pMenu_Game->panel_2->pnl->children->next->lbl->pic);
+
 	if (scr == MATE_WIN_LOSE)
 	{
 		if (properties[4] == WHITE_PLAYER)
 			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_checkMate_BlackWins.bmp");
 		else
 			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_checkMate_WhiteWins.bmp");
+
+		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_blankLabel.bmp");
 	}
 	else if (scr == TIE_SCORE)
+	{
 		pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_Tie.bmp");
-	else if (kingUnderThreat)
-	{
-		if (properties[4] == WHITE_PLAYER)
-			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_WhitePlaysCheck.bmp");
-		else
-			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_BlackPlaysCheck.bmp");
+		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_blankLabel.bmp");
 	}
+	
 	else
 	{
-		if (properties[4] == WHITE_PLAYER)
-			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_WhitePlayerTurn.bmp");
+		if (kingUnderThreat)
+		{
+			if (properties[4] == WHITE_PLAYER)
+				pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_WhitePlaysCheck.bmp");
+			else
+				pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_BlackPlaysCheck.bmp");
+		}
 		else
-			pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_BlackPlayerTurn.bmp");
-	}
+		{
+			if (properties[4] == WHITE_PLAYER)
+				pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_WhitePlayerTurn.bmp");
+			else
+				pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_BlackPlayerTurn.bmp");
+		}
 
-	if (stageTurn == PROMOTE)
-	{
-		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_promote.bmp");
-	}
+		if (stageTurn == PROMOTE)
+		{
+			pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_promote.bmp");
+		}
 
-	else
-	{
-		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_makeMove.bmp");
+		else
+		{
+			pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_makeMove.bmp");
+		}
 	}
+	
 	drawLabelsOfPanel(pMenu_Game->panel_2->pnl->children);
 
 

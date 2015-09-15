@@ -171,14 +171,16 @@ eTool get_eToolFromType(char type)
 
 int bestScore(board_t board, int player)
 {
-	Coord crd;
 	int column;
 	int score[2];  /* each side's score */
 	int ally, enemy, playerBlocked = 1, opponentBlocked = 1;
-
+	Coord crd;
 
 	/* Check for win or tie situations: */
 	/* Since getMoves doesn't provide any moves that leave the king at CHECK, if there aren't any moves, it is MATE */
+	
+	/* score function code copied*/
+	int canMove = 0;
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
 	{
 		crd.i_coord = (int)mod(k, BOARD_SIZE);
@@ -187,19 +189,34 @@ int bestScore(board_t board, int player)
 		enemy = IsEnemy(GetContentOfCoord(board, crd), player);
 		if (GetContentOfCoord(board, crd) != EMPTY)
 		{
-			if (ally > 0 && canMoveThisTool(board, crd) == 1)
-				playerBlocked = 0;
-			if (enemy > 0 && canMoveThisTool(board, crd) == 1)
-				opponentBlocked = 0;
+			if (opponentBlocked || playerBlocked)
+			{
+				canMove = canMoveThisTool(board, crd);
+				if (ally > 0 && canMove == 1)
+					playerBlocked = 0;
+				if (enemy > 0 && canMove == 1)
+					opponentBlocked = 0;
+			}
 		}
 	}
-	if (playerBlocked && !opponentBlocked)
-		return -1000000;
-	else if (playerBlocked && opponentBlocked)
-		return -999999;
-	else if (opponentBlocked)
-		return 1000000;
-
+	if (playerBlocked == 1)
+	{
+		if (KingUnderThreat(board, player))
+			return MATE_WIN_LOSE;//player lost
+		else
+			return TIE_SCORE; //tie
+	}
+	if (opponentBlocked == 1)
+	{
+		if (KingUnderThreat(board, -player))
+			return MATE_WIN_SCORE;//player won
+		else
+			return TIE_SCORE; //tie
+	}
+	/* END score function code copied*/
+	
+	
+	
 	/* this is the first pass: set up pawnRow, piecesScoreValue, and pawnsScoreValue. */
 	for (int i = 0; i < 10; ++i)
 	{
@@ -757,8 +774,8 @@ int GetBestDepth(board_t board, int player)
 		depth++;
 	}
 	if (DEBUG)
-		printf("best depth is: %d", depth - 1);
-	return --depth;
+		printf("best depth is: %d\n", depth - 1);
+	return --depth; //TODO: how much we want?
 
 }
 

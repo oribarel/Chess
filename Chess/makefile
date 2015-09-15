@@ -7,7 +7,7 @@ clean:
 	rm chessprog $(O_FILES)
 
 chessprog: $(O_FILES)
-	gcc -o $@ $^ $(C_FLAGS)
+	gcc -O2 -o $@ $^ $(C_FLAGS)
 
 Chess_Logic.o: Chess_Logic.c 
 	gcc -c $(C_FLAGS) Chess_Logic.c

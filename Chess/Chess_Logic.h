@@ -18,7 +18,7 @@
 
 
 #define PLAYER_WINS "player wins!"
-#define DEBUG 0
+#define DEBUG 1
 #define DAMKA 1
 
 #define MIN 0
@@ -89,6 +89,7 @@ typedef struct chessMove {
 	int eaten;  //0 if no captures made. else the char that represents the eaten piece
 	int promote; //0 if no promotion needed. else the char that represents the new promoted piece
 	struct chessMove *next;
+	int scoreWhenMade;
 } cMove;
 
 typedef enum Tool

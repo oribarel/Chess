@@ -464,6 +464,7 @@ cMove *AddMove(cMove **head, char toolType, Coord src, Coord dst, int eater, int
 	newMove->promote = promote;
 	newMove->next = *head;
 	*head = newMove;
+	newMove->scoreWhenMade = -1000002;
 	return *head;
 }
 
@@ -1428,8 +1429,6 @@ int makeMove(board_t board, cMove *move)
 	else
 		setSlotInBoard(board, move->dst, move->toolType);
 	return 0;
-
-
 }
 
 
