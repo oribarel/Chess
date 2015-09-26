@@ -43,9 +43,7 @@ const char *constBlack = "black";
 void init_board(board_t board)
 // j is rows, i is columns
 {
-	int i = 0, j = 0;
-	Coord crd;
-	crd.i_coord = i; crd.j_coord = j;
+
 
 	//fill white
 	init_rowV(board, WHITE_PLAYER);
@@ -810,7 +808,6 @@ int safeToMoveKing(board_t board, int player, Coord dst)
 
 	setSlotInBoard(board, kingCrd, generateTool(player, King));
 	setSlotInBoard(board, dst, dstType);
-
 	return !result;
 }
 

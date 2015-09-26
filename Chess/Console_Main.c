@@ -38,6 +38,7 @@ void setSlot(board_t board, char *horiz, char *vert, char type)
 				printf(WRONG_POSITION);
 		}
 
+
 	}
 }
 
@@ -916,6 +917,7 @@ int Parse(char *line, board_t board)
 		else if (strcmp(token, cmmd10) == 0)
 			//quit
 		{
+			//free(line);
 			properties[1] = 1;
 			return 0;
 		}
@@ -935,22 +937,6 @@ int Parse(char *line, board_t board)
 
 
 
-			/*checing check mate or tie before starting the game*/
-			int curScore = score(board, properties[4]);
-			if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
-			{
-				printWinner(-properties[4]);//print player wins;
-				properties[1] = 1;
-			}
-			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
-			{
-				printf(TIE);//print tie;
-				properties[1] = 1;
-			}
-			else if (KingUnderThreat(board, properties[4]))
-				printf(CHECK);
-
-
 			//update kings' coordinates
 			for (int j = BOARD_SIZE - 1; j >= 0; j--){
 				for (int i = 0; i < BOARD_SIZE; i++){
@@ -968,6 +954,31 @@ int Parse(char *line, board_t board)
 					}
 				}
 			}
+
+
+
+
+
+
+
+			/*checing check mate or tie before starting the game*/
+			int curScore = score(board, properties[4]);
+
+			if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
+			{
+				printWinner(-properties[4]);//print player wins;
+				properties[1] = 1;
+			}
+
+			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
+			{
+				printf(TIE);//print tie;
+				properties[1] = 1;
+			}
+			else if (KingUnderThreat(board, properties[4]))
+				printf(CHECK);
+
+
 
 			//update danger zone
 			/*UpdateDangerZone(board, WHITE_PLAYER);
@@ -1024,7 +1035,7 @@ int Parse(char *line, board_t board)
 				return 1;
 			}
 			makeMove(board, legalMove);
-			free(legalMove);
+			freeMovesList(legalMove);
 			print_board(board);
 			return 10;//successful move was made
 		}
@@ -1068,6 +1079,7 @@ int Parse(char *line, board_t board)
 			//print moves
 			printMovesList(pMove);
 			freeMovesList(pMove);
+			pMove = NULL;
 			return 0;
 		}
 
@@ -1100,6 +1112,7 @@ int Parse(char *line, board_t board)
 			//print moves
 			printMovesList(pMove);
 			freeMovesList(pMove);
+			pMove = NULL;
 			properties[2] = tmpD;
 			return 0;
 		}
@@ -1413,6 +1426,7 @@ int Console_Main(board_t board)
 				printMove(computerMove);
 				makeMove(brd, computerMove);
 				free(computerMove);
+				computerMove = NULL;
 				//print board
 				print_board(brd);
 			}
@@ -1679,14 +1693,14 @@ int Test()
 	srand(25);
 
 	//int parseResult = 0;
-	int iterations = 2;
+	int iterations = 40;
 	int printMode = 1;
 	int COMPUTER_COLOR = BLACK_PLAYER;
 	int record = 1;
 	properties[0] = 0;
 	//properties[3] = BLACK_PLAYER;	
 	//difficulty
-	properties[2] = 0;
+	properties[2] = 3;
 	properties[5] = 2;
 	properties[4] = WHITE_PLAYER;
 	int iterationToRecord = 41;
@@ -1771,7 +1785,7 @@ int Test()
 		else
 			record = 0;
 		countMoves++;
-		if (countMoves == 30)
+		if (countMoves == 45) // MAIMUM NUMBER OF MOVES
 		{
 			countMoves = 0;
 			properties[4] = COMPUTER_COLOR;

@@ -7,7 +7,7 @@ int mini_num = 0;
 pay attention: this function only returns integers. the argument bestMove
 is an address to a pointer that exists outside of minimax_score, and when obtaining the information about
 which move is truely optimal (due to depth restrictions) the content of the address is set to the address of that said move. */
-int minimax_score2(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int best)
+int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **bestMove, int a, int b, int best)
 {
 	cMove *movesList, *tmp;
 	int bestValue, val;
@@ -79,13 +79,16 @@ int minimax_score2(board_t board, int player, int depth, int minOrMax, cMove **b
 			bestValue = imax(bestValue, val);
 			a = imax(a, bestValue);
 			movesList = movesList->next;
-			if (bestUpdated == 0)
-			{
+			//if (bestUpdated == 0)
+			//{
 				free(tmp);
-			}
+			//}
 			tmp = movesList;
-			if (b <= a)
+			if (b < a)
+			{
+				freeMovesList(movesList);
 				break; // b cut-off
+			}
 		}
 		return bestValue;
 	}
@@ -125,14 +128,17 @@ int minimax_score2(board_t board, int player, int depth, int minOrMax, cMove **b
 			bestValue = imin(bestValue, val);
 			b = imin(b, bestValue);
 			movesList = movesList->next;
-			if (bestUpdated == 0)
-			{
+			//if (bestUpdated == 0)
+			//{
 				free(tmp);
-			}
+			//}
 			tmp = movesList;
 
-			if (b <= a)
+			if (b < a)
+			{
+				freeMovesList(movesList);
 				break; // a cut-off
+			}
 
 		}
 		return bestValue;
@@ -142,7 +148,7 @@ int minimax_score2(board_t board, int player, int depth, int minOrMax, cMove **b
 }
 
 
-int minimax_score(board_t board, int player, int depth, int maximizingPlayer, cMove **bestMove, int a, int b, int best)
+int minimax_score2(board_t board, int player, int depth, int maximizingPlayer, cMove **bestMove, int a, int b, int best)
 {
 	cMove *movesList, *head;
 	int bestValue, val, immediateWin = 0;
@@ -218,7 +224,7 @@ int minimax_score(board_t board, int player, int depth, int maximizingPlayer, cM
 
 				bestValue = imax(bestValue, val);
 				a = imax(a, bestValue);
-				if (b <= a)
+				if (b < a)
 					break; // b cut-off
 			}
 
@@ -241,7 +247,7 @@ int minimax_score(board_t board, int player, int depth, int maximizingPlayer, cM
 			b = imin(b, bestValue);
 			movesList = movesList->next;
 
-			if (b <= a)
+			if (b < a)
 				break; // a cut-off
 
 		}
@@ -254,7 +260,7 @@ int minimax_score(board_t board, int player, int depth, int maximizingPlayer, cM
 
 
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
-int makeMove_ComputeScore_Undo2(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int boardsCounter)
+int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int boardsCounter)
 /*Saves all the eaten tool types in the eatenTools array, all while making the move on the given board.
 Then, run minimax algorithm in recursion to produce a score. At last, undo the move, using the array, and return the score computed.*/
 {
@@ -297,7 +303,7 @@ int canWinImmediately(board_t board, cMove *movesList, int player)
 
 
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
-int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int maximizingPlayer, int a, int b, int best)
+int makeMove_ComputeScore_Undo2(board_t board, cMove *move, int player, int depth, int maximizingPlayer, int a, int b, int best)
 /*Makes the move on the given board. Then, runs minimax algorithm in recursion to produce a score. At last, undos the move and returns the score computed.*/
 {
 	int scr = 0;
