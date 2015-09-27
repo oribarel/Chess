@@ -260,7 +260,7 @@ int minimax_score2(board_t board, int player, int depth, int maximizingPlayer, c
 
 
 /*Called from within the minimax_score func. make reversable alterations on the board: see description inside.*/
-int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int boardsCounter)
+int makeMove_ComputeScore_Undo(board_t board, cMove *move, int player, int depth, int minOrMax, int a, int b, int best)
 /*Saves all the eaten tool types in the eatenTools array, all while making the move on the given board.
 Then, run minimax algorithm in recursion to produce a score. At last, undo the move, using the array, and return the score computed.*/
 {
@@ -269,7 +269,7 @@ Then, run minimax algorithm in recursion to produce a score. At last, undo the m
 	makeMove(board, move);
 
 	//make a recursive call to minimax_score and update the nuber of boards that have already been evaluated	
-	scr = minimax_score(board, -player, depth - 1, 1 - minOrMax, NULL, a, b, ++boardsCounter);
+	scr = minimax_score(board, -player, depth - 1, 1 - minOrMax, NULL, a, b, best);
 
 	//undo the move - reconstruct the board as before
 	setSlotInBoard(board, move->src, move->toolType);

@@ -1121,7 +1121,7 @@ int Parse(char *line, board_t board)
 			//get_score
 		{
 			int score = 0;
-
+			int best = 0;
 			//parsing the depth d
 			int d, tmpD = properties[2];
 			cMove *m;
@@ -1129,11 +1129,14 @@ int Parse(char *line, board_t board)
 			token = strtok(NULL, " ");
 			currentPosition = token;
 			if (currentPosition[0] == 'b')
-				d = BESTval;
+			{
+				best = 1;
+				d = GetBestDepth(board, properties[4]);
+			}
 			else
 				d = currentPosition[0] - '0';
-
 			//parsing the move m
+			token = strtok(NULL, " ");
 			token = strtok(NULL, "&");
 			currentPosition = token;
 			m = (cMove *)isLegalMove(currentPosition, board, pMove);
@@ -1141,12 +1144,12 @@ int Parse(char *line, board_t board)
 
 			//get  best moves in pMove
 			properties[2] = d;
-			score = makeMove_ComputeScore_Undo(board, m, properties[4], d, 1, MIN_VALUE, MAX_VALUE, 0);
+			score = makeMove_ComputeScore_Undo(board, m, properties[4], d, 1, MIN_VALUE, MAX_VALUE, best);
 			freeMovesList(m);
 
 			//print score
 			if (!properties[1])
-				printf("%d", score);
+				printf("%d\n", score);
 			properties[2] = tmpD;
 			return 0;
 		}
@@ -1690,10 +1693,10 @@ int Test()
 {
 
 	//srand(time(NULL));
-	srand(25);
+	srand(198487);
 
 	//int parseResult = 0;
-	int iterations = 40;
+	int iterations = 1000;
 	int printMode = 1;
 	int COMPUTER_COLOR = BLACK_PLAYER;
 	int record = 1;
@@ -1703,7 +1706,7 @@ int Test()
 	properties[2] = 3;
 	properties[5] = 2;
 	properties[4] = WHITE_PLAYER;
-	int iterationToRecord = 41;
+	int iterationToRecord = 42;
 
 
 	/**************************************************************
@@ -1776,11 +1779,11 @@ int Test()
 		{
 			record = 1;
 			char *s = (char*)calloc(20, sizeof(char));
-			char s2[16] = "chess1.xml\n";
+			char s2[16] = "chess3.xml\n";
 			for (int i = 0; i < 16; i++)
 				s[i] = s2[i];
 			Save(brd, s);
-			Record(brd, f);
+			Record(brd, f);		
 		}
 		else
 			record = 0;
