@@ -11,15 +11,15 @@
 #include <ctype.h>
 
 
-//damka
+
 #define WHITE_M 0
-//damka
+
 #define BLACK_M 1
 
 
 #define PLAYER_WINS "player wins!"
 #define DEBUG 1
-#define DAMKA 1
+
 
 #define MIN 0
 #define MAX 1
@@ -71,7 +71,7 @@
 #define XML_FIRST_LINE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 #define WRONG_FILE_NAME "Wrong file name\n"
 #define BESTval 0
-
+#define ERROR_CLOSING_FILE "error in file closing\n"
 
 
 
