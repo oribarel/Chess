@@ -35,7 +35,7 @@
 #define print_message(message) (printf("%s", message));
 
 
-#define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;) // TODO: check this
+#define perror_message1(func_name) (fprintf(stderr, "Error: standard function %s has failed\n", func_name); properties[1] = 1; return NULL;) 
 #define BEST "best\n"
 
 

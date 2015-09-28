@@ -24,7 +24,7 @@
 #define MIN 0
 #define MAX 1
 
-#define MAX_SCORE 400 //TODO: what to do?
+#define MAX_SCORE 400
 #define MAX_VALUE 1000001
 #define MIN_VALUE -1000001
 #define TIE_SCORE -999999

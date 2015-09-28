@@ -1,5 +1,4 @@
 /*********************************************************************************************************
-TODO: move the structs explanation to chess_Logic
 The structs are:
 - Coord: a coordinate on the board. see header file.
 - cMove(functions as a linked list node): which contains some data about the movement,

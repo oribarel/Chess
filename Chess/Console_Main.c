@@ -229,103 +229,9 @@ void setBoard(board_t board, char *config)
 }
 
 
-/*int score(board_t board, char player)
-TODO: win/stuck/lost implement inside
-{
-Coord coord;
-int score = 0, ally, enemy, playerExists = 0, opponentExists = 0;
-for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
-{
-coord.i_coord = (int)mod(k, BOARD_SIZE);
-coord.j_coord = k / BOARD_SIZE;
-ally = IsAlly(GetContentOfCoord(board, coord), player);
-enemy = IsEnemy(GetContentOfCoord(board, coord), player);
-score += (ally - enemy);
-if (!playerExists && ally > 0){ playerExists = 1; }
-if (!opponentExists && enemy > 0){ opponentExists = 1; }
-}
-if (!opponentExists && playerExists){ return 100; }
-if (!playerExists && opponentExists){ return -100; }
-return score;
-}*/
-
-#ifndef DAMKA
-/* an O(1) function to see if a disc is movable or stuck.
-returns 1 if movable and 0 otherwise.*/
-int canMoveThisTool(board_t board, Coord coord)
-{
-	Coord crd1, crd2;
-	crd1 = coord;
-	char tool = GetContentOfCoord(board, coord);
-	//if there is any empty adjacent diagonal cell or enemy to eat
-	for (int i = -1; i < 2; i += 2)
-	{
-		for (int j = -1; j < 2; j += 2)
-		{
-
-			crd1 = coord;
-			crd2 = coord;
-			crd1.i_coord += i; crd1.j_coord += j;
-			crd2.i_coord += 2 * i; crd2.j_coord += 2 * j;
-			if (tool == WHITE_K || tool == BLACK_K || ((tool == WHITE_M) && (crd1.j_coord > coord.j_coord)) || (tool == BLACK_M && crd1.j_coord < coord.j_coord))
-			{
-				if (isInBoard(crd1) && GetContentOfCoord(board, crd1) == EMPTY)//if there is any empty adjacent diagonal cell
-					return 1;
-			}
-			if (isInBoard(crd2) && GetContentOfCoord(board, crd2) == EMPTY)//if there is any empty adjacent diagonal cell or enemy to eat
-			{
-				if (
-					((tool == WHITE_K && (isWhite(GetContentOfCoord(board, crd1)) == 0)))
-					|| ((tool == BLACK_K && (isWhite(GetContentOfCoord(board, crd1)) == 1)))
-					|| ((tool == WHITE_M && (isWhite(GetContentOfCoord(board, crd1)) == 0) && GetContentOfCoord(board, crd1) != EMPTY))
-					|| ((tool == BLACK_M && isWhite(GetContentOfCoord(board, crd1)) == 1) && GetContentOfCoord(board, crd1) != EMPTY))
-
-					return 1;
-			}
-		}
-	}
-
-
-	return 0;
-
-}
-#endif
 
 
 
-/*int minimax_score(board_t board, char player, int depth, int minOrMax)
-{
-Move *movesList, *tmp;
-int scr = 101;
-if (depth == 0)
-return score(board, player);
-else
-{
-movesList = getMoves(board, player);
-tmp = movesList;
-if (movesList != NULL)
-{
-do
-{
-scr = (scr == 101) ? makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax) :
-((minOrMax) ? imax(scr, makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax)) :
-imin(scr, makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax)));
-
-movesList = movesList->next;
-free(tmp->route);
-free(tmp);
-tmp = movesList;
-
-} while (movesList != NULL);
-return scr;
-
-}
-else
-{
-return score(board, player);
-}
-}
-}*/
 
 
 
@@ -633,29 +539,7 @@ board_t GenerateRandomConfiguration()
 
 
 
-/*DEBUG*/
-#ifndef DAMKA
-board_t unitTest_movements(int i)
-{
-	board_t brd = NULL;
-	char *config;
-	brd = createBoard();
-	config = configuration(i);
-	setBoard(brd, config);
-	print_board(brd);
 
-	Move *moves;
-	printf("\nThe score for this board is: %d for W player and %d for B player.\n\n", score(brd, WHITE_K), score(brd, BLACK_K));
-	printf("moves for white are:\n");
-	moves = getMoves(brd, WHITE_K);
-	printMovesList(moves);
-
-	printf("\nmoves for black are:\n");
-	moves = getMoves(brd, BLACK_K);
-	printMovesList(moves);
-	return brd;
-}
-#endif
 
 /*Parses the input inserted by the user and operates accordingly.
 returns ints for convenience. specifically 10 is an important returned value: see inside.*/
@@ -838,7 +722,7 @@ int Parse(char *line, board_t board)
 
 		else if (strcmp(token, cmmd8) == 0)
 			//set
-		{//TODO: make sure that there is at exactly one king of each type
+		{
 			char *horiz, *vert, *color, *type, tool;
 
 			token = strtok(NULL, "<,");
@@ -1006,10 +890,7 @@ int Parse(char *line, board_t board)
 
 
 
-			//update danger zone
-			/*UpdateDangerZone(board, WHITE_PLAYER);
-			UpdateDangerZone(board, BLACK_PLAYER);*/
-
+			
 			if (DEBUG)
 				print_board(board);
 
@@ -1368,42 +1249,16 @@ int Console_Main(board_t board)
 
 	int parseResult = 0;
 
-	/*char* board[BOARD_SIZE];
-	char row0[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char row1[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char row2[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char row3[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char row4[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char row5[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char row6[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char row7[BOARD_SIZE] = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	board[0] = row0;
-	board[1] = row1;
-	board[2] = row2;
-	board[3] = row3;
-	board[4] = row4;
-	board[5] = row5;
-	board[6] = row6;
-	board[7] = row7;*/
+	
 
-	board_t brd = board; //= NULL; TODO: experiement
+	board_t brd = board; 
 	char *input = NULL;
 	cMove *computerMove = NULL;
-	//cMove *allPossibleMoves = NULL, *tmp;
+	
 
 	init_board(brd);
 
-	/*if (DEBUG)
-	brd = GenerateRandomConfiguration();
-	if (DEBUG) //tests
-	{
-	for (int i = 1; i < 12; i++)
-	{
-	if (i==9)
-	brd = unitTest_movements(i);
-
-	}
-	}*/
+	
 
 	print_board(brd);
 
@@ -1481,27 +1336,7 @@ int Console_Main(board_t board)
 		}
 		else if (!properties[0])
 		{
-			/*if (allPossibleMoves == NULL)
-			{
-			if (properties[3] == 0)//if player is white
-			allPossibleMoves = getMoves(brd, WHITE_M);
-			else //if player is black
-			allPossibleMoves = getMoves(brd, BLACK_M);
-			pMove = allPossibleMoves;
-			}
-			if (properties[1]) //if quit
-			{
-			pMove = allPossibleMoves;
-
-			while (allPossibleMoves != NULL)
-			{
-			allPossibleMoves = allPossibleMoves->next;
-			free(pMove->route);
-			free(pMove);
-			pMove = allPossibleMoves;
-			}
-			continue;
-			}*/
+			
 			if (properties[1]) //if quit
 				continue;
 			if (properties[4] == WHITE_PLAYER)
@@ -1537,14 +1372,7 @@ int Console_Main(board_t board)
 				else if (KingUnderThreat(board, -properties[4]))
 					printf(CHECK);
 			}
-			/*tmp = allPossibleMoves;
-			while (allPossibleMoves != NULL)
-			{
-			allPossibleMoves = allPossibleMoves->next;
-			free(tmp->route);
-			free(tmp);
-			tmp = allPossibleMoves;
-			}*/
+			
 			//change color of current player
 			properties[4] = -properties[4];
 
@@ -1561,110 +1389,11 @@ int Console_Main(board_t board)
 
 
 	//quit(brd, freeBoard);
-	exit(1);
+	exit(0);
 	return 0;
 
 
-	/*DEBUG*/
-	/*
-	int iterations = 250;
-	int printMode = 0;
-
-
-	while (!properties[1]&&iterations>0)//while not quit
-	{
-	computerMove = NULL;
-	if (!properties[0] && (properties[4] != properties[3]))//if in game state and it is the computer's turn
-	{
-
-	if (score(brd, getGenericTool(1)) == -100)//no legal move for the computer (computer lost)
-	{
-	printWinner(0);//print player wins;
-	//TODO:terminate the game!
-	brd = GenerateRandomConfiguration();
-	//brd = unitTest_movements(9);
-	iterations--;
-	printf("%u\n", iterations);
-	if (iterations == 4504)
-	printMode = 1;
-	continue;
-	}
-
-	//run MINIMAX
-	if (properties[3])//if computer's color is white
-	minimax_score(brd, WHITE_M, properties[2], 1, &computerMove);
-	else
-	minimax_score(brd, BLACK_M, properties[2], 1, &computerMove);
-
-	//print computer's move
-	if (computerMove != NULL)
-	{
-	if (printMode)
-	{
-	printf("Computer: move\n ");
-	printMove(computerMove);
-	print_board(brd);
-	}
-
-	}
-	if (computerMove == NULL)
-	print_board(brd);
-	makeMove(brd, computerMove);
-	free(computerMove->route);
-	free(computerMove);
-	//print board
-	//print_board(brd);
-	//change player
-
-	if ((score(brd, getGenericTool(0)) == -100))//if no legal move for the player (player lost)
-	{
-	printWinner(1);//print computer wins;
-	//TODO:terminate the game!
-	brd = GenerateRandomConfiguration();
-	//brd = unitTest_movements(9);
-	iterations--;
-	printf("%u\n", iterations);
-	if (iterations == 4504)
-	printMode = 1;
-	continue;
-	}
-	properties[4] = 1 - properties[4];
-	continue;
-	}
-	else if (!properties[0] && (properties[4] == properties[3]))//if in game state and it is the player's turn
-	{
-	if (allPossibleMoves == NULL)
-	{
-	if (properties[3] == 0)//if player is white
-	allPossibleMoves = getMoves(brd, WHITE_M);
-	else //if player is black
-	allPossibleMoves = getMoves(brd, BLACK_M);
-	pMove = allPossibleMoves;
-	}
-	//printf(ENTER_YOUR_MOVE);
-	}
-
-	computerMove = chooseMoveRandonly(brd);
-	makeMove(brd, computerMove);
-	if (printMode)
-	{
-	printf("player: move ");
-	printMove(computerMove);
-	print_board(brd);
-	}
-	tmp = allPossibleMoves;
-	while (allPossibleMoves != NULL)
-	{
-	allPossibleMoves = allPossibleMoves->next;
-	free(tmp->route);
-	free(tmp);
-	tmp = allPossibleMoves;
-	}
-	properties[4] = 1 - properties[4];
-	}
-	printf("bye");
-
-	return 0;*/
+	
 }
 
 
@@ -1741,7 +1470,7 @@ int Test()
 
 
 
-	board_t brd; //= NULL; TODO: experiement
+	board_t brd; //= NULL; 
 	//char *input = NULL;
 	cMove *computerMove = NULL;
 	cMove *allPossibleMoves = NULL, *tmp;

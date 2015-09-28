@@ -38,7 +38,7 @@ Coord BlackKing = { -1, -1 };
 const char *constWhite = "white";
 const char *constBlack = "black";
 
-/*CONVD*/
+
 /* Initializes the board to the regular game setting.*/
 void init_board(board_t board)
 // j is rows, i is columns
@@ -234,7 +234,7 @@ cMove *QueenMoves(board_t board, Coord coord)
 
 }
 
-/*CONVD*/
+
 /*returns 0 if the two chars reperesent allies*/
 int IsEnemy(char slot, int myColor)
 {
@@ -304,8 +304,7 @@ int isInBoard(Coord coord)
 	return 0;
 }
 
-/*CONVD*/
-//TODO: change next line
+
 /*return 1 if c is either 'm', 'k', 'M', 'K'etc.; otherwise 0.*/
 int isTool(char c)
 {
@@ -332,13 +331,11 @@ char GetContentOfCoord(board_t board, Coord coord)
 	return board[coord.i_coord][coord.j_coord];
 }
 
-/*TODO: consider this*/
+
 /*sets the coordinate slot in the board to be ch.*/
 void setSlotInBoard(board_t board, Coord slot, char ch)
 {
-	/*if (anointAKing(slot.j_coord, ch))
-	board[slot.i_coord][slot.j_coord] = getCorrespondingKing(ch);
-	else*/
+	
 
 	//set
 	board[slot.i_coord][slot.j_coord] = ch;
@@ -357,16 +354,14 @@ void setSlotInBoard(board_t board, Coord slot, char ch)
 
 		}
 	}
-	/*UpdateDangerZone(board, WHITE_PLAYER);
-	UpdateDangerZone(board, BLACK_PLAYER);*/
+
 }
 
 
 
-/*CONVD*/
-/*TODO: change this: returns 0 if tool is an oponnent tool
-return 1 if tool is ally man
-retrun 3 if tool is ally king
+
+/*returns 0 if tool is an oponnent tool
+otherwise, return the heuristic score of the tool as described in the project's official document
 */
 int IsAlly(char tool, int myColor)
 {
@@ -1196,7 +1191,7 @@ cMove* KingMoves(board_t board, Coord coord)
 	return head;
 }
 
-//TODO: implement 
+
 cMove *movesByPieceType(board_t board, Coord coord)
 {
 	char cordTool = GetContentOfCoord(board, coord);
@@ -1369,7 +1364,7 @@ int score(board_t board, int player)
 	}
 
 
-	/*TODO: consider what to do with this part*/
+	
 	if (playerBlocked == 1)
 	{
 		if (KingUnderThreat(board, player))
@@ -1419,7 +1414,7 @@ int isWhite(char type)
 /*changes the board so it describes the state created after the move is made.*/
 int makeMove(board_t board, cMove *move)
 {
-	//char myColor = GetContentOfCoord(board, move->src);//TODO: consider delete this line
+	
 	Coord crd = move->src;
 	setSlotInBoard(board, crd, EMPTY);
 	if (move->promote)
@@ -1553,9 +1548,10 @@ char getCorrespondingKing(char type)
 }
 
 
-//TODO: implement
+
 int quit(void)
 {
+	exit(0);
 	return 0;
 }
 
@@ -1731,7 +1727,7 @@ int LoadFromFile(char* file_path, board_t board){
 }
 
 
-/*CONVD*/
+
 /*prints the route of the move*/
 void printMove(cMove *move)
 {
@@ -1753,7 +1749,7 @@ void printMove(cMove *move)
 
 
 /*FOR DEBUG ONLY!*/
-/*CONVD*/
+
 /*prints the route of the move*/
 void printMoveToFile(FILE *f, cMove *move)
 {
@@ -1779,7 +1775,7 @@ void printMoveToFile(FILE *f, cMove *move)
 
 
 
-/*CONVD*/
+
 /*prints an entire linked list of Moves*/
 void printMovesList(cMove *move)
 {
