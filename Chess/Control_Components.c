@@ -22,7 +22,7 @@ int createWindow(Window *pWindow)
 {
 	/* 1 on successful run, 0 if SDL failed */
 	SDL_WM_SetCaption("Chess", "Chess");
-	SDL_Surface *surface = SDL_SetVideoMode(SCREEN_W, SCREEN_H, 0, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	SDL_Surface *surface = SDL_SetVideoMode(SCREEN_W, SCREEN_H, 0, SDL_HWSURFACE | SDL_DOUBLEBUF); // for fullscreen add: SDL_FULLSCREEN);
 	if (surface == NULL)
 	{
 		printf("ERROR: failed to set video mode: %s\n", SDL_GetError());

@@ -1516,6 +1516,11 @@ int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunc
 	selectedSlot = '0';
 	properties[0] = SETTINGS_MODE;
 
+	if (properties[5] == 1)
+	{
+		properties[2] = 1;
+		properties[3] = WHITE_PLAYER;
+	}
 	if (properties[4] == WHITE_PLAYER)
 	{
 		whitePlayerTurnStage = NONE_SELECTED;
