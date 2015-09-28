@@ -14,6 +14,7 @@ cMove *pMove;
 void setSlot(board_t board, char *horiz, char *vert, char type)
 {
 	Coord coord;
+	char originalContent;
 	int i = (int)*horiz - 97;
 	int j = (int)strtof(vert, NULL) - 1;
 	coord.i_coord = i; coord.j_coord = j;
@@ -22,12 +23,11 @@ void setSlot(board_t board, char *horiz, char *vert, char type)
 
 		if (isInBoard(coord))
 		{
-			if (NotTooManyOfType(board, type))
+			originalContent = board[i][j];
+			board[i][j] = type;
+			if (!NotTooManyOfType(board, type))
 			{
-				board[i][j] = type;
-			}
-			else
-			{//TODO: test the case in which the number of pieces equal to the maximum number of tools and the set command just changes such a piece to the exact same type
+				board[i][j] = originalContent;
 				printf(NO_PIECE);
 			}
 		}
@@ -933,6 +933,7 @@ int Parse(char *line, board_t board)
 			{
 				if (!properties[1])
 					printf(WRONG_BOARD_INITIALIZATION);
+				return 0;
 			}
 			else
 			{
@@ -972,12 +973,14 @@ int Parse(char *line, board_t board)
 			{
 				printWinner(-properties[4]);//print player wins;
 				properties[1] = 1;
+				return 0;
 			}
 
 			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
 			{
 				printf(TIE);//print tie;
 				properties[1] = 1;
+				return 0;
 			}
 			else if (KingUnderThreat(board, properties[4]))
 				printf(CHECK);
@@ -990,12 +993,14 @@ int Parse(char *line, board_t board)
 			{
 				printWinner(properties[4]);//print player wins;
 				properties[1] = 1;
+				return 0;
 			}
 
 			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
 			{
 				printf(TIE);//print tie;
 				properties[1] = 1;
+				return 0;
 			}
 			
 
@@ -1413,17 +1418,17 @@ int Console_Main(board_t board)
 		{
 			int curScore = score(brd, -properties[4]);
 			computerMove = NULL;
-			if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
+			if (curScore == MATE_WIN_LOSE && !properties[1])//no legal move for the computer (computer lost)
 			{
-				printWinner(properties[4]);//print player wins;
+				printWinner(properties[4] && !properties[1]);//print player wins;
 				properties[1] = 1;
 			}
-			else if (curScore == TIE_SCORE)//no legal move for the computer and for the player (tie)
+			else if (curScore == TIE_SCORE && !properties[1])//no legal move for the computer and for the player (tie)
 			{
 				printf(TIE);//print tie;
 				properties[1] = 1;
 			}
-			else if (KingUnderThreat(board, -properties[4]))
+			else if (KingUnderThreat(board, -properties[4]) && !properties[1])
 				printf(CHECK);
 
 
@@ -1459,18 +1464,18 @@ int Console_Main(board_t board)
 			//change player
 			curScore = score(brd, properties[4]);
 			properties[4] = -properties[4];
-			if ((curScore == MATE_WIN_LOSE))//if no legal move for the player (player lost - MATE!)
+			if (curScore == MATE_WIN_LOSE && !properties[1])//if no legal move for the player (player lost - MATE!)
 			{
 				printWinner(-properties[4]);//print computer wins;
 				properties[1] = 1;
 
 			}
-			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and (tie)
+			else if (curScore == TIE_SCORE && !properties[1])//no legal move for the computer or for the player and (tie)
 			{
 				printf(TIE);//print tie;
 				properties[1] = 1;
 			}
-			else if (KingUnderThreat(board, properties[4]))
+			else if (KingUnderThreat(board, properties[4]) && !properties[1])
 				printf(CHECK);
 			continue;
 		}
@@ -1515,7 +1520,7 @@ int Console_Main(board_t board)
 		if (!properties[1])//if not quit
 			parseResult = Parse(input, brd);
 
-		if (parseResult == 10 || properties[1] == 1)// user has successfully inserted a valid move, we now want to free allPossibleMoves
+		if (parseResult == 10 && !properties[1])// user has successfully inserted a valid move
 		{
 			if (properties[5] == 1)
 			{
