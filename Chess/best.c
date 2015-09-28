@@ -1,6 +1,6 @@
 #include "best.h"
 
-/* The scoring function in this file is based upon our learnings from the TSCP found in here: http://www.tckerrigan.com/Chess/TSCP/
+/* The best scoring function in this file is based upon our learnings from the TSCP found in here: http://www.tckerrigan.com/Chess/TSCP/
 And is modified to our needs. */
 
 
@@ -588,7 +588,7 @@ int scoreWhiteKingPawns(int column)
 	else if (pawnRow[LIGHT][column] > 2 && pawnRow[LIGHT][column] < BOARD_SIZE)
 		res -= 20;
 
-	//TODO: no pawn on the column means 8 for white or -1 for black
+	//no pawn on the column means 8 for white or -1 for black
 	/* no pawn on this column */
 	else  if (pawnRow[LIGHT][column] == BOARD_SIZE)
 		res -= 25;

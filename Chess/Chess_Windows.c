@@ -2255,7 +2255,6 @@ int isOfPlayer(int player, char tool)
 int isValidBoardInitialization(board_t board)
 {
 	/* Returns 1 iff it is legal to start a game with the board setting */
-	/* TODO: move this function to Chess_Logic.c */
 	char types[] = { BLACK_P, BLACK_N, BLACK_B, BLACK_R, BLACK_Q, BLACK_K, WHITE_P, WHITE_N, WHITE_B, WHITE_R, WHITE_Q, WHITE_K };
 	int result = 1;
 
