@@ -9,7 +9,7 @@
 * ccl<Name> if they function as a Label										*
 *****************************************************************************/
 
-int picAllocs = 0; //TODO: remove
+int picAllocs = 0;
 
 
 int init_GUI(void)

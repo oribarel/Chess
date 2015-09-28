@@ -1,27 +1,5 @@
 #include "Chess_Windows.h"
 
-
-
-/* Properties*/
-
-/*	'settings'		0
-'quit'				1
-'minimax_depth'		2
-'player color'		3
-'current player'	4
-'game mode'			5
-
-
-the initial state of the global properties array:
-properties[0] = 1;	//Setting state
-properties[1] = 0;	//Don't quit
-properties[2] = 1;	//Default minimax depth. 0 stands for best
-properties[3] = WHITE_PLAYER;	//Default player color white
-properties[4] = WHITE_PLAYER //It is now white's\black's turn: WHITE_PLAYER for white, BLACK_PLAYER for black
-properties[5] = 1;	//Default game mode is "two players mode"
-*/
-
-
 /* Logic Board */
 board_t pBoard = NULL; //Comes from chessprog main
 
@@ -63,6 +41,7 @@ char selectedSlot = '0';
 int hintLevel = 1;
 
 /* Methods */
+
 
 int panelMaker(ControlComponent *ccp, Panel *pnl, SDL_Rect rect, RGB color)
 {
@@ -724,7 +703,7 @@ int updateGUIBoard_Vis(Menu *menu)
 
 
 			crd.i_coord = i; crd.j_coord = j;
-			SDL_FreeSurface1(guiBoard[i][j].btn->pic); //TODO: be careful!
+			SDL_FreeSurface1(guiBoard[i][j].btn->pic);
 			guiBoard[i][j].btn->pic = uploadPicture(getPictureName_tools(crd, getColor(pBoard, crd),
 				get_eToolFromType(GetContentOfCoord(pBoard, crd)), selectionStatus));
 
@@ -954,6 +933,8 @@ int kingHighlight(struct menu *menu, struct controlComponent *ccb)
 	else
 		return 1;
 }
+
+
 
 int endPromotionStage(struct menu *menu, struct controlComponent *ccb)
 {
@@ -1357,7 +1338,7 @@ int AI_Settings_updatePlayButton(Window *window)
 	{
 		ccb_Play->btn->f = showGamePlayMenu;
 		SDL_FreeSurface1(ccb_Play->btn->pic);
-		ccb_Play->btn->pic = uploadPicture("StartGame.bmp"); //TODO: maybe unnecessary allocation too many times. also in twin function.
+		ccb_Play->btn->pic = uploadPicture("StartGame.bmp");
 	}
 
 	if (SDL_BlitSurface(ccb_Play->btn->pic, NULL, window->self, &(ccb_Play->rect)) != 0)
@@ -1382,11 +1363,6 @@ int GamePlayMenu_endGameAndShowMainMenu(struct menu *menu, struct controlCompone
 	properties[3] = WHITE_PLAYER;
 	properties[4] = WHITE_PLAYER;
 	properties[5] = PVP_MODE;
-	/* TODO:
-	update button images:
-	player selection: white player, PVP
-	AI settings: white player, 1diff
-	*/
 	showMainMenu(NULL, ccb);
 	return 0;
 }
@@ -1501,7 +1477,7 @@ int SaveOrLoad_Menu_UpdateVis(struct menu *menu)
 
 int SaveMenu_ResetGameAndShowMainMenu(struct menu *menu, struct controlComponent *ccb)
 {
-	//TODO: Reset all data (board, default settings, kingcrd, highlights, turnstages...) and also this menu's data, and then:
+	/* Reset all data (board, default settings, kingcrd, highlights, turnstages...) and also this menu's data*/
 	showMainMenu(menu, ccb);
 	return 1;
 }
@@ -1538,8 +1514,29 @@ int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunc
 	*(filename + 5) = selectedSlot;
 	LoadFromFile(filename, pBoard);
 
+	/* Old func
 	selectedSlot = '0';
 	properties[0] = GAME_MODE;
+
+	if (properties[4] == WHITE_PLAYER)
+	{
+	whitePlayerTurnStage = NONE_SELECTED;
+	blackPlayerTurnStage = WAITING;
+	}
+	else
+	{
+	whitePlayerTurnStage = WAITING;
+	blackPlayerTurnStage = NONE_SELECTED;
+	}
+
+	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
+
+	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
+	End old func */
+
+	/* New Func */
+	selectedSlot = '0';
+	properties[0] = SETTINGS_MODE;
 
 	if (properties[4] == WHITE_PLAYER)
 	{
@@ -1555,13 +1552,30 @@ int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunc
 	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
 
 	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
-	updateGUIBoard(pMenu_Game);
+
+
+	updateGUIBoard(pMenu_PlayerSelection);
 	for (int i = 0; i < BOARD_SIZE*BOARD_SIZE; i++)
 	{
 		highlightedSquares[i] = GenerateCoord(-1, -1);
 	}
 	updateGUIBoard_Vis(chessWindow->shownMenu);
-	showGamePlayMenu(pMenu_Game, NULL);
+	/* new lines */
+	playerSelectionMenu_updateContinueOrPlayButton(chessWindow);
+	AI_Settings_updatePlayButton(chessWindow);
+
+	updateGameModeButton();
+	updateNextPlayerButton();
+	if (properties[5] == PVC_MODE)
+	{
+		updatePlayerColorButton();
+		updateDiffButton();
+	}
+
+	/* end new lines */
+
+	//old line: showGamePlayMenu(pMenu_Game, NULL);
+	showPlayerSelectionMenu(pMenu_PlayerSelection, NULL);
 
 	if (properties[1] == 1)
 		return 0;
@@ -1569,6 +1583,68 @@ int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunc
 		return 1;
 }
 
+int updateDiffButton()
+{
+	SDL_FreeSurface1(pMenu_AI_settings->panel_2->pnl->children->btn->pic);
+	if (properties[2] > 0 && properties[2] < 5)
+	{
+		char filename[12] = "Xdiff.bmp \0";
+		*filename = properties[2] + '0';
+		pMenu_AI_settings->panel_2->pnl->children->btn->pic = uploadPicture(filename);
+	}
+	else
+	{
+		pMenu_AI_settings->panel_2->pnl->children->btn->pic = uploadPicture("BestDiff.bmp");
+	}
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
+}
+
+int updateGameModeButton()
+{
+	SDL_FreeSurface1(pMenu_PlayerSelection->panel_2->pnl->children->btn->pic);
+	if (properties[5] == PVC_MODE)
+		pMenu_PlayerSelection->panel_2->pnl->children->btn->pic = uploadPicture("PVC.bmp");
+	else
+		pMenu_PlayerSelection->panel_2->pnl->children->btn->pic = uploadPicture("PVP.bmp");
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
+
+}
+
+int updatePlayerColorButton()
+{
+	SDL_FreeSurface1(pMenu_AI_settings->panel_2->pnl->children->next->btn->pic);
+	if (properties[3] == WHITE_PLAYER)
+		pMenu_AI_settings->panel_2->pnl->children->next->btn->pic = uploadPicture("PlayerIsWhite.bmp");
+	else
+		pMenu_AI_settings->panel_2->pnl->children->next->btn->pic = uploadPicture("PlayerIsBlack.bmp");
+
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
+}
+
+int updateNextPlayerButton()
+{
+	SDL_FreeSurface1(pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic);
+	if (properties[4] == WHITE_PLAYER)
+		pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic = uploadPicture("NextPlayerWhite.bmp");
+	else 
+		pMenu_PlayerSelection->panel_2->pnl->children->next->btn->pic = uploadPicture("NextPlayerBlack.bmp");
+	
+	if (properties[1] == 1) //some picture allocation failed
+		return 0;
+	else
+		return 1;
+}
 
 int showMainMenu(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 {
@@ -1675,7 +1751,7 @@ int HintMenu_ShowHint(Menu *menu, ControlComponent *buttonWhichPressCalledThis)
 		hintLevel = properties[2];
 
 	// run minimax
-	GameLabel(chessWindow, HINT_THINKING_H); //TODO: need to change to hintLabel
+	GameLabel(chessWindow, HINT_THINKING_H);
 	if (SDL_Flip(chessWindow->self) != 0)
 	{
 		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
@@ -2058,7 +2134,7 @@ int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
 		pMenu_Game->panel_2->pnl->children->lbl->pic = uploadPicture("info_Tie.bmp");
 		pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_blankLabel.bmp");
 	}
-	
+
 	else
 	{
 		if (kingUnderThreat)
@@ -2086,7 +2162,7 @@ int updateInfoLabels(int scr, int kingUnderThreat, int stageTurn)
 			pMenu_Game->panel_2->pnl->children->next->lbl->pic = uploadPicture("info_makeMove.bmp");
 		}
 	}
-	
+
 	drawLabelsOfPanel(pMenu_Game->panel_2->pnl->children);
 
 

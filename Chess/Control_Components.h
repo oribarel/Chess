@@ -1,8 +1,6 @@
 #ifndef CONTROL_COMPONENTS_H
 #define CONTROL_COMPONENTS_H
 
-//TODO: declare all functions
-
 
 #include <SDL.h>
 #include <SDL_video.h>
@@ -78,18 +76,6 @@ typedef struct window
 	struct menu *shownMenu;
 	struct SDL_Surface *self;
 } Window;
-
-
-typedef struct pixel
-{
-	int x, y;
-} Pixel;
-
-typedef struct rectSize
-{
-	int h, w;
-} RectSize;
-
 
 
 /* Extern Variables */

@@ -1,4 +1,5 @@
-/*
+/*********************************************************************************************************
+TODO: move the structs explanation to chess_Logic
 The structs are:
 - Coord: a coordinate on the board. see header file.
 - cMove(functions as a linked list node): which contains some data about the movement,
@@ -15,7 +16,24 @@ public array properties contains 5 cells which are relevant throughtout the prog
 Functions that are labeled:
 - DEBUG: are for debugging purposes only
 - UNUSED: are unused although not deleted.
-*/
+*********************************************************************************************************/
+
+
+
+/*********************************************************************************************************
+This project contains multiple files: here is the include heirarchy:
+(Key principle is that a file.c only includes his file.h, all of the next statements apply to the headers)
+
+chessprog.h includes: Console_Main.h and GUI_Main.h
+GUI_Main.h includes: Chess_Windows.h
+Chess_Windows.h includes: Chess_Controls.h and minimax.h
+Chess_Controls.h includes: Control_Components.h
+Control_Components.h includes: <SDL.h>, <SDL_Video.h> and Chess_Logic.h
+Chess_Logic.h includes: <stdio.h>, <string.h>, <stdlib.h>, <assert.h>, <ctype.h>
+minimax.h includes: best.h
+best.h includes: Chess_Logic.h
+Console_Main.h includes: Chess_Logic.h, minimax.h
+**********************************************************************************************************/
 
 #include "chessprog.h"
 

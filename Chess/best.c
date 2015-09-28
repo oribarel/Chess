@@ -1,141 +1,136 @@
-
-/*
-*	EVAL.C
-*	Tom Kerrigan's Simple Chess Program (TSCP)
-*
-*	Copyright 1997 Tom Kerrigan
-*/
 #include "best.h"
 
-
+/* The scoring function in this file is based upon our learnings from the TSCP found in here: http://www.tckerrigan.com/Chess/TSCP/
+And is modified to our needs. */
 
 
 /* the values of the pieces */
 int piece_value[6] = { 100, 300, 300, 500, 900, 0 };
 
-int pawnPCSQ_col7[BOARD_SIZE] = { 0, 0, 1, 2, 3, 4, 5, 0 };
-int pawnPCSQ_col6[BOARD_SIZE] = { 0, 0, 2, 4, 6, 8, 10, 0 };
-int pawnPCSQ_col5[BOARD_SIZE] = { 0, 0, 3, 6, 9, 12, 15, 0 };
-int pawnPCSQ_col4[BOARD_SIZE] = { 0, -40, 8, 8, 12, 16, 20, 0 };
-int pawnPCSQ_col3[BOARD_SIZE] = { 0, -40, 8, 8, 12, 16, 20, 0 };
-int pawnPCSQ_col2[BOARD_SIZE] = { 0, 0, 3, 6, 9, 12, 15, 0 };
-int pawnPCSQ_col1[BOARD_SIZE] = { 0, 0, 2, 4, 6, 8, 10, 0 };
-int pawnPCSQ_col0[BOARD_SIZE] = { 0, 0, 1, 2, 3, 4, 5, 0 };
+/* Bonuses Matrices*/
+int pawnBonus_col7[BOARD_SIZE] = { 0, 0, 1, 2, 3, 4, 5, 0 };
+int pawnBonus_col6[BOARD_SIZE] = { 0, 0, 2, 4, 6, 8, 10, 0 };
+int pawnBonus_col5[BOARD_SIZE] = { 0, 0, 3, 6, 9, 12, 15, 0 };
+int pawnBonus_col4[BOARD_SIZE] = { 0, -40, 8, 8, 12, 16, 20, 0 };
+int pawnBonus_col3[BOARD_SIZE] = { 0, -40, 8, 8, 12, 16, 20, 0 };
+int pawnBonus_col2[BOARD_SIZE] = { 0, 0, 3, 6, 9, 12, 15, 0 };
+int pawnBonus_col1[BOARD_SIZE] = { 0, 0, 2, 4, 6, 8, 10, 0 };
+int pawnBonus_col0[BOARD_SIZE] = { 0, 0, 1, 2, 3, 4, 5, 0 };
 
-int *pawnPCSQ[BOARD_SIZE] =
+int *pawnBonus[BOARD_SIZE] =
 {
-	pawnPCSQ_col0,
-	pawnPCSQ_col1,
-	pawnPCSQ_col2,
-	pawnPCSQ_col3,
-	pawnPCSQ_col4,
-	pawnPCSQ_col5,
-	pawnPCSQ_col6,
-	pawnPCSQ_col7
+	pawnBonus_col0,
+	pawnBonus_col1,
+	pawnBonus_col2,
+	pawnBonus_col3,
+	pawnBonus_col4,
+	pawnBonus_col5,
+	pawnBonus_col6,
+	pawnBonus_col7
 };
 
 
-int knightPCSQ_col7[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
-int knightPCSQ_col6[BOARD_SIZE] = { -30, 0, 0, 0, 0, 0, 0, -10 };
-int knightPCSQ_col5[BOARD_SIZE] = { -10, 0, 5, 5, 5, 5, 0, -10 };
-int knightPCSQ_col4[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
-int knightPCSQ_col3[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
-int knightPCSQ_col2[BOARD_SIZE] = { -10, 0, 5, 5, 5, 5, 0, -10 };
-int knightPCSQ_col1[BOARD_SIZE] = { -30, 0, 0, 0, 0, 0, 0, -10 };
-int knightPCSQ_col0[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
+int knightBonus_col7[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
+int knightBonus_col6[BOARD_SIZE] = { -30, 0, 0, 0, 0, 0, 0, -10 };
+int knightBonus_col5[BOARD_SIZE] = { -10, 0, 5, 5, 5, 5, 0, -10 };
+int knightBonus_col4[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
+int knightBonus_col3[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
+int knightBonus_col2[BOARD_SIZE] = { -10, 0, 5, 5, 5, 5, 0, -10 };
+int knightBonus_col1[BOARD_SIZE] = { -30, 0, 0, 0, 0, 0, 0, -10 };
+int knightBonus_col0[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
 
-int *knightPCSQ[BOARD_SIZE] =
+int *knightBonus[BOARD_SIZE] =
 {
-	knightPCSQ_col0,
-	knightPCSQ_col1,
-	knightPCSQ_col2,
-	knightPCSQ_col3,
-	knightPCSQ_col4,
-	knightPCSQ_col5,
-	knightPCSQ_col6,
-	knightPCSQ_col7
+	knightBonus_col0,
+	knightBonus_col1,
+	knightBonus_col2,
+	knightBonus_col3,
+	knightBonus_col4,
+	knightBonus_col5,
+	knightBonus_col6,
+	knightBonus_col7
 };
 
 
-int bishopPCSQ_col7[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
-int bishopPCSQ_col6[BOARD_SIZE] = { -10, 0, 0, 0, 0, 0, 0, -10 };
-int bishopPCSQ_col5[BOARD_SIZE] = { -20, 0, 5, 5, 5, 5, 0, -10 };
-int bishopPCSQ_col4[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
-int bishopPCSQ_col3[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
-int bishopPCSQ_col2[BOARD_SIZE] = { -20, 0, 5, 5, 5, 5, 0, -10 };
-int bishopPCSQ_col1[BOARD_SIZE] = { -10, 0, 0, 0, 0, 0, 0, -10 };
-int bishopPCSQ_col0[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
+int bishopBonus_col7[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
+int bishopBonus_col6[BOARD_SIZE] = { -10, 0, 0, 0, 0, 0, 0, -10 };
+int bishopBonus_col5[BOARD_SIZE] = { -20, 0, 5, 5, 5, 5, 0, -10 };
+int bishopBonus_col4[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
+int bishopBonus_col3[BOARD_SIZE] = { -10, 0, 5, 10, 10, 5, 0, -10 };
+int bishopBonus_col2[BOARD_SIZE] = { -20, 0, 5, 5, 5, 5, 0, -10 };
+int bishopBonus_col1[BOARD_SIZE] = { -10, 0, 0, 0, 0, 0, 0, -10 };
+int bishopBonus_col0[BOARD_SIZE] = { -10, -10, -10, -10, -10, -10, -10, -10 };
 
-int *bishopPCSQ[BOARD_SIZE] =
+int *bishopBonus[BOARD_SIZE] =
 {
-	bishopPCSQ_col0,
-	bishopPCSQ_col1,
-	bishopPCSQ_col2,
-	bishopPCSQ_col3,
-	bishopPCSQ_col4,
-	bishopPCSQ_col5,
-	bishopPCSQ_col6,
-	bishopPCSQ_col7
-};
-
-
-
-int kingPCSQ_col7[BOARD_SIZE] = { 20, -20, -40, -40, -40, -40, -40, -40 };
-int kingPCSQ_col6[BOARD_SIZE] = { 40, -20, -40, -40, -40, -40, -40, -40 };
-int kingPCSQ_col5[BOARD_SIZE] = { -20, -20, -40, -40, -40, -40, -40, -40 };
-int kingPCSQ_col4[BOARD_SIZE] = { 0, -20, -40, -40, -40, -40, -40, -40 };
-int kingPCSQ_col3[BOARD_SIZE] = { -20, -20, -40, -40, -40, -40, -40, -40 };
-int kingPCSQ_col2[BOARD_SIZE] = { 40, -20, -40, -40, -40, -40, -40, -40 };
-int kingPCSQ_col1[BOARD_SIZE] = { 20, -20, -40, -40, -40, -40, -40, -40 };
-int kingPCSQ_col0[BOARD_SIZE] = { 0, -20, -40, -40, -40, -40, -40, -40 };
-
-int *kingPCSQ[BOARD_SIZE] =
-{
-	kingPCSQ_col0,
-	kingPCSQ_col1,
-	kingPCSQ_col2,
-	kingPCSQ_col3,
-	kingPCSQ_col4,
-	kingPCSQ_col5,
-	kingPCSQ_col6,
-	kingPCSQ_col7
+	bishopBonus_col0,
+	bishopBonus_col1,
+	bishopBonus_col2,
+	bishopBonus_col3,
+	bishopBonus_col4,
+	bishopBonus_col5,
+	bishopBonus_col6,
+	bishopBonus_col7
 };
 
 
 
-int kingEndGamePCSQ_col7[BOARD_SIZE] = { 0, 10, 20, 30, 30, 20, 10, 0 };
-int kingEndGamePCSQ_col6[BOARD_SIZE] = { 10, 20, 30, 40, 40, 30, 20, 10 };
-int kingEndGamePCSQ_col5[BOARD_SIZE] = { 20, 30, 40, 50, 50, 40, 30, 20 };
-int kingEndGamePCSQ_col4[BOARD_SIZE] = { 30, 40, 50, 60, 60, 50, 40, 30 };
-int kingEndGamePCSQ_col3[BOARD_SIZE] = { 30, 40, 50, 60, 60, 50, 40, 30 };
-int kingEndGamePCSQ_col2[BOARD_SIZE] = { 20, 30, 40, 50, 50, 40, 30, 20 };
-int kingEndGamePCSQ_col1[BOARD_SIZE] = { 10, 20, 30, 40, 40, 30, 20, 10 };
-int kingEndGamePCSQ_col0[BOARD_SIZE] = { 0, 10, 20, 30, 30, 20, 10, 0 };
+int kingBonus_col7[BOARD_SIZE] = { 20, -20, -40, -40, -40, -40, -40, -40 };
+int kingBonus_col6[BOARD_SIZE] = { 40, -20, -40, -40, -40, -40, -40, -40 };
+int kingBonus_col5[BOARD_SIZE] = { 5, -20, -40, -40, -40, -40, -40, -40 };
+int kingBonus_col4[BOARD_SIZE] = { 0, -20, -40, -40, -40, -40, -40, -40 };
+int kingBonus_col3[BOARD_SIZE] = { 5, -20, -40, -40, -40, -40, -40, -40 };
+int kingBonus_col2[BOARD_SIZE] = { 40, -20, -40, -40, -40, -40, -40, -40 };
+int kingBonus_col1[BOARD_SIZE] = { 20, -20, -40, -40, -40, -40, -40, -40 };
+int kingBonus_col0[BOARD_SIZE] = { 0, -20, -40, -40, -40, -40, -40, -40 };
 
-int *kingEndGamePCSQ[BOARD_SIZE] =
+int *kingBonus[BOARD_SIZE] =
 {
-	kingEndGamePCSQ_col0,
-	kingEndGamePCSQ_col1,
-	kingEndGamePCSQ_col2,
-	kingEndGamePCSQ_col3,
-	kingEndGamePCSQ_col4,
-	kingEndGamePCSQ_col5,
-	kingEndGamePCSQ_col6,
-	kingEndGamePCSQ_col7
+	kingBonus_col0,
+	kingBonus_col1,
+	kingBonus_col2,
+	kingBonus_col3,
+	kingBonus_col4,
+	kingBonus_col5,
+	kingBonus_col6,
+	kingBonus_col7
 };
 
 
-/* pawnRow[x][y] is the rank of the least advanced pawn of color x on file
-y - 1. There are "buffer files" on the left and right to avoid special-case
-logic later. If there's no pawn on a rank, we pretend the pawn is
-impossibly far advanced (8 for LIGHT and -1 for DARK). This makes it easy to
-test for pawns on a rank and it simplifies some pawn evaluation code. */
+
+int kingEndGameBonus_col7[BOARD_SIZE] = { 0, 10, 20, 30, 30, 20, 10, 0 };
+int kingEndGameBonus_col6[BOARD_SIZE] = { 10, 20, 30, 40, 40, 30, 20, 10 };
+int kingEndGameBonus_col5[BOARD_SIZE] = { 20, 30, 40, 50, 50, 40, 30, 20 };
+int kingEndGameBonus_col4[BOARD_SIZE] = { 30, 40, 50, 60, 60, 50, 40, 30 };
+int kingEndGameBonus_col3[BOARD_SIZE] = { 30, 40, 50, 60, 60, 50, 40, 30 };
+int kingEndGameBonus_col2[BOARD_SIZE] = { 20, 30, 40, 50, 50, 40, 30, 20 };
+int kingEndGameBonus_col1[BOARD_SIZE] = { 10, 20, 30, 40, 40, 30, 20, 10 };
+int kingEndGameBonus_col0[BOARD_SIZE] = { 0, 10, 20, 30, 30, 20, 10, 0 };
+
+int *kingEndGameBonus[BOARD_SIZE] =
+{
+	kingEndGameBonus_col0,
+	kingEndGameBonus_col1,
+	kingEndGameBonus_col2,
+	kingEndGameBonus_col3,
+	kingEndGameBonus_col4,
+	kingEndGameBonus_col5,
+	kingEndGameBonus_col6,
+	kingEndGameBonus_col7
+};
+
+
+/* pawnRow[x][y] is the row of the least advanced pawn of color x on column
+y - 1. There are extra columns on the left and right to make easy logics later.
+If there's no pawn on a rank, we pretend the pawn is
+impossibly far advanced (8 for LIGHT and -1 for DARK). */
+
 int pawnRow[2][BOARD_SIZE + 2];
 
 int piecesScoreValue[2];  /* the value of a side's pieces */
 int pawnsScoreValue[2];  /* the value of a side's pawns */
 
-
+/*Util*/
 eTool get_eToolFromType(char type)
 {
 	if (type == WHITE_P || type == BLACK_P)
@@ -154,20 +149,7 @@ eTool get_eToolFromType(char type)
 		return Empty;
 }
 
-/*return 1 if the king of the given player is under threat*/
-/*int checkDangerZoneForKingUnderThreat(board_t board, int player)
-{
-	Coord kingCrd, *dangerZone;
-	kingCrd = WHITE_PLAYER == player ? WhiteKing : BlackKing;
-	dangerZone = WHITE_PLAYER == player ? WhiteKingDangerZone : BlackKingDangerZone;
-	for (int i = 0; i < BOARD_SIZE*BOARD_SIZE && isInBoard(dangerZone[i]) ; i++)
-	{
 
-		if (isAttacking(board, dangerZone[i], kingCrd))
-			return 1;
-	}
-	return 0;
-}*/
 
 int bestScore(board_t board, int player)
 {
@@ -179,7 +161,7 @@ int bestScore(board_t board, int player)
 	/* Check for win or tie situations: */
 	/* Since getMoves doesn't provide any moves that leave the king at CHECK, if there aren't any moves, it is MATE */
 	
-	/* score function code copied*/
+	
 	int canMove = 0;
 	for (int k = 0; k < BOARD_SIZE*BOARD_SIZE; k++)
 	{
@@ -213,14 +195,13 @@ int bestScore(board_t board, int player)
 		else
 			return TIE_SCORE; //tie
 	}
-	/* END score function code copied*/
 	
 	
 	
-	/* this is the first pass: set up pawnRow, piecesScoreValue, and pawnsScoreValue. */
+	/* set up pawnRow, piecesScoreValue, and pawnsScoreValue. */
 	for (int i = 0; i < 10; ++i)
 	{
-		// Pawns are set to impossible locations. 
+		// Pawns are set to impossibly far locations. 
 		pawnRow[LIGHT][i] = BOARD_SIZE;
 		pawnRow[DARK][i] = -1;
 	}
@@ -239,7 +220,8 @@ int bestScore(board_t board, int player)
 				continue;
 			if (GetContentOfCoord(board, crd) == WHITE_P || GetContentOfCoord(board, crd) == BLACK_P)
 			{
-				pawnsScoreValue[getColorInLightOrDark(board, crd)] += piece_value[0]; // reminder: int piece_value[6] = {100, 300, 300, 500, 900, 0};
+				pawnsScoreValue[getColorInLightOrDark(board, crd)] += piece_value[0];
+				// reminder: int piece_value[6] = {100, 300, 300, 500, 900, 0};
 
 				column = i + 1;  /* add 1 because of the extra column in the array */
 				if (getColorInLightOrDark(board, crd) == LIGHT)
@@ -258,7 +240,7 @@ int bestScore(board_t board, int player)
 		}
 	}
 
-	/* this is the second pass: evaluate each piece */
+	/* evaluate each piece */
 	score[LIGHT] = piecesScoreValue[LIGHT] + pawnsScoreValue[LIGHT];
 	score[DARK] = piecesScoreValue[DARK] + pawnsScoreValue[DARK];
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -274,9 +256,9 @@ int bestScore(board_t board, int player)
 				if (tool == WHITE_P)
 					score[LIGHT] += scoreWhitePawns(crd);
 				else if (tool == WHITE_N)
-					score[LIGHT] += knightPCSQ[i][j];
+					score[LIGHT] += knightBonus[i][j];
 				else if (tool == WHITE_B)
-					score[LIGHT] += bishopPCSQ[i][j];
+					score[LIGHT] += bishopBonus[i][j];
 				else if (tool == WHITE_R)
 				{
 					if (pawnRow[LIGHT][i + 1] == BOARD_SIZE)
@@ -292,7 +274,7 @@ int bestScore(board_t board, int player)
 				else if (tool == WHITE_K)
 				{
 					if (piecesScoreValue[DARK] <= 1200)
-						score[LIGHT] += kingEndGamePCSQ[i][j];
+						score[LIGHT] += kingEndGameBonus[i][j];
 					else
 						score[LIGHT] += scoreWhiteKing(crd);
 				}
@@ -303,9 +285,9 @@ int bestScore(board_t board, int player)
 				if (tool == BLACK_P)
 					score[DARK] += scoreBlackPawns(crd);
 				else if (tool == BLACK_N)
-					score[DARK] += knightPCSQ[i][BOARD_SIZE - 1 - j];
+					score[DARK] += knightBonus[i][BOARD_SIZE - 1 - j];
 				else if (tool == BLACK_B)
-					score[DARK] += bishopPCSQ[i][BOARD_SIZE - 1 - j];
+					score[DARK] += bishopBonus[i][BOARD_SIZE - 1 - j];
 				else if (tool == BLACK_R)
 				{
 
@@ -322,7 +304,7 @@ int bestScore(board_t board, int player)
 				else if (tool == BLACK_K)
 				{
 					if (piecesScoreValue[LIGHT] <= 1200)
-						score[DARK] += kingEndGamePCSQ[i][BOARD_SIZE - 1 - j];
+						score[DARK] += kingEndGameBonus[i][BOARD_SIZE - 1 - j];
 					else
 						score[DARK] += scoreBlackKing(crd);
 				}
@@ -337,6 +319,7 @@ int bestScore(board_t board, int player)
 	return score[DARK] - score[LIGHT];
 }
 
+/*UNUSED*/
 int Material(board_t board, int player)
 {
 	Coord crd;
@@ -424,9 +407,9 @@ int Material(board_t board, int player)
 				if (tool == WHITE_P)
 					score[LIGHT] += scoreWhitePawns(crd);
 				else if (tool == WHITE_N)
-					score[LIGHT] += knightPCSQ[i][j];
+					score[LIGHT] += knightBonus[i][j];
 				else if (tool == WHITE_B)
-					score[LIGHT] += bishopPCSQ[i][j];
+					score[LIGHT] += bishopBonus[i][j];
 				else if (tool == WHITE_R)
 				{
 					if (pawnRow[LIGHT][i + 1] == BOARD_SIZE)
@@ -442,7 +425,7 @@ int Material(board_t board, int player)
 				else if (tool == WHITE_K)
 				{
 					if (piecesScoreValue[DARK] <= 1200)
-						score[LIGHT] += kingEndGamePCSQ[i][j];
+						score[LIGHT] += kingEndGameBonus[i][j];
 					else
 						score[LIGHT] += scoreWhiteKing(crd);
 				}
@@ -453,9 +436,9 @@ int Material(board_t board, int player)
 				if (tool == BLACK_P)
 					score[DARK] += scoreBlackPawns(crd);
 				else if (tool == BLACK_N)
-					score[DARK] += knightPCSQ[i][BOARD_SIZE - 1 - j];
+					score[DARK] += knightBonus[i][BOARD_SIZE - 1 - j];
 				else if (tool == BLACK_B)
-					score[DARK] += bishopPCSQ[i][BOARD_SIZE - 1 - j];
+					score[DARK] += bishopBonus[i][BOARD_SIZE - 1 - j];
 				else if (tool == BLACK_R)
 				{
 
@@ -472,7 +455,7 @@ int Material(board_t board, int player)
 				else if (tool == BLACK_K)
 				{
 					if (piecesScoreValue[LIGHT] <= 1200)
-						score[DARK] += kingEndGamePCSQ[i][BOARD_SIZE - 1 - j];
+						score[DARK] += kingEndGameBonus[i][BOARD_SIZE - 1 - j];
 					else
 						score[DARK] += scoreBlackKing(crd);
 				}
@@ -496,7 +479,7 @@ int scoreWhitePawns(Coord crd)
 	res = 0;
 	column = crd.j_coord + 1;
 
-	res += pawnPCSQ[crd.i_coord][crd.j_coord];
+	res += pawnBonus[crd.i_coord][crd.j_coord];
 
 	/* a penalty for a doubled pawn: https://en.wikipedia.org/wiki/Doubled_pawns */
 	if (pawnRow[LIGHT][column] < crd.j_coord)
@@ -526,7 +509,7 @@ int scoreBlackPawns(Coord crd)
 	res = 0;
 	column = crd.j_coord + 1;
 
-	res += pawnPCSQ[crd.i_coord][BOARD_SIZE - 1 - crd.j_coord];
+	res += pawnBonus[crd.i_coord][BOARD_SIZE - 1 - crd.j_coord];
 
 	/* a penalty for a doubled pawn: https://en.wikipedia.org/wiki/Doubled_pawns */
 	if (pawnRow[DARK][column] > crd.j_coord)
@@ -553,7 +536,7 @@ int scoreWhiteKing(Coord crd)
 {
 	int res;
 
-	res = kingPCSQ[crd.i_coord][crd.j_coord];
+	res = kingBonus[crd.i_coord][crd.j_coord];
 
 	/* if the king is castled, use a special function to evaluate the
 	pawns on the appropriate side */
@@ -582,15 +565,13 @@ int scoreWhiteKing(Coord crd)
 		}
 	}
 
-	/* scale the king safety value according to the opponent's material;
-	the premise is that your king safety can only be bad if the
-	opponent has enough pieces to attack you */
+	/* scale the king score according to the opponent's material */
 
 	/*res *= piecesScoreValue[DARK];
 	res /= 3100;*/
 
 	res *= 3100;
-	res /= piecesScoreValue[DARK]; //TODO: check Ori to see if that change makes sense.
+	res /= piecesScoreValue[DARK]; 
 
 	return res;
 }
@@ -631,7 +612,7 @@ int scoreBlackKing(Coord crd)
 {
 	int res;
 
-	res = kingPCSQ[crd.i_coord][BOARD_SIZE - 1 - crd.j_coord];
+	res = kingBonus[crd.i_coord][BOARD_SIZE - 1 - crd.j_coord];
 	if (crd.i_coord < 3)
 	{
 		res += scoreBlackKingPawns(1);
@@ -652,6 +633,7 @@ int scoreBlackKing(Coord crd)
 				res -= 10;
 		}
 	}
+
 	/*res *= piecesScoreValue[LIGHT];
 	res /= 3100;*/
 
@@ -693,6 +675,7 @@ int getColorInLightOrDark(board_t board, Coord crd)
 		return DARK;
 }
 
+/*This function assesses the depth to run the minimax with in order to not exceed boards limitation*/
 int GetBestDepth(board_t board, int player)
 {
 	int numberOfWhitePawns = 0, numberOfBlackPawns = 0;
