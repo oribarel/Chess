@@ -1631,7 +1631,10 @@ int Save(board_t board, char* file_name){
 	}
 	fprintf(f, "\t</board>\n");
 	fprintf(f, "</game>\n");
-	fclose(f);
+	if (fclose(f) != 0)
+	{
+		printf("%s", ERROR_CLOSING_FILE);
+	}
 	return 0;
 }
 
@@ -1721,7 +1724,10 @@ int LoadFromFile(char* file_path, board_t board){
 		}
 	}
 
-	fclose(file);
+	if (fclose(file) != 0)
+	{
+		printf("%s", ERROR_CLOSING_FILE);
+	}
 	print_board(board);
 	return 0;
 }
