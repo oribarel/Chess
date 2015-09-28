@@ -1556,6 +1556,10 @@ int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunc
 
 	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
 	updateGUIBoard(pMenu_Game);
+	for (int i = 0; i < BOARD_SIZE*BOARD_SIZE; i++)
+	{
+		highlightedSquares[i] = GenerateCoord(-1, -1);
+	}
 	updateGUIBoard_Vis(chessWindow->shownMenu);
 	showGamePlayMenu(pMenu_Game, NULL);
 

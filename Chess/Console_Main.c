@@ -710,7 +710,10 @@ int Parse(char *line, board_t board)
 				if (mode == 1)
 					printf("%s", TWO_PLAYERS_GAME_MODE);
 				else
+				{
+					properties[2] = 1;
 					printf("%s", PLAYER_VS_AI_GAME_MODE);
+				}
 			}
 			else
 			{
@@ -743,8 +746,9 @@ int Parse(char *line, board_t board)
 				properties[2] = BESTval;//0 stands for best
 				return 0;
 			}
+			token = strtok(NULL, " ");
 			long depth = strtol(token, &token, BOARD_SIZE);
-			if (depth > 0 && depth < 7)
+			if (depth > 0 && depth < 5)
 				properties[2] = (int)depth;
 			else
 			{
@@ -977,6 +981,23 @@ int Parse(char *line, board_t board)
 			}
 			else if (KingUnderThreat(board, properties[4]))
 				printf(CHECK);
+
+
+			/*checing check mate or tie before starting the game*/
+			curScore = score(board, -properties[4]);
+
+			if (curScore == MATE_WIN_LOSE || KingUnderThreat(board, -properties[4]))//no legal move for the computer (computer lost)
+			{
+				printWinner(properties[4]);//print player wins;
+				properties[1] = 1;
+			}
+
+			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
+			{
+				printf(TIE);//print tie;
+				properties[1] = 1;
+			}
+			
 
 
 
@@ -1428,7 +1449,7 @@ int Console_Main(board_t board)
 					printf("Computer: move ");
 				printMove(computerMove);
 				makeMove(brd, computerMove);
-				free(computerMove);
+				freeMovesList(computerMove);
 				computerMove = NULL;
 				//print board
 				print_board(brd);
@@ -1696,7 +1717,7 @@ int Test()
 	srand(198487);
 
 	//int parseResult = 0;
-	int iterations = 1000;
+	int iterations = 5;
 	int printMode = 1;
 	int COMPUTER_COLOR = BLACK_PLAYER;
 	int record = 1;

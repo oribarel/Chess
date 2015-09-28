@@ -1326,6 +1326,7 @@ int NotTooManyOfType(board_t board, char type)
 		break;
 
 	default:
+		result = 1;
 		break;
 	}
 	return result;

@@ -33,6 +33,14 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 	int scr = score(board, player); //if terminal node
 	if (scr == MATE_WIN_LOSE || scr == MATE_WIN_SCORE || scr == TIE_SCORE)
 	{
+		/* In case that the node is terminal, then tie should be treated with extra care.
+		 When the maximizing player computes a tie score he will return it to a minimizer player - so we shall return a very high score
+		 so that the minimizer wouldn't take it.
+		 Same thing goes with the minimizer, when he computes a tie score it in turn will return it to a maximizer, so we return a very low score
+		 so that the maximizer wouldn't take it as well.
+		 The reason for all that is that a tie is almost the worst case for both players (except for losing) and we want none of
+		 the players to choose a tie.
+		 */
 		if (minOrMax == 1)// 1 for maximizing player
 		{
 			if (scr == TIE_SCORE)
@@ -51,12 +59,13 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 	{
 		bestValue = MIN_VALUE;
 		movesList = getMoves(board, player);
+		//movesList = mergeSort_movesList(movesList, board, player);
 		tmp = movesList;
 
 
 		while (movesList != NULL)
 		{
-			int bestUpdated = 0;
+			//int bestUpdated = 0;
 			//compute score and return board to its original state
 			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, best);
 			if (depth == properties[2] && val >= bestValue) //if depth == minimax_depth
@@ -74,7 +83,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 					//(*bestMove) = tmp;
 					//(*bestMove)->next = NULL;
 				}
-				bestUpdated = 1;
+				//bestUpdated = 1;
 			}
 			bestValue = imax(bestValue, val);
 			a = imax(a, bestValue);
@@ -96,11 +105,12 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 	{
 		bestValue = MAX_VALUE;
 		movesList = getMoves(board, player);
+		//movesList = mergeSort_movesList(movesList, board, -player);
 		tmp = movesList;
 
 		while (movesList != NULL)
 		{
-			int bestUpdated = 0;
+			//int bestUpdated = 0;
 			//compute score and return board to its original state
 			val = makeMove_ComputeScore_Undo(board, movesList, player, depth, minOrMax, a, b, best);
 
@@ -121,7 +131,7 @@ int minimax_score(board_t board, int player, int depth, int minOrMax, cMove **be
 					//(*bestMove) = tmp;
 					//(*bestMove)->next = NULL;
 				}
-				bestUpdated = 1;
+				//bestUpdated = 1;
 			}
 			/* End unnecessary */
 
@@ -412,6 +422,7 @@ cMove *mergeSort_movesList(cMove *list, board_t board, int player)
 	}
 }
 
+/*in this function: player is the one that started the minimax (the maximizer) */
 int cmp(cMove *a, cMove *b, board_t board, int player)
 {
 	int scr;

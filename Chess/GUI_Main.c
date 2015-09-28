@@ -420,6 +420,7 @@ int GUI_Main(board_t passedBoard)
 	freeMenu(pMenu_Game);
 	freeMenu(pMenu_Hint);
 	freePanel(pCCP_Board);
+	SDL_Quit();
 	printf("%d pictures not freed.\n", picAllocs);
 	printf("ended\n");
 	return 1;
