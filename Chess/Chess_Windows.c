@@ -519,8 +519,7 @@ int createHintMenu(Menu *pMenu_Hint, ControlComponent *ccp_HintMenuCCPs, Panel *
 
 	/* label rects */
 	SDL_Rect header = createSDL_Rect(wBoardPanel, 75, wTogglePanels + wSide, 10);
-	//SDL_Rect infoRect_top = createSDL_Rect(wTogglePanels - 2 * wSide, hTogglePanels / 2 - 2 * hSide, wSide, 0);
-	//SDL_Rect infoRect_bottom = createSDL_Rect(wTogglePanels - 2 * wSide, hTogglePanels / 2 - 2 * hSide, wSide, hTogglePanels / 2);
+	
 
 	createMenu(pMenu_Hint, Rect1024x768, rgbMenuBlue, HINT_MENU);
 
@@ -597,7 +596,7 @@ int showMenu(Window *window, Menu *menu)
 	if (SDL_Flip(chessWindow->self) != 0)
 	{
 		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 	return 1;
@@ -1514,27 +1513,6 @@ int LoadGame(struct menu *menu, ControlComponent *buttonWhichPressCalledThisFunc
 	*(filename + 5) = selectedSlot;
 	LoadFromFile(filename, pBoard);
 
-	/* Old func
-	selectedSlot = '0';
-	properties[0] = GAME_MODE;
-
-	if (properties[4] == WHITE_PLAYER)
-	{
-	whitePlayerTurnStage = NONE_SELECTED;
-	blackPlayerTurnStage = WAITING;
-	}
-	else
-	{
-	whitePlayerTurnStage = WAITING;
-	blackPlayerTurnStage = NONE_SELECTED;
-	}
-
-	selectedTool.i_coord = -1; selectedTool.j_coord = -1;
-
-	SaveOrLoad_Menu_UpdateVis(chessWindow->shownMenu);
-	End old func */
-
-	/* New Func */
 	selectedSlot = '0';
 	properties[0] = SETTINGS_MODE;
 

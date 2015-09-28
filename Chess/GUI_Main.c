@@ -55,7 +55,7 @@
 
  Button: this struct has a btnFunc (typedef) member, a function pointer. This function will be operated when the button
  is pressed. it has a picture, as an SDL_Surface.
- A Coord (struct, see Chess_Logic explanation) that is used for when poressing board squares.
+ A Coord (struct, see chessprog explanation) that is used for when poressing board squares.
  also a char member called purpose, for easier debugging.
 
  Label: only contains a picture as an SDL_Surface.
@@ -227,6 +227,7 @@ int GUI_Main(board_t passedBoard)
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		printf("ERROR: unable to init SDL: %s\n", SDL_GetError());
+		terminateProgram();
 		return 0;
 	}
 
@@ -267,7 +268,7 @@ int GUI_Main(board_t passedBoard)
 	if (SDL_Flip(chessWindow->self) != 0)
 	{
 		printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-		quit();
+		terminateProgram();
 		return 0;
 	}
 
@@ -281,12 +282,8 @@ int GUI_Main(board_t passedBoard)
 			SDL_Delay(40);
 			if (e.type == SDL_QUIT)
 			{
-				/*freeCCTree(window->panelChild);
-				window->panelChild = NULL;
-				SDL_FreeSurface1(window->self);
-				free(window);
-				intQuit = 1;
-				break;*/
+				terminateProgram();
+				break;
 			}
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
@@ -301,7 +298,7 @@ int GUI_Main(board_t passedBoard)
 			if (SDL_Flip(chessWindow->self) != 0)
 			{
 				printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-				quit();
+				terminateProgram();
 				return 0;
 			}
 
@@ -363,7 +360,7 @@ int GUI_Main(board_t passedBoard)
 					if (SDL_Flip(chessWindow->self) != 0)
 					{
 						printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-						quit();
+						terminateProgram();
 						return 0;
 					}
 
@@ -387,7 +384,7 @@ int GUI_Main(board_t passedBoard)
 					if (SDL_Flip(chessWindow->self) != 0)
 					{
 						printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-						quit();
+						terminateProgram();
 						return 0;
 					}
 
@@ -434,7 +431,7 @@ int GUI_Main(board_t passedBoard)
 						if (SDL_Flip(chessWindow->self) != 0)
 						{
 							printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-							quit();
+							terminateProgram();
 							return 0;
 						}
 					}
@@ -443,7 +440,7 @@ int GUI_Main(board_t passedBoard)
 			if (SDL_Flip(chessWindow->self) != 0)
 			{
 				printf("ERROR: failed to flip buffer: %s\n", SDL_GetError());
-				quit();
+				terminateProgram();
 				return 0;
 			}
 		}
@@ -472,5 +469,6 @@ int GUI_Main(board_t passedBoard)
 	SDL_Quit();
 	//printf("%d pictures not freed.\n", picAllocs);
 	//printf("ended\n");
+	exit(0);
 	return 1;
 }
