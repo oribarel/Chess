@@ -706,9 +706,9 @@ int updateGUIBoard_Vis(Menu *menu)
 			guiBoard[i][j].btn->pic = uploadPicture(getPictureName_tools(crd, getColor(pBoard, crd),
 				get_eToolFromType(GetContentOfCoord(pBoard, crd)), selectionStatus));
 
-			if (SDL_BlitSurface(guiBoard[i][j].btn->pic, NULL, chessWindow->self, &(guiBoard[i][j].rect)) != 0)
+			if ( SDL_BlitSurface(guiBoard[i][j].btn->pic, NULL, chessWindow->self, &(guiBoard[i][j].rect)) != 0)
 			{
-				SDL_FreeSurface1(guiBoard[i][j].btn->pic);
+				//SDL_FreeSurface1(guiBoard[i][j].btn->pic);
 				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 				terminateProgram();
 				return 0;
@@ -1095,7 +1095,7 @@ int playerSelectionMenu_toggleTool(struct menu *menu, struct controlComponent *c
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1126,7 +1126,7 @@ int playerSelectionMenu_toggleGameMode(Menu *menu, struct controlComponent *ccb)
 	}
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1172,7 +1172,7 @@ int playerSelectionMenu_updateContinueOrPlayButton(Window *window)
 
 	if (SDL_BlitSurface(ccb_continueOrPlay->btn->pic, NULL, window->self, &(ccb_continueOrPlay->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb_continueOrPlay->btn->pic);
+		//SDL_FreeSurface1(ccb_continueOrPlay->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1202,7 +1202,7 @@ int playerSelectionMenu_toggleNextPlayer(Menu *menu, struct controlComponent *cc
 	}
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1224,7 +1224,7 @@ int AI_settingsMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1253,7 +1253,7 @@ int AI_settingsMenu_togglePlayerColor(Menu *menu, struct controlComponent *ccb)
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1304,7 +1304,7 @@ int AI_SettingsMenu_toggleTool(struct menu *menu, struct controlComponent *ccb)
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1342,7 +1342,7 @@ int AI_Settings_updatePlayButton(Window *window)
 
 	if (SDL_BlitSurface(ccb_Play->btn->pic, NULL, window->self, &(ccb_Play->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb_Play->btn->pic);
+		//SDL_FreeSurface1(ccb_Play->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -1453,7 +1453,7 @@ int SaveOrLoad_Menu_UpdateVis(struct menu *menu)
 		ccbCurr->btn->pic = uploadPicture(i + '1' == selectedSlot ? filenamePressed : filenameUnpressed);
 		if (SDL_BlitSurface(ccbCurr->btn->pic, NULL, chessWindow->self, &(ccbCurr->rect)) != 0)
 		{
-			SDL_FreeSurface1(ccbCurr->btn->pic);
+			//SDL_FreeSurface1(ccbCurr->btn->pic);
 			printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 			terminateProgram();
 			return 0;
@@ -1706,7 +1706,7 @@ int HintMenu_toggleDifficulty(Menu *menu, struct controlComponent *ccb)
 
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -2175,7 +2175,7 @@ int GameLabel(Window *window, int thinking)
 
 	if (SDL_BlitSurface(lbl_gameHeader->pic, NULL, chessWindow->self, &(ccl_gameHeader->rect)) != 0)
 	{
-		SDL_FreeSurface1(lbl_gameHeader->pic);
+		//SDL_FreeSurface1(lbl_gameHeader->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;

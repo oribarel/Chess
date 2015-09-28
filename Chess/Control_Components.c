@@ -140,7 +140,7 @@ int drawButtonToPanel(ControlComponent *ccb)
 	/* Pre: has a pic */
 	if (SDL_BlitSurface(ccb->btn->pic, NULL, chessWindow->self, &(ccb->rect)) != 0)
 	{
-		SDL_FreeSurface1(ccb->btn->pic);
+		//SDL_FreeSurface1(ccb->btn->pic);
 		printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 		terminateProgram();
 		return 0;
@@ -243,7 +243,7 @@ int drawLabelsOfPanel(ControlComponent *ccl)
 		{
 			if (SDL_BlitSurface(ccl->lbl->pic, NULL, chessWindow->self, &(ccl->rect)) != 0)
 			{
-				SDL_FreeSurface1(ccl->lbl->pic);
+				//SDL_FreeSurface1(ccl->lbl->pic);
 				printf("ERROR: failed to blit image: %s\n", SDL_GetError());
 				terminateProgram();
 				return 0;
@@ -299,11 +299,18 @@ int nullFunction(struct menu *pMenu, struct controlComponent *ccb)
 SDL_Surface *uploadPicture(const char *path)
 {
 	SDL_Surface *pic = SDL_LoadBMP(path);
+	if (pic == NULL)
+	{
+		printf("ERROR: failed to load image: %s\n", SDL_GetError());
+		terminateProgram();
+		return NULL;
+	}
 	SDL_Surface *displayPic = SDL_DisplayFormat(pic);
 	if (displayPic == NULL)
 	{
 		printf("ERROR: failed to convert image to new format: %s\n", SDL_GetError());
 		terminateProgram();
+		return NULL;
 	}
 	picAllocs++;
 	SDL_FreeSurface(pic);
