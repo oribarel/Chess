@@ -69,7 +69,7 @@ void print_board(board_t board)
 	print_line();
 	for (j = BOARD_SIZE - 1; j >= 0; j--)
 	{
-		printf((j < 9 ? " %d" : "%d"), j + 1);
+		printf("%d", j + 1);
 		for (i = 0; i < BOARD_SIZE; i++){
 			printf("| %c ", board[i][j]);
 		}
@@ -78,7 +78,11 @@ void print_board(board_t board)
 	}
 	printf("   ");
 	for (j = 0; j < BOARD_SIZE; j++){
-		printf(" %c  ", (char)('a' + j));
+		if (j==0)
+			printf("%c  ", (char)('a' + j));
+		else
+			printf(" %c  ", (char)('a' + j));
+
 	}
 	printf("\n");
 }
@@ -1793,14 +1797,14 @@ void printMovesList(cMove *move)
 }
 
 
-/*NO NEED FOR CONV*/
+
 /*Print a seperation line in the board*/
 void print_line()
 {
 	int i;
 	if (properties[1])
 		return;
-	printf("  |");
+	printf(" |");
 	for (i = 1; i < BOARD_SIZE * 4; i++)
 	{
 		printf("-");

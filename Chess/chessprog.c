@@ -1,20 +1,27 @@
-/*********************************************************************************************************
-The structs are:
+/********************************************************************************************************
+												READ ME
+*********************************************************************************************************/
+/*
+1. The best scoring funtion was implemented for the bonus section. casteling was not implemented.
+
+2.The structs are:
 - Coord: a coordinate on the board. see header file.
 - cMove(functions as a linked list node): which contains some data about the movement,
 and also the type of the eaten tool if exists.
 
-A brief explaination about implementation:
+3. A brief explaination about implementation:
 the board is two-dim char array, allocated statically only once in the main.
 no board duplications were made. in order to achieve better performance the getMoves functions (of all kinds),
 and the minimax function (including the	MakeMove_ComputeScore_Undo) make reversable alterations on the given board,
 making board-duplications unnecessary.
 
-public array properties contains 5 cells which are relevant throughtout the program. see below.
+4. public array properties contains 5 cells which are relevant throughtout the program. see below.
 
-Functions that are labeled:
+5. Functions that are labeled:
 - DEBUG: are for debugging purposes only
 - UNUSED: are unused although not deleted.
+
+6. Further explenation can be found in the GUI_Main.c
 *********************************************************************************************************/
 
 
