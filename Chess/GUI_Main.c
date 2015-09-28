@@ -306,7 +306,7 @@ int GUI_Main(board_t passedBoard)
 				updateInfoLabels(0, 0, PROMOTE);
 
 
-			/* New Experiement*/
+			
 			if (properties[0] == GAME_MODE && chessWindow->shownMenu->identifier == GAME_PLAY_MENU)
 			{
 				scr = score(pBoard, properties[4]);
@@ -314,7 +314,7 @@ int GUI_Main(board_t passedBoard)
 
 				updateInfoLabels(scr, currKingUnderThreat, properties[4] == WHITE_PLAYER ? whitePlayerTurnStage : blackPlayerTurnStage);
 			}
-			/* End new Experiement */
+			
 
 
 			/* PVP only when turn changes */

@@ -205,5 +205,12 @@ int GameLabel(Window *window, int thinking);
 int isHighlighted(Coord crd);
 int resetHighlights(void);
 
+int updateDiffButton();
+int updateGameModeButton();
+int updatePlayerColorButton();
+int updateNextPlayerButton();
+
+
+
 int isValidBoardInitialization(board_t board);
 #endif

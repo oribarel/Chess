@@ -1376,8 +1376,8 @@ int score(board_t board, int player)
 	{
 		if (KingUnderThreat(board, -player))
 			return MATE_WIN_SCORE;//player won
-		else
-			return TIE_SCORE; //tie
+		//else
+			//return TIE_SCORE; //tie
 	}
 	if (DEBUG && score == MATE_WIN_LOSE)
 	{

@@ -585,6 +585,11 @@ int Parse(char *line, board_t board)
 		{
 			token = strtok(NULL, " \n");
 			LoadFromFile(token, board);
+			if (properties[5] == 1)
+			{
+				properties[3] = WHITE_PLAYER;
+				properties[2] = 1;				
+			}
 			return 0;
 		}
 
@@ -789,21 +794,15 @@ int Parse(char *line, board_t board)
 
 
 			/*checing check mate or tie before starting the game*/
-			curScore = score(board, -properties[4]);
 
-			if (curScore == MATE_WIN_LOSE || KingUnderThreat(board, -properties[4]))//no legal move for the computer (computer lost)
+
+			if (curScore == MATE_WIN_SCORE || KingUnderThreat(board, -properties[4]))//no legal move for the computer (computer lost)
 			{
 				printWinner(properties[4]);//print player wins;
 				properties[1] = 1;
 				return 0;
 			}
-
-			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
-			{
-				printf(TIE);//print tie;
-				properties[1] = 1;
-				return 0;
-			}
+			
 			
 
 
@@ -1165,7 +1164,7 @@ int Console_Main(board_t board)
 
 	//srand(time(NULL));
 
-	int parseResult = 0;
+	int parseResult = 10;
 
 	
 
@@ -1189,11 +1188,11 @@ int Console_Main(board_t board)
 			printf(ENTER_SETTINGS);
 		if (properties[5] == 2 && !properties[0] && (properties[4] != properties[3]))//if in AI mode, in game state and it is the computer's turn
 		{
-			int curScore = score(brd, -properties[4]);
+			int curScore = score(brd, properties[4]);
 			computerMove = NULL;
 			if (curScore == MATE_WIN_LOSE && !properties[1])//no legal move for the computer (computer lost)
 			{
-				printWinner(properties[4] && !properties[1]);//print player wins;
+				printWinner(-properties[4] && !properties[1]);//print player wins;
 				properties[1] = 1;
 			}
 			else if (curScore == TIE_SCORE && !properties[1])//no legal move for the computer and for the player (tie)
@@ -1201,7 +1200,7 @@ int Console_Main(board_t board)
 				printf(TIE);//print tie;
 				properties[1] = 1;
 			}
-			else if (KingUnderThreat(board, -properties[4]) && !properties[1])
+			else if (KingUnderThreat(board, properties[4]) && !properties[1])
 				printf(CHECK);
 
 
@@ -1235,26 +1234,51 @@ int Console_Main(board_t board)
 
 
 			//change player
-			curScore = score(brd, properties[4]);
 			properties[4] = -properties[4];
-			if (curScore == MATE_WIN_LOSE && !properties[1])//if no legal move for the player (player lost - MATE!)
-			{
-				printWinner(-properties[4]);//print computer wins;
-				properties[1] = 1;
+			parseResult = 10;
+			//curScore = score(brd, properties[4]);			
+			//if (curScore == MATE_WIN_LOSE && !properties[1])//if no legal move for the player (player lost - MATE!)
+			//{
+			//	printWinner(-properties[4]);//print computer wins;
+			//	properties[1] = 1;
 
+			//}
+			//else if (curScore == TIE_SCORE && !properties[1])//no legal move for the computer or for the player and (tie)
+			//{
+			//	printf(TIE);//print tie;
+			//	properties[1] = 1;
+			//}
+			//else if (KingUnderThreat(board, properties[4]) && !properties[1])
+			//	printf(CHECK);
+			continue;
+		}
+		
+
+		if (properties[1])//if quit
+			continue;
+
+
+		if (parseResult == 10 && !properties[1])
+		{
+			if (score(brd, properties[4]) == MATE_WIN_LOSE)//no legal move for the other player (other plyer lost - MATE!)
+			{
+				printWinner(-properties[4]);//print current player wins;
+				properties[1] = 1;
 			}
-			else if (curScore == TIE_SCORE && !properties[1])//no legal move for the computer or for the player and (tie)
+			else if (score(brd, properties[4]) == TIE_SCORE)//no legal move for both players(tie)
 			{
 				printf(TIE);//print tie;
 				properties[1] = 1;
 			}
-			else if (KingUnderThreat(board, properties[4]) && !properties[1])
+			else if (KingUnderThreat(board, properties[4]))
 				printf(CHECK);
-			continue;
+
 		}
-		else if (!properties[0])
+
+
+		if (!properties[0])
 		{
-			
+
 			if (properties[1]) //if quit
 				continue;
 			if (properties[4] == WHITE_PLAYER)
@@ -1265,9 +1289,6 @@ int Console_Main(board_t board)
 
 		}
 
-		if (properties[1])//if quit
-			continue;
-
 		input = getLine();
 
 		if (!properties[1])//if not quit
@@ -1275,25 +1296,8 @@ int Console_Main(board_t board)
 
 		if (parseResult == 10 && !properties[1])// user has successfully inserted a valid move
 		{
-			if (properties[5] == 1)
-			{
-				if (score(brd, -properties[4]) == MATE_WIN_LOSE)//no legal move for the other player (other plyer lost - MATE!)
-				{
-					printWinner(properties[4]);//print current player wins;
-					properties[1] = 1;
-				}
-				else if (score(brd, -properties[4]) == TIE_SCORE)//no legal move for both players(tie)
-				{
-					printf(TIE);//print tie;
-					properties[1] = 1;
-				}
-				else if (KingUnderThreat(board, -properties[4]))
-					printf(CHECK);
-			}
-			
 			//change color of current player
 			properties[4] = -properties[4];
-
 		}
 
 		if (input != NULL)
@@ -1395,8 +1399,8 @@ int Test()
 
 	//init_board(brd);
 
-	if (DEBUG)
-		brd = GenerateRandomConfiguration();
+
+	brd = GenerateRandomConfiguration();
 	/*if (DEBUG) //tests
 	{
 	for (int i = 1; i < 12; i++)

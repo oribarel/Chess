@@ -18,7 +18,7 @@
 
 
 #define PLAYER_WINS "player wins!"
-#define DEBUG 1
+#define DEBUG 0
 
 
 #define MIN 0

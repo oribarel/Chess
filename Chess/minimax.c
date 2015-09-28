@@ -183,7 +183,7 @@ int minimax_score2(board_t board, int player, int depth, int maximizingPlayer, c
 
 
 	movesList = getMoves(board, player);
-	movesList = mergeSort_movesList(movesList, board, player);
+	//movesList = mergeSort_movesList(movesList, board, player);
 	head = movesList;
 
 
@@ -334,93 +334,93 @@ int makeMove_ComputeScore_Undo2(board_t board, cMove *move, int player, int dept
 
 }
 
-cMove *mergeSort_movesList(cMove *list, board_t board, int player)
-{
-	cMove *p, *q, *e, *tail, *oldhead;
-	int insize, nmerges, psize, qsize, i;
-
-	if (list == NULL)
-		return NULL;
-
-	insize = 1;
-	while (1)
-	{
-		p = list;
-		oldhead = list;		       /* only used for circular linkage */
-		list = NULL;
-		tail = NULL;
-
-		nmerges = 0;  /* count number of merges we do in this pass */
-
-		while (p)
-		{
-			nmerges++;  /* there exists a merge to be done */
-			/* step `insize' places along from p */
-			q = p;
-			psize = 0;
-			for (i = 0; i < insize; i++)
-			{
-				psize++;
-				q = q->next;
-				if (!q) break;
-			}
-
-			/* if q hasn't fallen off end, we have two lists to merge */
-			qsize = insize;
-
-			/* now we have two lists; merge them */
-			while (psize > 0 || (qsize > 0 && q))
-			{
-
-				/* decide whether next element of merge comes from p or q */
-				if (psize == 0)
-				{
-					/* p is empty; e must come from q. */
-					e = q; q = q->next; qsize--;
-				}
-				else if (qsize == 0 || !q)
-				{
-					/* q is empty; e must come from p. */
-					e = p; p = p->next; psize--;
-				}
-				else if (cmp(p, q, board, player) >= 0)
-				{
-					/* First element of p is higher (or same);
-					 * e must come from p. */
-					e = p; p = p->next; psize--;
-				}
-				else
-				{
-					/* First element of q is higher; e must come from q. */
-					e = q; q = q->next; qsize--;
-				}
-
-				/* add the next element to the merged list */
-				if (tail)
-				{
-					tail->next = e;
-				}
-				else
-				{
-					list = e;
-				}
-				tail = e;
-			}
-
-			/* now p has stepped `insize' places along, and q has too */
-			p = q;
-		}
-
-		tail->next = NULL;
-
-		/* If we have done only one merge, we're finished. */
-		if (nmerges <= 1)   /* allow for nmerges==0, the empty list case */
-			return list;
-
-		/* Otherwise repeat, merging lists twice the size */
-		insize *= 2;
-	}
-}
+//cMove *mergeSort_movesList(cMove *list, board_t board, int player)
+//{
+//	cMove *p, *q, *e, *tail, *oldhead;
+//	int insize, nmerges, psize, qsize, i;
+//
+//	if (list == NULL)
+//		return NULL;
+//
+//	insize = 1;
+//	while (1)
+//	{
+//		p = list;
+//		oldhead = list;		       /* only used for circular linkage */
+//		list = NULL;
+//		tail = NULL;
+//
+//		nmerges = 0;  /* count number of merges we do in this pass */
+//
+//		while (p)
+//		{
+//			nmerges++;  /* there exists a merge to be done */
+//			/* step `insize' places along from p */
+//			q = p;
+//			psize = 0;
+//			for (i = 0; i < insize; i++)
+//			{
+//				psize++;
+//				q = q->next;
+//				if (!q) break;
+//			}
+//
+//			/* if q hasn't fallen off end, we have two lists to merge */
+//			qsize = insize;
+//
+//			/* now we have two lists; merge them */
+//			while (psize > 0 || (qsize > 0 && q))
+//			{
+//
+//				/* decide whether next element of merge comes from p or q */
+//				if (psize == 0)
+//				{
+//					/* p is empty; e must come from q. */
+//					e = q; q = q->next; qsize--;
+//				}
+//				else if (qsize == 0 || !q)
+//				{
+//					/* q is empty; e must come from p. */
+//					e = p; p = p->next; psize--;
+//				}
+//				else if (cmp(p, q, board, player) >= 0)
+//				{
+//					/* First element of p is higher (or same);
+//					 * e must come from p. */
+//					e = p; p = p->next; psize--;
+//				}
+//				else
+//				{
+//					/* First element of q is higher; e must come from q. */
+//					e = q; q = q->next; qsize--;
+//				}
+//
+//				/* add the next element to the merged list */
+//				if (tail)
+//				{
+//					tail->next = e;
+//				}
+//				else
+//				{
+//					list = e;
+//				}
+//				tail = e;
+//			}
+//
+//			/* now p has stepped `insize' places along, and q has too */
+//			p = q;
+//		}
+//
+//		tail->next = NULL;
+//
+//		/* If we have done only one merge, we're finished. */
+//		if (nmerges <= 1)   /* allow for nmerges==0, the empty list case */
+//			return list;
+//
+//		/* Otherwise repeat, merging lists twice the size */
+//		insize *= 2;
+//	}
+//}
 
 /*in this function: player is the one that started the minimax (the maximizer) */
 int cmp(cMove *a, cMove *b, board_t board, int player)

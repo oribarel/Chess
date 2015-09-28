@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <game>
 	<next_turn>White<next_turn>
-	<game_mode>2<game_mode>
-	<difficulty>4<difficulty>
-	<user_color>White<user_color>
+	<game_mode>1<game_mode>
+	<difficulty><difficulty>
+	<user_color><user_color>
 	<board>
 		<row_8>RNB_KBNR<row_8>
 		<row_7>MMMM_M__<row_7>
