@@ -776,32 +776,36 @@ int Parse(char *line, board_t board)
 			/*checing check mate or tie before starting the game*/
 			int curScore = score(board, properties[4]);
 
-			if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
+			if (properties[5] == 1)
 			{
-				printWinner(-properties[4]);//print player wins;
-				properties[1] = 1;
-				return 0;
+				if (curScore == MATE_WIN_LOSE)//no legal move for the computer (computer lost)
+				{
+					printWinner(-properties[4]);//print player wins;
+					properties[1] = 1;
+					return 0;
+				}
+
+				else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
+				{
+					printf(TIE);//print tie;
+					properties[1] = 1;
+					return 0;
+				}
+				else if (KingUnderThreat(board, properties[4]))
+					printf(CHECK);
+
+
+				/*checing check mate or tie before starting the game*/
 			}
 
-			else if (curScore == TIE_SCORE)//no legal move for the computer or for the player and king unthreatened (tie)
-			{
-				printf(TIE);//print tie;
-				properties[1] = 1;
-				return 0;
-			}
-			else if (KingUnderThreat(board, properties[4]))
-				printf(CHECK);
 
-
-			/*checing check mate or tie before starting the game*/
-
-
-			if (curScore == MATE_WIN_SCORE || KingUnderThreat(board, -properties[4]))//no legal move for the computer (computer lost)
-			{
-				printWinner(properties[4]);//print player wins;
-				properties[1] = 1;
-				return 0;
-			}
+				if (curScore == MATE_WIN_SCORE || KingUnderThreat(board, -properties[4]))//no legal move for the computer (computer lost)
+				{
+					printWinner(properties[4]);//print player wins;
+					properties[1] = 1;
+					return 0;
+				}
+			
 			
 			
 
